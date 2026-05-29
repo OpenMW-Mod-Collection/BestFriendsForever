@@ -1,0 +1,38 @@
+msg_followerDown: "{npc_name} is down!"
+
+page_name: Good Company
+page_description: Several utilities for you and your followers.
+
+toggles_groupName: Toggles
+enableTeleport_name: Enable Teleporting
+enableImmortality_name: Enable Immortal Followers
+enableCatchUp_name: Enable Catch Up
+
+# teleport_groupName: Teleporting
+# teleport_groupDesc: If follower gets unloaded, they will teleport behind you.
+
+immortality_groupName: Immortality
+immortality_groupDesc: |
+  Instead of dying, your followers will get knocked down until the end of combat.
+  
+  Doesn't affect summons.
+ingoreCommanded_name: Ignore Followers Under Command Spell
+ingoreCommanded_desc: Any Command effect, any magnitude.
+threshold_name: Health Threshold
+threshold_desc: |
+  At which health follower will get knocked down.
+  
+  Requires a reaload.
+
+catchUp_groupName: Catch Up
+catchUp_groupDesc: |
+  Gradually speeds up followers if they get too far.
+
+  Requires a reload for all the settings.
+startDist_name: Starting Distance
+startDist_desc: Distance at which follower will start speeding up.
+maxDist_name: Maximum Distance
+maxDist_desc: Distance at which the follower will reach max speed.
+maxSpeed_name: Max Speed Boost
+lerpSpeed_name: Lerp Speed
+lerpSpeed_desc: How smooth the speed up curve should be.
