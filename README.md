@@ -1,8 +1,8 @@
 # Good Company (OpenMW)
 
-Collection of small utilities for followers made with performance in mind. Modernized Attend Me, if you will.
+A collection of utilities for followers made with performance in mind. Modernized Attend Me, if you will.
 
-[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great. But it can be improved. That's why I'm presenting to you Good Company - performant and modernized alternative to Attend Me!
+[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Good Company - performant and modernized alternative to Attend Me!
 
 Featuring:
 
@@ -11,25 +11,25 @@ Featuring:
   - Equipped weapon, spell or lack of them
   - Currently active effects
   - Notifications about diseases and damaged stats
-- Follower teleport to you if they get unloaded
-- Follower speed up when catching up to you
-- Immortal followers
-  - Instead of dying, they will get knocked down until the end of the combat
-  - Enemies will switch aggro from follower onto you
-  - Summons and followers under any Command effect are ignored for immortality
+- Followers teleport to you if they get unloaded
+- Followers speed up to catch up to you
+- Immortal followers:
+  - Instead of dying, followers are knocked down until the end of combat
+  - Enemies switch aggro from the follower to you
+  - Summoned creatures and followers under any Command effect are excluded from immortality
 
 ## Compatibility
 
 Safe to install or update mid-playthrough.  
-As for removing, make sure none of the followers is in the down state.
+When removing the mod, make sure no follower is currently downed.
 
 Should be compatible with anything.
 
-Technically compatible with [Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but they shouldn't be used together.
+It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but they should not be used together.
 
 ## Requirements
 
-Load Good Company as high as you can - before any of the mods that might alter melee damage calculations.
+Load Good Company as high as possible in the load order - before any mods that might alter melee damage calculations.
 
 Dependency load order doesn't matter.
 

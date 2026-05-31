@@ -6,6 +6,7 @@ Add:
 
 - HUD
 - Settings hotswapping
+- Immortality: require a healing spell or a healing potion to "revive" your follower
 - Immortality: blacklist
 - Teleport: blacklist
 - Speed up: blacklist
