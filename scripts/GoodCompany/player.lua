@@ -20,12 +20,14 @@ local followers = {}
 local notifListPerFollower = {}
 
 local function onUpdate()
+    -- sparce notification sending
+    -- for enemy aggro redirection
     for followerId, notifList in pairs(notifListPerFollower) do
         if #notifList == 0 then
             notifListPerFollower[followerId] = nil
         else
             local notif = table.remove(notifList)
-            notif.actor:sendEvent(notif.event, notif)
+            notif.actor:sendEvent(notif.eventName, notif)
         end
     end
 end
@@ -53,20 +55,17 @@ local function combatTargetRemoved(actor)
     inCombat = currentlyInComabt
 end
 
-local function followerDown(data)
-    -- building notification list
-    -- to switch aggro on all currently active actors (if there is)
-    -- from downed actor to the player
-    notifListPerFollower[data.follower.id] = {}
-    local notifList = notifListPerFollower[data.follower.id]
-    local state = followers[data.follower.id]
+local function fillNotifList(follower, eventName)
+    notifListPerFollower[follower.id] = {}
+    local notifList = notifListPerFollower[follower.id]
+    local state = followers[follower.id]
     local leader = state.superLeader or state.leader
 
     for _, actor in pairs(nearby.actors) do
         if not followers[actor.id] and actor.id ~=  self.id then
             notifList[#notifList + 1] = {
-                event = "GoodCompany_followerDown",
-                follower = data.follower,
+                eventName = eventName,
+                follower = follower,
                 leader = leader,
                 actor = actor,
             }
@@ -74,19 +73,12 @@ local function followerDown(data)
     end
 end
 
-local function followerUp(data)
-    notifListPerFollower[data.follower.id] = {}
-    local notifList = notifListPerFollower[data.follower.id]
+local function followerDown(data)
+    fillNotifList(data.follower, "GoodCompany_followerDown")
+end
 
-    for _, actor in pairs(nearby.actors) do
-        if not followers[actor.id] and actor.id ~=  self.id then
-            notifList[#notifList + 1] = {
-                event = "GoodCompany_followerUp",
-                follower = data.follower,
-                actor = actor,
-            }
-        end
-    end
+local function followerUp(data)
+    fillNotifList(data.follower, "GoodCompany_followerUp")
 end
 
 return {

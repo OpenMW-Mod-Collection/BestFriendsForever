@@ -47,11 +47,8 @@ end
 -- Timer started at init time, as required by runRepeatedly
 local stopTimer = time.runRepeatedly(
     updateTarget,
-    1 * time.second,
-    {
-        initialDelay = math.random(),
-        type = time.SimulationTime,
-    }
+    .25,
+    { initialDelay = math.random() }
 )
 
 local function onUpdate()

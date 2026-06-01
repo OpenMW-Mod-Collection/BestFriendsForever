@@ -31,23 +31,34 @@ I.Settings.registerGroup {
     }
 }
 
--- I.Settings.registerGroup {
---     key = 'SettingsGoodCompany_teleport',
---     page = 'GoodCompany',
---     l10n = 'GoodCompany',
---     name = 'teleport_groupName',
---     description = "teleport_groupDesc",
---     permanentStorage = true,
---     order = 1,
---     settings = {
---         {
---             key = 'teleport',
---             name = 'teleport_name',
---             renderer = 'checkbox',
---             default = true,
---         },
---     }
--- }
+I.Settings.registerGroup {
+    key = 'SettingsGoodCompany_blacklist',
+    page = 'GoodCompany',
+    l10n = 'GoodCompany',
+    name = 'blacklist_groupName',
+    permanentStorage = true,
+    order = 1,
+    settings = {
+        {
+            key = 'teleportBlacklistMWScript',
+            name = 'teleportBlacklistMWScript_name',
+            renderer = 'checkbox',
+            default = false,
+        },
+        {
+            key = 'immortalityBlacklistMWScript',
+            name = 'immortalityBlacklistMWScript_name',
+            renderer = 'checkbox',
+            default = false,
+        },
+        {
+            key = 'catchUpBlacklistMWScript',
+            name = 'catchUpBlacklistMWScript_name',
+            renderer = 'checkbox',
+            default = false,
+        },
+    }
+}
 
 I.Settings.registerGroup {
     key = 'SettingsGoodCompany_immortality',
@@ -56,7 +67,7 @@ I.Settings.registerGroup {
     name = 'immortality_groupName',
     description = "immortality_groupDesc",
     permanentStorage = true,
-    order = 1,
+    order = 10,
     settings = {
         {
             key = 'ingoreCommanded',
@@ -89,7 +100,7 @@ I.Settings.registerGroup {
     name = 'catchUp_groupName',
     description = "catchUp_groupDesc",
     permanentStorage = true,
-    order = 1,
+    order = 10,
     settings = {
         {
             key = 'startDist',

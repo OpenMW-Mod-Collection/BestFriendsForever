@@ -10,7 +10,9 @@ local scripts = {
         cond = function(fState)
             local isSummon = string.find(fState.actor.recordId, "_summon$")
                 or fState.actor.recordId == "bonewalker_greater_summ"
-            return not isSummon and fState.followsPlayer and settings.enableImmortality
+        return not isSummon
+            and fState.followsPlayer
+            and settings.enableImmortality
         end,
         path = "scripts/GoodCompany/followerScripts/immortality.lua"
     },
@@ -52,23 +54,21 @@ settings = settingsCache.new(
     storage.globalSection("SettingsGoodCompany_toggles"),
     async,
     function(key)
-        -- A nil key means section:reset() was called - resync everything
-        -- A specific key means one toggle changed - resync covers both cases
         resyncAll()
     end
 )
 
-local function syncScripts(actor, fState, add)
+local function syncScripts(actor, fState, addingScript)
     for _, script in ipairs(scripts) do
-        local has = actor:hasScript(script.path)
-        if add then
-            if not has and script.cond(fState) then
+        local hasScript = actor:hasScript(script.path)
+        if addingScript then
+            if not hasScript and script.cond(fState) then
                 actor:addScript(script.path, {
                     leader = fState.superLeader or fState.leader
                 })
             end
         else
-            if has then
+            if hasScript then
                 actor:removeScript(script.path)
             end
         end
@@ -97,6 +97,9 @@ local function detachScript(data)
 end
 
 local function tp(data)
+    -- teleport method throws harmless errors
+    -- if two teleports occur in the same frame
+    -- or when the summon gets despawned
     pcall(function()
         data.actor:teleport(data.cell, data.pos, data.options)
     end)

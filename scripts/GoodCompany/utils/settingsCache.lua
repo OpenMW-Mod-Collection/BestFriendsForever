@@ -1,8 +1,5 @@
 ---@omw-context local | global
 --
--- Drop-in module that mirrors a StorageSection into a plain Lua table,
--- kept live via subscribe. Works in any script context (global, local, player).
---
 -- USAGE:
 --   local async   = require("openmw.async")
 --   local storage = require("openmw.storage")
@@ -22,8 +19,8 @@
 local M = {}
 
 --- Create a new settings cache for a StorageSection.
----@param section openmw.storage.StorageSection  The storage section to mirror
----@param async   table           The openmw.async instance from the calling script
+---@param section  openmw.storage.StorageSection  The storage section to mirror
+---@param async    table          The openmw.async instance from the calling script
 ---@param onChange function|nil   Optional callback(key) fired after the cache updates.
 --- key is nil when the whole section was reset.
 ---@return table table  A plain table whose keys mirror the section's current values

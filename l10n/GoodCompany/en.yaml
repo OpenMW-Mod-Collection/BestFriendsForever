@@ -8,8 +8,10 @@ enableTeleport_name: Enable Teleporting
 enableImmortality_name: Enable Immortal Followers
 enableCatchUp_name: Enable Catch Up
 
-# teleport_groupName: Teleporting
-# teleport_groupDesc: If follower gets unloaded, they will teleport behind you.
+blacklist_groupName: Blacklisting
+teleportBlacklistMWScript_name: Disable Teleporting for Everyone with MWScripts
+immortalityBlacklistMWScript_name: Disable Immortality for Everyone with MWScripts
+catchUpBlacklistMWScript_name: Disable Catching Up for Everyone with MWScripts
 
 immortality_groupName: Immortality
 immortality_groupDesc: |

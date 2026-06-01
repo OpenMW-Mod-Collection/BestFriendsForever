@@ -5,6 +5,11 @@ local async = require("openmw.async")
 
 local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 
+-- [==========================================================]
+-- currently here's only logic for switching enemy aggro
+-- from downed followers to their leader
+-- [==========================================================]
+
 local noOneDowned = true
 local downedFollowersToLeaders = {}
 
