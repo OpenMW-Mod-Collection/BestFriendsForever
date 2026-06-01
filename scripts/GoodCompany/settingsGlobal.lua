@@ -72,6 +72,13 @@ I.Settings.registerGroup {
             renderer = 'number',
             default = 10,
         },
+        {
+            key = 'changeAggro',
+            name = 'changeAggro_name',
+            description = "changeAggro_desc",
+            renderer = 'checkbox',
+            default = true,
+        },
     }
 }
 

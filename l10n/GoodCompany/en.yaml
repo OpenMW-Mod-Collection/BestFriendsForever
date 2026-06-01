@@ -20,6 +20,9 @@ ingoreCommanded_name: Ignore Followers Under Command Spell
 ingoreCommanded_desc: Any Command effect, any magnitude.
 threshold_name: Health Threshold
 threshold_desc: At which health follower will get knocked down.
+changeAggro_name: Change Enemy Aggro if the Follower is Down
+changeAggro_desc: >
+  If an enemy targets the downed follower, they will change aggro onto you.
 
 catchUp_groupName: Catch Up
 catchUp_groupDesc: Gradually speeds up followers if they get too far.

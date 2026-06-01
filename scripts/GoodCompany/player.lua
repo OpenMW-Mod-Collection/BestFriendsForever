@@ -25,7 +25,7 @@ local function onUpdate()
             notifListPerFollower[followerId] = nil
         else
             local notif = table.remove(notifList)
-            notif.actor:sendEvent("GoodCompany_followerDown", notif)
+            notif.actor:sendEvent(notif.event, notif)
         end
     end
 end
@@ -65,6 +65,7 @@ local function followerDown(data)
     for _, actor in pairs(nearby.actors) do
         if not followers[actor.id] and actor.id ~=  self.id then
             notifList[#notifList + 1] = {
+                event = "GoodCompany_followerDown",
                 follower = data.follower,
                 leader = leader,
                 actor = actor,
@@ -74,7 +75,18 @@ local function followerDown(data)
 end
 
 local function followerUp(data)
-    notifListPerFollower[data.follower.id] = nil
+    notifListPerFollower[data.follower.id] = {}
+    local notifList = notifListPerFollower[data.follower.id]
+
+    for _, actor in pairs(nearby.actors) do
+        if not followers[actor.id] and actor.id ~=  self.id then
+            notifList[#notifList + 1] = {
+                event = "GoodCompany_followerUp",
+                follower = data.follower,
+                actor = actor,
+            }
+        end
+    end
 end
 
 return {
