@@ -19,16 +19,10 @@ immortality_groupDesc: |
 ingoreCommanded_name: Ignore Followers Under Command Spell
 ingoreCommanded_desc: Any Command effect, any magnitude.
 threshold_name: Health Threshold
-threshold_desc: |
-  At which health follower will get knocked down.
-  
-  Requires a reaload.
+threshold_desc: At which health follower will get knocked down.
 
 catchUp_groupName: Catch Up
-catchUp_groupDesc: |
-  Gradually speeds up followers if they get too far.
-
-  Requires a reload for all the settings.
+catchUp_groupDesc: Gradually speeds up followers if they get too far.
 startDist_name: Starting Distance
 startDist_desc: Distance at which follower will start speeding up.
 maxDist_name: Maximum Distance

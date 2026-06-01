@@ -1,5 +1,5 @@
 PLAYER: scripts/GoodCompany/player.lua
-NPC, CREATURE: scripts/GoodCompany/actpr.lua
+NPC, CREATURE: scripts/GoodCompany/actor.lua
 GLOBAL: scripts/GoodCompany/global.lua
 
 CUSTOM: scripts/GoodCompany/followerScripts/immortality.lua

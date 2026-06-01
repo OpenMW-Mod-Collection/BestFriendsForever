@@ -1,25 +1,28 @@
 ---@omw-context global
 local storage = require("openmw.storage")
+local async = require("openmw.async")
+local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 
-local settingsToggles = storage.globalSection("SettingsGoodCompany_toggles")
+local settings = {}
+
 local scripts = {
     {
-        cond = function(fState, settings)
+        cond = function(fState)
             local isSummon = string.find(fState.actor.recordId, "_summon$")
                 or fState.actor.recordId == "bonewalker_greater_summ"
-            return not isSummon and fState.followsPlayer and settings.immortality
+            return not isSummon and fState.followsPlayer and settings.enableImmortality
         end,
         path = "scripts/GoodCompany/followerScripts/immortality.lua"
     },
     {
-        cond = function(fState, settings)
-            return settings.teleport
+        cond = function(fState)
+            return settings.enableTeleport
         end,
         path = "scripts/GoodCompany/followerScripts/teleport.lua"
     },
     {
-        cond = function(fState, settings)
-            return settings.catchUp
+        cond = function(fState)
+            return settings.enableCatchUp
         end,
         path = "scripts/GoodCompany/followerScripts/catchUp.lua"
     }
@@ -27,11 +30,39 @@ local scripts = {
 
 local followers = {}
 
-local function syncScripts(actor, fState, settings, add)
+-- Re-evaluate every script on every current follower.
+-- Adds scripts whose cond is now true, removes those whose cond is now false.
+local function resyncAll()
+    for _, fState in pairs(followers) do
+        for _, script in ipairs(scripts) do
+            local has  = fState.actor:hasScript(script.path)
+            local want = script.cond(fState)
+            if want and not has then
+                fState.actor:addScript(script.path, {
+                    leader = fState.superLeader or fState.leader
+                })
+            elseif not want and has then
+                fState.actor:removeScript(script.path)
+            end
+        end
+    end
+end
+
+settings = settingsCache.new(
+    storage.globalSection("SettingsGoodCompany_toggles"),
+    async,
+    function(key)
+        -- A nil key means section:reset() was called - resync everything
+        -- A specific key means one toggle changed - resync covers both cases
+        resyncAll()
+    end
+)
+
+local function syncScripts(actor, fState, add)
     for _, script in ipairs(scripts) do
         local has = actor:hasScript(script.path)
         if add then
-            if not has and script.cond(fState, settings) then
+            if not has and script.cond(fState) then
                 actor:addScript(script.path, {
                     leader = fState.superLeader or fState.leader
                 })
@@ -46,24 +77,16 @@ end
 
 local function followerListUpdated(data)
     local currFollowers = data.followers
-    local settings = {
-        immortality = settingsToggles:get("enableImmortality"),
-        teleport = settingsToggles:get("enableTeleport"),
-        catchUp = settingsToggles:get("enableCatchUp"),
-    }
-
     for id, fState in pairs(currFollowers) do
         if not followers[id] then
-            syncScripts(fState.actor, fState, settings, true)
+            syncScripts(fState.actor, fState, true)
         end
     end
-
     for id, fState in pairs(followers) do
         if not currFollowers[id] then
-            syncScripts(fState.actor, fState, settings, false)
+            syncScripts(fState.actor, fState, false)
         end
     end
-
     followers = currFollowers
 end
 
@@ -74,8 +97,7 @@ local function detachScript(data)
 end
 
 local function tp(data)
-    -- data.actor:teleport(data.cell, data.pos, data.options)
-    pcall(function ()
+    pcall(function()
         data.actor:teleport(data.cell, data.pos, data.options)
     end)
 end

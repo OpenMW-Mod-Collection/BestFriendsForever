@@ -5,18 +5,20 @@ local core = require("openmw.core")
 local time = require("openmw_aux.time")
 local storage = require("openmw.storage")
 local I = require("openmw.interfaces")
+local async = require("openmw.async")
+
+local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 
 if self.type.isDead(self) then return end
 
 ---@type GameObject
 local leader
 
-local settings = storage.globalSection("SettingsGoodCompany_catchUp")
+local settings = settingsCache.new(
+    storage.globalSection("SettingsGoodCompany_catchUp"),
+    async
+)
 local speed = self.type.stats.attributes.speed(self)
-local BOOST_START_DIST = settings:get("startDist")
-local BOOST_MAX_DIST = settings:get("maxDist")
-local MAX_SPEED_BOOST = settings:get("maxSpeed")
-local LERP_SPEED = settings:get("lerpSpeed")
 
 local currentBoost = 0
 local targetBoost = 0 -- written by the timer, read by onUpdate
@@ -26,13 +28,13 @@ local function updateTarget()
 
     local distance = (self.position - leader.position):length()
 
-    if distance <= BOOST_START_DIST then
+    if distance <= settings.startDist then
         targetBoost = 0
-    elseif distance >= BOOST_MAX_DIST then
-        targetBoost = MAX_SPEED_BOOST
+    elseif distance >= settings.maxDist then
+        targetBoost = settings.maxSpeed
     else
-        local t = (distance - BOOST_START_DIST) / (BOOST_MAX_DIST - BOOST_START_DIST)
-        targetBoost = t * MAX_SPEED_BOOST
+        local t = (distance - settings.startDist) / (settings.maxDist - settings.startDist)
+        targetBoost = t * settings.maxSpeed
     end
 end
 
@@ -61,7 +63,7 @@ local function onUpdate()
     end
 
     -- Lerp currentBoost toward targetBoost every frame
-    currentBoost = currentBoost + (targetBoost - currentBoost) * LERP_SPEED
+    currentBoost = currentBoost + (targetBoost - currentBoost) * settings.lerpSpeed
     if math.abs(currentBoost) < 0.5 then currentBoost = 0 end
     speed.modifier = currentBoost
 end

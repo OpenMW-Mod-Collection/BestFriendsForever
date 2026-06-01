@@ -1,5 +1,6 @@
 ---@omw-context player
 local nearby = require("openmw.nearby")
+local self = require("openmw.self")
 
 local deps = require("scripts.BoonsAndBurdens.utils.dependencies")
 deps.checkAll("Good Company", {
@@ -62,8 +63,8 @@ local function followerDown(data)
     local leader = state.superLeader or state.leader
 
     for _, actor in pairs(nearby.actors) do
-        if not followers[actor.id] then
-            notifList[#notifList+1] = {
+        if not followers[actor.id] and actor.id ~=  self.id then
+            notifList[#notifList + 1] = {
                 follower = data.follower,
                 leader = leader,
                 actor = actor,
