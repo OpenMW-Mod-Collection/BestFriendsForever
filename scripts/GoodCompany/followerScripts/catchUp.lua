@@ -2,7 +2,6 @@
 ---@omw-context local
 local self = require("openmw.self")
 local core = require("openmw.core")
-local time = require("openmw_aux.time")
 local storage = require("openmw.storage")
 local I = require("openmw.interfaces")
 local async = require("openmw.async")
@@ -20,21 +19,18 @@ local settings = settingsCache.new(
 )
 local speed = self.type.stats.attributes.speed(self)
 
-local currentBoost = 0
-local targetBoost = 0 -- written by the timer, read by onUpdate
-
-local function updateTarget()
-    if not leader then return end
+local function getTargetBoost()
+    if not leader then return 0 end
 
     local distance = (self.position - leader.position):length()
 
     if distance <= settings.startDist then
-        targetBoost = 0
+        return 0
     elseif distance >= settings.maxDist then
-        targetBoost = settings.maxSpeed
+        return settings.maxSpeed
     else
         local t = (distance - settings.startDist) / (settings.maxDist - settings.startDist)
-        targetBoost = t * settings.maxSpeed
+        return t * settings.maxSpeed
     end
 end
 
@@ -44,25 +40,26 @@ local function onCleanup()
     end
 end
 
--- Timer started at init time, as required by runRepeatedly
-local stopTimer = time.runRepeatedly(
-    updateTarget,
-    .25,
-    { initialDelay = math.random() }
-)
-
-local function onUpdate()
+local acc = 0
+local delay = .5
+local currentBoost = 0
+local function onUpdate(dt)
     if not leader then return end
 
     if I.AI.getActiveTarget("Combat") then
         onCleanup()
+        acc = 0
         return
     end
 
-    -- Lerp currentBoost toward targetBoost every frame
-    currentBoost = currentBoost + (targetBoost - currentBoost) * settings.lerpSpeed
-    if math.abs(currentBoost) < 0.5 then currentBoost = 0 end
-    speed.modifier = currentBoost
+    acc = acc + dt
+    if acc > delay then
+        -- Lerp currentBoost toward targetBoost every frame
+        currentBoost = currentBoost + (getTargetBoost() - currentBoost) * settings.lerpSpeed
+        if math.abs(currentBoost) < 0.5 then currentBoost = 0 end
+        speed.modifier = currentBoost
+        acc = 0
+    end
 end
 
 local function onSave()
@@ -87,7 +84,6 @@ return {
     },
     eventHandlers = {
         Died = function()
-            stopTimer()
             onCleanup()
             core.sendGlobalEvent("GoodCompany_detachScript", {
                 actor = self,
