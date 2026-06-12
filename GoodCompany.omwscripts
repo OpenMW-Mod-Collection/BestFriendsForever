@@ -6,5 +6,6 @@ CUSTOM: scripts/GoodCompany/followerScripts/immortality.lua
 CUSTOM: scripts/GoodCompany/followerScripts/teleport.lua
 CUSTOM: scripts/GoodCompany/followerScripts/catchUp.lua
 
+MENU: scripts/GoodCompany/utils/colorPicker.lua
 MENU: scripts/GoodCompany/settingsMenu.lua
 GLOBAL: scripts/GoodCompany/settingsGlobal.lua

@@ -1,6 +1,13 @@
 ---@omw-context player
 local nearby = require("openmw.nearby")
 local self = require("openmw.self")
+local storage = require("openmw.storage")
+local async = require("openmw.async")
+
+local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local followerUI = require("scripts.GoodCompany.ui")
+
+local settingsWrapper = settingsCache.new(storage.playerSection("SettingsGoodCompany_UIWrapper"), async)
 
 local deps = require("scripts.BoonsAndBurdens.utils.dependencies")
 deps.checkAll("Good Company", {
@@ -16,7 +23,11 @@ deps.checkAll("Good Company", {
 
 local inCombat = false
 local combatTargets = {}
-local followers = {}
+local followers = {
+    asd = {
+        state = require("openmw.nearby").actors[1]
+    }
+}
 local notifListPerFollower = {}
 
 local function onUpdate()
@@ -28,6 +39,20 @@ local function onUpdate()
         else
             local notif = table.remove(notifList)
             notif.actor:sendEvent(notif.eventName, notif)
+        end
+    end
+end
+
+local function onFrame()
+    if settingsWrapper.enable then
+        if not followerUI.root then
+            followerUI.new(followers)
+        else
+            followerUI.root:update()
+        end
+    else
+        if followerUI.root then
+            followerUI.root:destroy()
         end
     end
 end
@@ -84,10 +109,14 @@ end
 return {
     engineHandlers = {
         onUpdate = onUpdate,
+        onFrame = onFrame,
     },
     eventHandlers = {
         FDU_UpdateFollowerList = function(data)
             followers = data.followers
+            if settingsWrapper.enable then
+                followerUI.new(followers)
+            end
         end,
         S3CombatTargetAdded = combatTargetAdded,
         S3CombatTargetRemoved = combatTargetRemoved,

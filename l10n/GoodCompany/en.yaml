@@ -35,3 +35,33 @@ maxDist_desc: Distance at which the follower will reach max speed.
 maxSpeed_name: Max Speed Boost
 lerpSpeed_name: Lerp Speed
 lerpSpeed_desc: How smooth the speed up curve should be.
+
+UIWrapper_groupName: "Follower UI: Wrapper"
+enable_name: Enable Follower UI
+lockPosition_name: Lock Position
+lockPosition_desc: |
+  If disabled, you can:
+  - drag the UI around by holding it with LMB
+  - scale the UI by scrolling your mousewheel while dragging it
+posX_name: X Position
+posY_name: Y Position
+scale_name: Scale
+enableBordersAndBg_name: Enable Borders and Background
+bgAlpha_name: Background Transparency
+verticalLayout_name: Vertical Layout
+textAlign_name: Text Align
+
+UIFollower_groupName: "Follower UI: Followers"
+healthBarEnabled_name: Enable Health Bar
+healthBarColor_name: Health Bar Color
+magickaBarEnabled_name: Enable Magicka Bar
+magickaBarColor_name: Magicka Bar Color
+fatigueBarEnabled_name: Enable Fatigue Bar
+fatigueBarColor_name: Fatigue Bar Color
+barLength_name: Bar Length
+barWidth_name: Bar Width
+barLabels_name: Enable Bar Labels (Numbers)
+combatIcon_name: Enable Combat Icon
+combatIcon_desc: Equipped weapon, spell or lack thereof.
+immortalityIntegration_name: Immortality Integration
+immortalityIntegration: If enabled, when your follower gets down, the UI will grey out properly display it.
