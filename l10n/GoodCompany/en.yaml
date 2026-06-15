@@ -38,6 +38,8 @@ lerpSpeed_desc: How smooth the speed up curve should be.
 
 UIWrapper_groupName: "Follower UI: Wrapper"
 enable_name: Enable Follower UI
+pollingRate_name: UI Update Polling Rate (sec)
+pollingRate_desc: Set it to zero to update UI every frame.
 lockPosition_name: Lock Position
 lockPosition_desc: |
   If disabled, you can:
@@ -45,10 +47,8 @@ lockPosition_desc: |
   - scale the UI by scrolling your mousewheel while dragging it
 posX_name: X Position
 posY_name: Y Position
-scale_name: Scale
 enableBordersAndBg_name: Enable Borders and Background
-bgAlpha_name: Background Transparency
-verticalLayout_name: Vertical Layout
+horizontalLayout_name: Horizontal Layout
 textAlign_name: Text Align
 
 UIFollower_groupName: "Follower UI: Followers"

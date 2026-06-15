@@ -39,6 +39,13 @@ I.Settings.registerGroup {
             default = true,
         },
         {
+            key = 'pollingRate',
+            name = 'pollingRate_name',
+            description = 'pollingRate_desc',
+            renderer = 'number',
+            default = .1,
+        },
+        {
             key = 'lockPosition',
             name = 'lockPosition_name',
             description = "lockPosition_desc",
@@ -58,44 +65,16 @@ I.Settings.registerGroup {
             default = 10,
         },
         {
-            key = 'scale',
-            name = 'scale_name',
-            renderer = 'number',
-            default = 1,
-        },
-        {
             key = 'enableBordersAndBg',
             name = 'enableBordersAndBg_name',
             renderer = 'checkbox',
             default = true,
         },
         {
-            key = 'bgAlpha',
-            name = 'bgAlpha_name',
-            renderer = 'number',
-            default = 1,
-            min = 0,
-            max = 1,
-        },
-        {
-            key = 'verticalLayout',
-            name = 'verticalLayout_name',
+            key = 'horizontalLayout',
+            name = 'horizontalLayout_name',
             renderer = 'checkbox',
-            default = true,
-        },
-        {
-            key = 'textAlign',
-            name = 'textAlign_name',
-            renderer = 'select',
-            argument = {
-                l10n = "GoodCompany",
-                items = {
-                    "Start",
-                    "Center",
-                    "End",
-                },
-            },
-            default = true,
+            default = false,
         },
     }
 }
@@ -112,7 +91,30 @@ I.Settings.registerGroup {
             key = 'nameTextSize',
             name = 'nameTextSize_name',
             renderer = 'number',
-            default = 16,
+            default = 18,
+        },
+        {
+            key = 'nameColor',
+            name = 'nameColor_name',
+            renderer = "SuperColorPicker2",
+            default = util.color.hex("eee2c9"),
+            argument = {
+                presetColors = presetColors,
+            },
+        },
+        {
+            key = 'textAlign',
+            name = 'textAlign_name',
+            renderer = 'select',
+            argument = {
+                l10n = "GoodCompany",
+                items = {
+                    "Start",
+                    "Center",
+                    "End",
+                },
+            },
+            default = "Center",
         },
         {
             key = 'healthBarEnabled',
@@ -163,13 +165,13 @@ I.Settings.registerGroup {
             key = 'barLength',
             name = 'barLength_name',
             renderer = 'number',
-            default = 200,
+            default = 100,
         },
         {
             key = 'barWidth',
             name = 'barWidth_name',
             renderer = 'number',
-            default = 10,
+            default = 16,
         },
         {
             key = 'barLabels',
@@ -181,6 +183,13 @@ I.Settings.registerGroup {
             key = 'combatIcon',
             name = 'combatIcon_name',
             description = 'combatIcon_desc',
+            renderer = 'checkbox',
+            default = true,
+        },
+        {
+            key = 'horizontalIcons',
+            name = 'horizontalIcons_name',
+            description = "horizontalIcons_desc",
             renderer = 'checkbox',
             default = true,
         },

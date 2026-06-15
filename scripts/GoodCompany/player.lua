@@ -1,8 +1,10 @@
+---@diagnostic disable: undefined-field
 ---@omw-context player
 local nearby = require("openmw.nearby")
 local self = require("openmw.self")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
+local I = require("openmw.interfaces")
 
 local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 local followerUI = require("scripts.GoodCompany.ui")
@@ -13,7 +15,7 @@ local deps = require("scripts.BoonsAndBurdens.utils.dependencies")
 deps.checkAll("Good Company", {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
-        interface = true,
+        interface = I.FollowerDetectionUtil,
     },
     {
         plugin = "h3lp_yours3lf.omwscripts",
@@ -23,12 +25,13 @@ deps.checkAll("Good Company", {
 
 local inCombat = false
 local combatTargets = {}
-local followers = {
-    asd = {
-        state = require("openmw.nearby").actors[1]
-    }
-}
+local followers = I.FollowerDetectionUtil.getFollowerList()
 local notifListPerFollower = {}
+local downedFollowers = {}
+
+if settingsWrapper.enable then
+    followerUI.new(followers)
+end
 
 local function onUpdate()
     -- sparce notification sending
@@ -43,11 +46,19 @@ local function onUpdate()
     end
 end
 
-local function onFrame()
+local onFrameAccumulator = 0
+local function onFrame(dt)
+    onFrameAccumulator = onFrameAccumulator + dt
+    if settingsWrapper.pollingRate >= onFrameAccumulator then
+        return
+    end
+    onFrameAccumulator = 0
+
     if settingsWrapper.enable then
         if not followerUI.root then
             followerUI.new(followers)
         else
+            followerUI.updateData()
             followerUI.root:update()
         end
     else
@@ -87,7 +98,7 @@ local function fillNotifList(follower, eventName)
     local leader = state.superLeader or state.leader
 
     for _, actor in pairs(nearby.actors) do
-        if not followers[actor.id] and actor.id ~=  self.id then
+        if not followers[actor.id] and actor.id ~= self.id then
             notifList[#notifList + 1] = {
                 eventName = eventName,
                 follower = follower,
@@ -98,29 +109,55 @@ local function fillNotifList(follower, eventName)
     end
 end
 
+local function followerListUpdated(data)
+    followers = data.followers
+    if settingsWrapper.enable then
+        followerUI.new(followers)
+    end
+end
+
 local function followerDown(data)
+    downedFollowers[data.follower.id] = data.follower
     fillNotifList(data.follower, "GoodCompany_followerDown")
+    followerUI.followerData[data.follower.id].down = true
 end
 
 local function followerUp(data)
+    downedFollowers[data.follower.id] = nil
     fillNotifList(data.follower, "GoodCompany_followerUp")
+    followerUI.followerData[data.follower.id].down = false
+end
+
+local function onSave()
+    return {
+        downedFollowers = downedFollowers
+    }
+end
+
+local function onLoad(data)
+    if not data then return end
+    downedFollowers = data.downedFollowers or downedFollowers
 end
 
 return {
     engineHandlers = {
         onUpdate = onUpdate,
         onFrame = onFrame,
+        onSave = onSave,
+        onLoad = onLoad,
     },
     eventHandlers = {
-        FDU_UpdateFollowerList = function(data)
-            followers = data.followers
-            if settingsWrapper.enable then
-                followerUI.new(followers)
-            end
-        end,
+        FDU_UpdateFollowerList = followerListUpdated,
         S3CombatTargetAdded = combatTargetAdded,
         S3CombatTargetRemoved = combatTargetRemoved,
         GoodCompany_followerDown = followerDown,
         GoodCompany_followerUp = followerUp,
+    },
+    interfaceName = "GoodCompany",
+    interface = {
+        version = 1,
+        getDownedFollowers = function()
+            return downedFollowers
+        end
     }
 }

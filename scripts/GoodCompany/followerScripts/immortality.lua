@@ -82,7 +82,7 @@ end
 
 I.Combat.addOnHitHandler(function(attack)
     if down then return false end
-    if not attack.successful then return end
+    if not attack.successful or not attack.damage.health then return end
     if attack.damage.health > health.current - settings.threshold then
         if not down then
             selfDown()

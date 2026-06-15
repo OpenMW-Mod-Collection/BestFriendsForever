@@ -1,9 +1,11 @@
 selected:sendEvent("StartAIPackage", {target = self, type="Follow"})
 
+Change:
+
+- Split ui.lua into separate files omfg
+
 Add:
 
-- HUD
-- Immortality: require a healing spell or a healing potion to "revive" your follower
 - Immortality: blacklist
 - Teleport: blacklist
 - Speed up: blacklist
