@@ -50,13 +50,11 @@ maxDist_desc: Distance at which the follower will reach max speed.
 
 UIWrapper_groupName: Wrapper Settings
 enable_name: Enable Follower UI
-pollingRate_name: UI Update Polling Rate (sec)
+pollingRate_name: UI Update Polling Rate
 pollingRate_desc: Set it to zero to update UI every frame.
 lockPosition_name: Lock Position
-lockPosition_desc: |
-  If disabled, you can:
-  - drag the UI around by holding it with LMB
-  - scale the UI by scrolling your mousewheel while dragging it
+lockPosition_desc: >
+  If disabled, you can drag the UI around by holding it with LMB.
 posX_name: X Position
 posY_name: Y Position
 expansionDirection_name: Expansion Direction

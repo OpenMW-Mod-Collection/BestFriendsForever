@@ -2,6 +2,7 @@
 ---@omw-context menu
 local I = require('openmw.interfaces')
 local util = require("openmw.util")
+local ui   = require("openmw.ui")
 
 local presetColors = {
     "d4edfc", -- thirst
@@ -48,8 +49,20 @@ I.Settings.registerGroup {
             key = 'callDistance',
             name = 'callDistance_name',
             description = "callDistance_desc",
-            renderer = 'number',
-            default = -200,
+            renderer = 'SuperSlider4',
+            default = 200,
+            argument = {
+                min = -1000,
+                max = 1000,
+                step = 50,
+                default = 200,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                minLabel = "In front of",
+                maxLabel = "Behind",
+                unit = "units",
+            }
         },
     }
 }
@@ -79,8 +92,17 @@ I.Settings.registerGroup {
             key = 'pollingRate',
             name = 'pollingRate_name',
             description = 'pollingRate_desc',
-            renderer = 'number',
+            renderer = "SuperSlider4",
             default = .1,
+            argument = {
+                max = 2,
+                step = .1,
+                default = .1,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "sec",
+            }
         },
         {
             key = 'lockPosition',
@@ -92,14 +114,32 @@ I.Settings.registerGroup {
         {
             key = 'posX',
             name = 'posX_name',
-            renderer = 'number',
+            renderer = "SuperSlider4",
             default = 10,
+            argument = {
+                max = ui.screenSize().x,
+                step = 1,
+                default = 10,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "px",
+            }
         },
         {
             key = 'posY',
             name = 'posY_name',
-            renderer = 'number',
+            renderer = "SuperSlider4",
             default = 10,
+            argument = {
+                max = ui.screenSize().y,
+                step = 1,
+                default = 10,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "px",
+            }
         },
         {
             key = 'expansionDirection',
@@ -142,8 +182,15 @@ I.Settings.registerGroup {
         {
             key = 'nameTextSize',
             name = 'nameTextSize_name',
-            renderer = 'number',
+            renderer = 'SuperSlider4',
             default = 18,
+            argument = {
+                min = 1,
+                default = 18,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+            }
         },
         {
             key = 'nameColor',
@@ -216,14 +263,28 @@ I.Settings.registerGroup {
         {
             key = 'barLength',
             name = 'barLength_name',
-            renderer = 'number',
+            renderer = 'SuperSlider4',
             default = 100,
+            argument = {
+                max = 500,
+                default = 100,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+            }
         },
         {
             key = 'barWidth',
             name = 'barWidth_name',
-            renderer = 'number',
+            renderer = 'SuperSlider4',
             default = 16,
+            argument = {
+                max = 50,
+                default = 16,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+            }
         },
         {
             key = 'barLabels',
@@ -241,7 +302,6 @@ I.Settings.registerGroup {
         {
             key = 'horizontalIcons',
             name = 'horizontalIcons_name',
-            description = "horizontalIcons_desc",
             renderer = 'checkbox',
             default = true,
         },

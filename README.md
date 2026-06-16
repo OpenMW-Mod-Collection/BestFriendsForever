@@ -75,5 +75,5 @@ I.GoodCompany.getDownedFollowers()
 
 **Sosnoviy Bor** - Author  
 **urm** - Main inspiration and many UI elements ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))  
-**atka** - Inspiration for Call feature  
-**ownlyme** - The mod's name
+**ownlyme** - Slider renderer, ideas and the mod's name  
+**atka** - Inspiration for Call feature

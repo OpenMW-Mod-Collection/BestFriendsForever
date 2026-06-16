@@ -12,10 +12,11 @@ local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 local raycast = require("scripts.GoodCompany.utils.raycast")
 local followerUI = require("scripts.GoodCompany.ui")
 
-local settingsWrapper = settingsCache.new(storage.playerSection("SettingsGoodCompany_UIWrapper"), async)
+local sectionWrapper = storage.playerSection("SettingsGoodCompany_UIWrapper")
+local settingsWrapper = settingsCache.new(sectionWrapper, async)
 local settingsCall = settingsCache.new(storage.playerSection("SettingsGoodCompany_call"), async)
 
-local deps = require("scripts.BoonsAndBurdens.utils.dependencies")
+local deps = require("scripts.GoodCompany.utils.dependencies")
 deps.checkAll("Good Company", {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
@@ -49,7 +50,8 @@ input.registerAction {
 input.registerActionHandler(
     "GoodCompany_call",
     async:callback(function(pressed)
-        if pressed then return end
+        if pressed or I.UI.getMode() then return end
+
         local pos = raycast.findSafeTpPos(self, settingsCall.callDistance)
         for _, state in pairs(followers) do
             local myFollower = state.superLeader and state.superLeader.id == self.id
@@ -194,6 +196,10 @@ return {
         version = 1,
         getDownedFollowers = function()
             return downedFollowers
-        end
+        end,
+        setPosSettings = function(x, y)
+            sectionWrapper:set("posX", x)
+            sectionWrapper:set("posY", y)
+        end,
     }
 }

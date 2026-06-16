@@ -80,8 +80,15 @@ I.Settings.registerGroup {
             key = 'threshold',
             name = 'threshold_name',
             description = "threshold_desc",
-            renderer = 'number',
+            renderer = "SuperSlider4",
             default = 10,
+            argument = {
+                default = 10,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "HP",
+            }
         },
         {
             key = 'changeAggro',
@@ -106,15 +113,33 @@ I.Settings.registerGroup {
             key = 'startDist',
             name = 'startDist_name',
             description = "startDist_desc",
-            renderer = 'number',
-            default = 500,
+            renderer = 'SuperSlider4',
+            default = 200,
+            argument = {
+                max = 5000,
+                step = 50,
+                default = 200,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "units",
+            }
         },
         {
             key = 'maxDist',
             name = 'maxDist_name',
             description = "maxDist_desc",
-            renderer = 'number',
-            default = 5000,
+            renderer = 'SuperSlider4',
+            default = 2000,
+            argument = {
+                max = 5000,
+                step = 50,
+                default = 2000,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "units",
+            }
         },
     }
 }

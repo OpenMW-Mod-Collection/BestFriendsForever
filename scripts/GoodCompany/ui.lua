@@ -15,12 +15,7 @@ local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 local followerUI = {}
 
 local wrapperSection = storage.playerSection("SettingsGoodCompany_UIWrapper")
-local ignoredSettingsKeys = {
-    posX = true,
-    posY = true,
-}
 local function settingsUpdated(key)
-    if ignoredSettingsKeys[key] then return end
     followerUI.new(I.FollowerDetectionUtil.getFollowerList())
 end
 local settingsWrapper = settingsCache.new(
@@ -36,22 +31,22 @@ local settingsLocalUI = settingsCache.new(
 
 ---@class IconData
 ---@field container openmw.ui.Layout|nil
----@field combatLayout openmw.ui.Layout|nil Layout node for the combat icon image; nil if combatIcon setting is off
----@field debuffLayout openmw.ui.Layout|nil Layout node for the debuff icon image; nil if no debuff or setting is off
+---@field combatLayout openmw.ui.Layout|nil     Layout node for the combat icon image; nil if combatIcon setting is off
+---@field debuffLayout openmw.ui.Layout|nil     Layout node for the debuff icon image; nil if no debuff or setting is off
 
 ---@class BarData
----@field enabled boolean Whether this bar is shown
----@field color openmw.util.Color Bar fill color
----@field imgLayout openmw.ui.Layout|nil Layout node for the bar image; nil until the follower's UI is built
----@field label openmw.ui.Layout|nil Layout node for the current/base label; nil if barLabels is off or UI not yet built
+---@field enabled boolean                   Whether this bar is shown
+---@field color openmw.util.Color           Bar fill color
+---@field imgLayout openmw.ui.Layout|nil    Layout node for the bar image; nil until the follower's UI is built
+---@field label openmw.ui.Layout|nil        Layout node for the current/base label; nil if barLabels is off or UI not yet built
 
 ---@class StatEntry
 ---@field name "health"|"magicka"|"fatigue"
----@field stat openmw.types.DynamicStat|nil Live stat proxy from dynamicStats.*()
+---@field stat openmw.types.DynamicStat|nil     Live stat proxy from dynamicStats.*()
 ---@field bar BarData
 
 ---@class FollowerData
----@field stats StatEntry[] Ordered: [1]=health, [2]=magicka, [3]=fatigue
+---@field stats StatEntry[]     Ordered: [1]=health, [2]=magicka, [3]=fatigue
 ---@field icons IconData
 ---@field actor GameObject
 ---@field down boolean
@@ -98,7 +93,6 @@ local rootFlex
 -- +--------------------+
 
 local function mousePress(data, elem)
-    print("pressed!")
     if data.button ~= 1 or settingsWrapper.lockPosition then return end -- Left mouse button
     if not elem.userData then
         elem.userData = {}
@@ -120,8 +114,6 @@ local function mouseMove(data, elem)
         elem.userData.windowStartPosition.x + deltaX,
         elem.userData.windowStartPosition.y + deltaY
     )
-    wrapperSection:set("posX", math.floor(newPosition.x))
-    wrapperSection:set("posY", math.floor(newPosition.y))
     followerUI.root.layout.props.position = newPosition
 
     followerUI.root:update()
@@ -131,6 +123,11 @@ local function mouseRelease(data, elem)
     if elem.userData then
         elem.userData.isDragging = false
     end
+    -- kinda idiotic way of doing things, but it works
+    I.GoodCompany.setPosSettings(
+        math.floor(followerUI.root.layout.props.position.x),
+        math.floor(followerUI.root.layout.props.position.y)
+    )
     followerUI.root:update()
 end
 
@@ -505,11 +502,11 @@ local function createFollowerFlex(follower, down)
                     actor = follower,
                 },
                 events = {
-                    mouseClick = function()
+                    mouseClick = async:callback(function()
                         self:sendEvent("GoodCompany_followerWidgetClicked", follower)
                         follower:sendEvent("GoodCompany_followerWidgetClicked")
                         core.sendGlobalEvent("GoodCompany_followerWidgetClicked", follower)
-                    end
+                    end),
                 },
                 content = ui.content {
                     {
@@ -519,8 +516,8 @@ local function createFollowerFlex(follower, down)
                             text = follower.type.records[follower.recordId].name,
                             textSize = settingsLocalUI.nameTextSize,
                             textShadow = true,
-                            textColor = settingsLocalUI.nameColor
-                        }
+                            textColor = settingsLocalUI.nameColor,
+                        },
                     },
                     {
                         name = "followerFlex_H1",

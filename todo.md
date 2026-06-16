@@ -10,3 +10,6 @@ Add:
 - Teleport: blacklist
 - Speed up: blacklist
 - Levitation and water walking sharing (?)
+- UI: hide on certain UI modes
+- UI: hide when UI is hidden
+- Replace S3lf with vanilla event handling
