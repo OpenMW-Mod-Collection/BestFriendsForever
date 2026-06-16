@@ -25,8 +25,45 @@ I.Settings.registerPage {
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_UIWrapper',
+    key = 'SettingsGoodCompany_call',
     page = 'GoodCompany',
+    l10n = 'GoodCompany',
+    name = 'call_groupName',
+    description = "call_groupDesc",
+    permanentStorage = true,
+    order = 10,
+    settings = {
+        {
+            key = 'callKeybind',
+            name = 'callKeybind_name',
+            description = "callKeybind_desc",
+            renderer = 'inputBinding',
+            argument = {
+                key = "GoodCompany_call",
+                type = "action",
+            },
+            default = "g",
+        },
+        {
+            key = 'callDistance',
+            name = 'callDistance_name',
+            description = "callDistance_desc",
+            renderer = 'number',
+            default = -200,
+        },
+    }
+}
+
+I.Settings.registerPage {
+    key = 'GoodCompany_UI',
+    l10n = 'GoodCompany',
+    name = 'page_UI_name',
+    description = 'page_UI_description',
+}
+
+I.Settings.registerGroup {
+    key = 'SettingsGoodCompany_UIWrapper',
+    page = 'GoodCompany_UI',
     l10n = 'GoodCompany',
     name = 'UIWrapper_groupName',
     permanentStorage = true,
@@ -81,7 +118,7 @@ I.Settings.registerGroup {
 
 I.Settings.registerGroup {
     key = 'SettingsGoodCompany_UIFollower',
-    page = 'GoodCompany',
+    page = 'GoodCompany_UI',
     l10n = 'GoodCompany',
     name = 'UIFollower_groupName',
     permanentStorage = true,

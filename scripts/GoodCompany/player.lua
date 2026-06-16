@@ -1,15 +1,19 @@
----@diagnostic disable: undefined-field
+---@diagnostic disable: undefined-field, param-type-mismatch
 ---@omw-context player
 local nearby = require("openmw.nearby")
 local self = require("openmw.self")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
 local I = require("openmw.interfaces")
+local input = require("openmw.input")
+local core = require("openmw.core")
 
 local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local raycast = require("scripts.GoodCompany.utils.raycast")
 local followerUI = require("scripts.GoodCompany.ui")
 
 local settingsWrapper = settingsCache.new(storage.playerSection("SettingsGoodCompany_UIWrapper"), async)
+local settingsCall = settingsCache.new(storage.playerSection("SettingsGoodCompany_call"), async)
 
 local deps = require("scripts.BoonsAndBurdens.utils.dependencies")
 deps.checkAll("Good Company", {
@@ -32,6 +36,38 @@ local downedFollowers = {}
 if settingsWrapper.enable then
     followerUI.new(followers)
 end
+
+input.registerAction {
+    key = "GoodCompany_call",
+    type = input.ACTION_TYPE.Boolean,
+    l10n = "GoodCompany",
+    name = "callAction_name",
+    description = "",
+    defaultValue = false,
+}
+
+input.registerActionHandler(
+    "GoodCompany_call",
+    async:callback(function(pressed)
+        if pressed then return end
+        local pos = raycast.findSafeTpPos(self, settingsCall.callDistance)
+        for _, state in pairs(followers) do
+            local myFollower = state.superLeader and state.superLeader.id == self.id
+                or state.leader and state.leader.id == self.id
+            if myFollower then
+                core.sendGlobalEvent(
+                    "GoodCompany_teleport",
+                    {
+                        actor = state.actor,
+                        pos = pos,
+                        cell = self.cell.name,
+                        options = { onGround = true },
+                    }
+                )
+            end
+        end
+    end)
+)
 
 local function onUpdate()
     -- sparce notification sending

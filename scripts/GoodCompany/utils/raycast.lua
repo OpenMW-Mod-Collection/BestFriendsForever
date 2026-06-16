@@ -1,4 +1,4 @@
----@diagnostic disable: missing-fields
+---@diagnostic disable: missing-fields, undefined-field
 ---@omw-context local
 --  Taken from Dangers of Broken Artifacts by Foxunder
 -- https://www.nexusmods.com/morrowind/mods/58227
@@ -10,9 +10,12 @@ local R = {}
 local SPAWN_Z_OFFSET = 50
 local GROUND_CHECK_Z = 200
 
-R.findSafeTpPos = function(actor, distance)
-    local backward      = actor.rotation:apply(util.vector3(0, -1, 0))
-    local right         = actor.rotation:apply(util.vector3(1, 0, 0))
+---@param obj GameObject
+---@param distance openmw.util.Vector3    Positive numbers = backward, negative = forward
+---@return openmw.util.Vector3
+R.findSafeTpPos = function(obj, distance)
+    local backward      = obj.rotation:apply(util.vector3(0, -1, 0))
+    local right         = obj.rotation:apply(util.vector3(1, 0, 0))
 
     local candidateDirs = {
         backward,
@@ -23,14 +26,14 @@ R.findSafeTpPos = function(actor, distance)
     }
 
     for _, dir in ipairs(candidateDirs) do
-        local candidate = actor.position + dir:normalize() * distance
+        local candidate = obj.position + dir:normalize() * distance
 
         local wallCheck = nearby.castRay(
-            actor.position + util.vector3(0, 0, 60),
+            obj.position + util.vector3(0, 0, 60),
             candidate + util.vector3(0, 0, 60),
             {
                 collisionType = nearby.COLLISION_TYPE.World,
-                ignore = { actor }
+                ignore = { obj }
             }
         )
 
@@ -42,7 +45,7 @@ R.findSafeTpPos = function(actor, distance)
             )
 
             if groundCheck.hit then
-                local heightDiff = math.abs(groundCheck.hitPos.z - actor.position.z)
+                local heightDiff = math.abs(groundCheck.hitPos.z - obj.position.z)
                 if heightDiff < 120 then
                     return groundCheck.hitPos + util.vector3(0, 0, 10)
                 end
@@ -50,7 +53,7 @@ R.findSafeTpPos = function(actor, distance)
         end
     end
 
-    return actor.position + util.vector3(0, 0, 80)
+    return obj.position + backward:normalize() * distance
 end
 
 return R

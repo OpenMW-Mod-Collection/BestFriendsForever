@@ -2,6 +2,8 @@ msg_followerDown: "{npc_name} is down!"
 
 page_name: Good Company
 page_description: Several utilities for you and your followers.
+page_UI_name: "Good Company: UI"
+page_UI_description: Settings for Good Company's UI.
 
 toggles_groupName: Toggles
 enableTeleport_name: Enable Teleporting
@@ -26,6 +28,19 @@ changeAggro_name: Change Enemy Aggro if the Follower is Down
 changeAggro_desc: >
   If an enemy targets the downed follower, they will change aggro onto you.
 
+call_groupName: Call
+call_groupDesc: Teleporting your followers near you.
+callKeybind_name: Keybind
+callKeybind_desc: |
+  Teleports all your followers near you.
+  
+  Triggers only on release.
+callAction_name: Call
+callDistance_name: Teleportation Distance
+callDistance_desc: |
+  X > 0 = behind you,
+  X < 0 = in front of you.
+
 catchUp_groupName: Catch Up
 catchUp_groupDesc: Gradually speeds up followers if they get too far.
 startDist_name: Starting Distance
@@ -36,7 +51,7 @@ maxSpeed_name: Max Speed Boost
 lerpSpeed_name: Lerp Speed
 lerpSpeed_desc: How smooth the speed up curve should be.
 
-UIWrapper_groupName: "Follower UI: Wrapper"
+UIWrapper_groupName: Wrapper Settings
 enable_name: Enable Follower UI
 pollingRate_name: UI Update Polling Rate (sec)
 pollingRate_desc: Set it to zero to update UI every frame.
@@ -51,7 +66,9 @@ enableBordersAndBg_name: Enable Borders and Background
 horizontalLayout_name: Horizontal Layout
 textAlign_name: Text Align
 
-UIFollower_groupName: "Follower UI: Followers"
+UIFollower_groupName: Follower Widgets
+nameTextSize_name: Name Text Size
+nameColor_name: Name Color
 healthBarEnabled_name: Enable Health Bar
 healthBarColor_name: Health Bar Color
 magickaBarEnabled_name: Enable Magicka Bar
@@ -60,8 +77,10 @@ fatigueBarEnabled_name: Enable Fatigue Bar
 fatigueBarColor_name: Fatigue Bar Color
 barLength_name: Bar Length
 barWidth_name: Bar Width
-barLabels_name: Enable Bar Labels (Numbers)
-combatIcon_name: Enable Combat Icon
-combatIcon_desc: Equipped weapon, spell or lack thereof.
+barLabels_name: Enable Bar Labels
+combatIcon_name: Enable Icons
+combatIcon_desc: Equipped weapon, spell or a disease.
+horizontalIcons_name: Stack Icons Horizontally
 immortalityIntegration_name: Immortality Integration
-immortalityIntegration: If enabled, when your follower gets down, the UI will grey out properly display it.
+immortalityIntegration: >
+  If enabled, when your follower gets down, the UI will grey out properly display it.

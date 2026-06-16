@@ -14,20 +14,20 @@ local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 
 local followerUI = {}
 
+local function settingsUpdated()
+    followerUI.new(I.FollowerDetectionUtil.getFollowerList())
+end
 local settingsWrapper = settingsCache.new(
     storage.playerSection("SettingsGoodCompany_UIWrapper"),
     async,
-    function()
-        followerUI.new(I.FollowerDetectionUtil.getFollowerList())
-    end
+    settingsUpdated
 )
 local settingsLocalUI = settingsCache.new(
     storage.playerSection("SettingsGoodCompany_UIFollower"),
     async,
-    function()
-        followerUI.new(I.FollowerDetectionUtil.getFollowerList())
-    end
+    settingsUpdated
 )
+
 ---@class IconData
 ---@field container openmw.ui.Layout|nil
 ---@field combatLayout openmw.ui.Layout|nil Layout node for the combat icon image; nil if combatIcon setting is off
@@ -53,10 +53,6 @@ local settingsLocalUI = settingsCache.new(
 ---@type table<string, FollowerData>
 followerUI.followerData = {}
 
-local barTexture = ui.texture({ path = 'textures/menu_bar_gray.dds' })
-local sidePadding = 3
-local interval = { template = I.MWUI.templates.interval }
-
 local function padding(x, y)
     return {
         props = {
@@ -65,8 +61,22 @@ local function padding(x, y)
     }
 end
 
-local rootFlex
+local sidePadding = 3
+local delimiterW = 10
+local delimiterH = 15
+local interval = { template = I.MWUI.templates.interval }
+local delimiterPadding = padding(delimiterW, delimiterH)
 local padding_0_3 = padding(0, 3)
+local barTexture = ui.texture { path = 'textures/menu_bar_gray.dds' }
+local magicIcon = ui.texture {
+    path = 'textures/menu_icon_magic.dds',
+    offset = v2(0, 0),
+    size = v2(42, 42),
+}
+local h2hIcon = ui.texture { path = 'icons/k/stealth_handtohand.dds' }
+local iconCache = {}
+
+local rootFlex
 local function createRoot()
     rootFlex = {
         name = "rootFlex",
@@ -99,7 +109,7 @@ local function createRoot()
             position = v2(settingsWrapper.posX, settingsWrapper.posY),
         },
         content = ui.content { {
-            name = "rootPadding",
+            name = "rootOuterPadding",
             template = I.MWUI.templates.padding,
             props = {
                 inheritAlpha = false,
@@ -108,10 +118,6 @@ local function createRoot()
         } }
     }
 end
-
-followerUI = {
-    root = createRoot()
-}
 
 local function labelText(curr, base)
     return ('%i/%i'):format(math.floor(curr), math.floor(base))
@@ -165,13 +171,6 @@ local function barElement(data)
     }
 end
 
-local magicIcon = ui.texture({
-    path = 'textures/menu_icon_magic.dds',
-    offset = v2(0, 0),
-    size = v2(42, 42),
-})
-local h2hIcon = ui.texture({ path = 'icons/k/stealth_handtohand.dds' })
-local iconCache = {}
 local function getEffectIcon(id)
     local effect = core.magic.effects.records[id]
     local path = effect.icon:gsub('^(.*[/\\])(.*)$', '%1b_%2')
@@ -251,7 +250,6 @@ end
 
 local STANCE = types.Actor.STANCE
 local EQUIPMENT_SLOT = types.Actor.EQUIPMENT_SLOT
-
 local function renderCombat(actor)
     local icon
     local magic = false
@@ -331,13 +329,19 @@ local function populateIcons(fData)
 end
 
 ---@param follower GameObject
----@return table
-local function createFollowerFlex(follower, down)
+---@param down boolean
+local function newFollowerData(follower, down)
     followerUI.followerData[follower.id] = {
         actor = follower,
         down = down,
         icons = {
-            container = nil,
+            container = {
+                type = ui.TYPE.Flex,
+                props = {
+                    horizontal = settingsLocalUI.horizontalIcons,
+                },
+                content = ui.content({}),
+            },
             combatLayout = nil,
             debuffLayout = nil,
         },
@@ -374,6 +378,12 @@ local function createFollowerFlex(follower, down)
             },
         },
     }
+end
+
+---@param follower GameObject
+---@return table
+local function createFollowerFlex(follower, down)
+    newFollowerData(follower, down)
     local fData = followerUI.followerData[follower.id]
 
     local bars = {}
@@ -394,13 +404,6 @@ local function createFollowerFlex(follower, down)
         content = ui.content(bars)
     }
 
-    fData.icons.container = {
-        type = ui.TYPE.Flex,
-        props = {
-            horizontal = settingsLocalUI.horizontalIcons,
-        },
-        content = ui.content({}),
-    }
     if settingsLocalUI.combatIcon then
         populateIcons(fData)
     end
@@ -460,9 +463,6 @@ followerUI.new = function(followers)
         and I.GoodCompany.getDownedFollowers()
         or {}
 
-    local delimiterW = 10
-    local delimiterH = 15
-    local delimiterPadding = padding(delimiterW, delimiterH)
     for _, state in pairs(followers) do
         local myFollower = state.superLeader and state.superLeader.id == self.id
             or state.leader and state.leader.id == self.id
@@ -555,5 +555,7 @@ followerUI.updateData = function()
 
     followerUI.root:update()
 end
+
+followerUI.root = createRoot()
 
 return followerUI

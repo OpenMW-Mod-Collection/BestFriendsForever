@@ -60,6 +60,9 @@ local function onUpdate()
             fatigue.current = 1
             leader:sendEvent("GoodCompany_followerUp", eventData)
             core.sendGlobalEvent("GoodCompany_followerUp", eventData)
+            -- stop combat because if immortality was triggered due to infighting
+            -- they would have a chance to remove their aggro
+            I.AI.removePackages("Combat")
         end
     end
 end

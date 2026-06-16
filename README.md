@@ -44,5 +44,6 @@ Dependency load order doesn't matter.
 ## Credits
 
 **Sosnoviy Bor** - Author  
-**urm** - Main inspiration ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))  
+**urm** - Main inspiration and many UI elements ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))  
+**atka** - Inspiration for Call feature  
 **ownlyme** - The mod's name
