@@ -501,6 +501,16 @@ local function createFollowerFlex(follower, down)
                     horizontal = false,
                     arrange = ui.ALIGNMENT[settingsLocalUI.uiAlign],
                 },
+                userData = {
+                    actor = follower,
+                },
+                events = {
+                    mouseClick = function()
+                        self:sendEvent("GoodCompany_followerWidgetClicked", follower)
+                        follower:sendEvent("GoodCompany_followerWidgetClicked")
+                        core.sendGlobalEvent("GoodCompany_followerWidgetClicked", follower)
+                    end
+                },
                 content = ui.content {
                     {
                         name = "followerName",
@@ -627,10 +637,5 @@ followerUI.updateData = function()
 end
 
 followerUI.root = createRoot()
-
-followerUI.root.layout.events.mousePress = async:callback(mousePress)
-followerUI.root.layout.events.mouseMove = async:callback(mouseMove)
-followerUI.root.layout.events.mouseRelease = async:callback(mouseRelease)
-followerUI.root:update()
 
 return followerUI

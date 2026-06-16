@@ -42,6 +42,35 @@ Dependency load order doesn't matter.
 - [Friendlier Fire](https://www.nexusmods.com/morrowind/mods/57975)
 - [Follower Commands](https://www.nexusmods.com/morrowind/mods/58818)
 
+## API
+
+### Events
+
+```lua
+-- Sent when the player clicks certain follower's widget
+-- Payload: Actor (follower object)
+-- Scope: Player, Global
+GoodCompany_followerWidgetClicked
+
+-- Sent when the follower enters Down state
+-- Payload: { follower: Actor, leader: Actor }
+-- Scope: Player, Global
+GoodCompany_followerDown
+
+-- Sent when the follower eis released from the Down state
+-- Payload: { follower: Actor, leader: Actor }
+GoodCompany_followerUp
+```
+
+### Interfaces
+
+```lua
+-- Returns downed followers of the player
+-- Returns: table<string, Actor>
+-- Scope: Player
+I.GoodCompany.getDownedFollowers()
+```
+
 ## Credits
 
 **Sosnoviy Bor** - Author  

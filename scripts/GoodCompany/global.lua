@@ -6,7 +6,7 @@ local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 local settings = {}
 
 -- TODO
--- ignore npcs with CharGenWalkNPC mwscript
+-- ignore npcs with CharGenWalkNPC mwscript???
 
 local scripts = {
     {
