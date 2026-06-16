@@ -107,27 +107,14 @@ I.Settings.registerGroup {
             name = 'startDist_name',
             description = "startDist_desc",
             renderer = 'number',
-            default = 200,
+            default = 500,
         },
         {
             key = 'maxDist',
             name = 'maxDist_name',
             description = "maxDist_desc",
             renderer = 'number',
-            default = 2000,
-        },
-        {
-            key = 'maxSpeed',
-            name = 'maxSpeed_name',
-            renderer = 'number',
-            default = 300,
-        },
-        {
-            key = 'lerpSpeed',
-            name = 'lerpSpeed_name',
-            description = "lerpSpeed_desc",
-            renderer = 'number',
-            default = .1,
+            default = 5000,
         },
     }
 }

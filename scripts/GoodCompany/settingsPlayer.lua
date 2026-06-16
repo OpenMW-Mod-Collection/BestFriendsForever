@@ -102,6 +102,21 @@ I.Settings.registerGroup {
             default = 10,
         },
         {
+            key = 'expansionDirection',
+            name = 'expansionDirection_name',
+            description = 'expansionDirection_desc',
+            renderer = 'select',
+            argument = {
+                l10n = "GoodCompany",
+                items = {
+                    "Start",
+                    "Center",
+                    "End",
+                },
+            },
+            default = "Center",
+        },
+        {
             key = 'enableBordersAndBg',
             name = 'enableBordersAndBg_name',
             renderer = 'checkbox',
@@ -140,15 +155,15 @@ I.Settings.registerGroup {
             },
         },
         {
-            key = 'textAlign',
-            name = 'textAlign_name',
+            key = 'uiAlign',
+            name = 'uiAlign_name',
             renderer = 'select',
             argument = {
                 l10n = "GoodCompany",
                 items = {
-                    "Start",
+                    "Left",
                     "Center",
-                    "End",
+                    "Right",
                 },
             },
             default = "Center",
@@ -227,6 +242,12 @@ I.Settings.registerGroup {
             key = 'horizontalIcons',
             name = 'horizontalIcons_name',
             description = "horizontalIcons_desc",
+            renderer = 'checkbox',
+            default = true,
+        },
+        {
+            key = 'rightIcons',
+            name = 'rightIcons_name',
             renderer = 'checkbox',
             default = true,
         },

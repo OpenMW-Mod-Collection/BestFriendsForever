@@ -14,11 +14,17 @@ local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
 
 local followerUI = {}
 
-local function settingsUpdated()
+local wrapperSection = storage.playerSection("SettingsGoodCompany_UIWrapper")
+local ignoredSettingsKeys = {
+    posX = true,
+    posY = true,
+}
+local function settingsUpdated(key)
+    if ignoredSettingsKeys[key] then return end
     followerUI.new(I.FollowerDetectionUtil.getFollowerList())
 end
 local settingsWrapper = settingsCache.new(
-    storage.playerSection("SettingsGoodCompany_UIWrapper"),
+    wrapperSection,
     async,
     settingsUpdated
 )
@@ -64,6 +70,16 @@ end
 local sidePadding = 3
 local delimiterW = 10
 local delimiterH = 15
+local alignToAnchor = {
+    Start = 0,
+    Center = .5,
+    End = 1
+}
+local sideToAlignment = {
+    Left = "Start",
+    Center = "Center",
+    Right = "End",
+}
 local interval = { template = I.MWUI.templates.interval }
 local delimiterPadding = padding(delimiterW, delimiterH)
 local padding_0_3 = padding(0, 3)
@@ -75,14 +91,62 @@ local magicIcon = ui.texture {
 }
 local h2hIcon = ui.texture { path = 'icons/k/stealth_handtohand.dds' }
 local iconCache = {}
-
 local rootFlex
+
+-- +--------------------+
+-- | Draggable UI logic |
+-- +--------------------+
+
+local function mousePress(data, elem)
+    print("pressed!")
+    if data.button ~= 1 or settingsWrapper.lockPosition then return end -- Left mouse button
+    if not elem.userData then
+        elem.userData = {}
+    end
+    elem.userData.isDragging = true
+    elem.userData.dragStartPosition = data.position
+    elem.userData.windowStartPosition = followerUI.root.layout.props.position
+        or v2(settingsWrapper.posX, settingsWrapper.posY)
+
+    followerUI.root:update()
+end
+
+local function mouseMove(data, elem)
+    if not (elem.userData and elem.userData.isDragging) then return end
+    -- Calculate new position based on mouse movement
+    local deltaX = data.position.x - elem.userData.dragStartPosition.x
+    local deltaY = data.position.y - elem.userData.dragStartPosition.y
+    local newPosition = util.vector2(
+        elem.userData.windowStartPosition.x + deltaX,
+        elem.userData.windowStartPosition.y + deltaY
+    )
+    wrapperSection:set("posX", math.floor(newPosition.x))
+    wrapperSection:set("posY", math.floor(newPosition.y))
+    followerUI.root.layout.props.position = newPosition
+
+    followerUI.root:update()
+end
+
+local function mouseRelease(data, elem)
+    if elem.userData then
+        elem.userData.isDragging = false
+    end
+    followerUI.root:update()
+end
+
+local eventCallbacks = {
+    mousePress = async:callback(mousePress),
+    mouseMove = async:callback(mouseMove),
+    mouseRelease = async:callback(mouseRelease),
+}
+
 local function createRoot()
     rootFlex = {
         name = "rootFlex",
         type = ui.TYPE.Flex,
         props = {
             horizontal = settingsWrapper.horizontalLayout,
+            arrange = ui.ALIGNMENT[sideToAlignment[settingsLocalUI.uiAlign]],
         },
         content = ui.content {}
     }
@@ -102,12 +166,17 @@ local function createRoot()
 
     return ui.create {
         name = "root",
-        layer = "Windows",
+        layer = settingsWrapper.lockPosition and "HUD" or "Modal",
         template = I.MWUI.templates.boxTransparent,
         props = {
             alpha = settingsWrapper.enableBordersAndBg and 1 or 0,
             position = v2(settingsWrapper.posX, settingsWrapper.posY),
+            anchor = v2(
+                alignToAnchor[settingsWrapper.expansionDirection],
+                alignToAnchor[settingsWrapper.expansionDirection]
+            )
         },
+        events = eventCallbacks,
         content = ui.content { {
             name = "rootOuterPadding",
             template = I.MWUI.templates.padding,
@@ -115,7 +184,10 @@ local function createRoot()
                 inheritAlpha = false,
             },
             content = ui.content { rootFlexPadding }
-        } }
+        } },
+        userData = {
+            windowStartPosition = v2(settingsWrapper.posX, settingsWrapper.posY)
+        },
     }
 end
 
@@ -311,21 +383,27 @@ local function renderDebuff(disease, effect)
     end
 end
 
-local function populateIcons(fData)
-    local combatLayout = renderCombat(fData.actor)
-    fData.icons.combatLayout = combatLayout
+local function placeIconsIntoContainers(fData, debuffed)
     if types.Actor.getStance(fData.actor) ~= STANCE.Nothing then
-        fData.icons.container.content:add(combatLayout)
+        fData.icons.container.content:add(fData.icons.combatLayout)
     end
-    local disease, effect = getDebuff(fData.actor)
-    local debuffLayout = renderDebuff(disease, effect)
-    fData.icons.debuffLayout = debuffLayout
-    if disease or effect then
+    if debuffed then
         if #fData.icons.container.content > 0 then
             fData.icons.container.content:add(interval)
         end
-        fData.icons.container.content:add(debuffLayout)
+        fData.icons.container.content:add(fData.icons.debuffLayout)
     end
+end
+
+local function populateIcons(fData)
+    local combatLayout = renderCombat(fData.actor)
+    fData.icons.combatLayout = combatLayout
+
+    local disease, effect = getDebuff(fData.actor)
+    local debuffLayout = renderDebuff(disease, effect)
+    fData.icons.debuffLayout = debuffLayout
+
+    placeIconsIntoContainers(fData, disease or effect)
 end
 
 ---@param follower GameObject
@@ -421,7 +499,7 @@ local function createFollowerFlex(follower, down)
                 type = ui.TYPE.Flex,
                 props = {
                     horizontal = false,
-                    arrange = ui.ALIGNMENT[settingsLocalUI.textAlign],
+                    arrange = ui.ALIGNMENT[settingsLocalUI.uiAlign],
                 },
                 content = ui.content {
                     {
@@ -442,9 +520,9 @@ local function createFollowerFlex(follower, down)
                             arrange = ui.ALIGNMENT.Center,
                         },
                         content = ui.content {
-                            barsCountainer,
+                            settingsLocalUI.rightIcons and barsCountainer or fData.icons.container,
                             interval,
-                            fData.icons.container,
+                            settingsLocalUI.rightIcons and fData.icons.container or barsCountainer,
                         },
                     },
                 },
@@ -541,15 +619,7 @@ followerUI.updateData = function()
             local disease, effect = getDebuff(fData.actor)
             fData.icons.debuffLayout.content = renderDebuff(disease, effect).content
             fData.icons.container.content = ui.content {}
-            if types.Actor.getStance(fData.actor) ~= STANCE.Nothing then
-                fData.icons.container.content:add(fData.icons.combatLayout)
-            end
-            if disease or effect then
-                if #fData.icons.container.content > 0 then
-                    fData.icons.container.content:add(interval)
-                end
-                fData.icons.container.content:add(fData.icons.debuffLayout)
-            end
+            placeIconsIntoContainers(fData, disease or effect)
         end
     end
 
@@ -557,5 +627,10 @@ followerUI.updateData = function()
 end
 
 followerUI.root = createRoot()
+
+followerUI.root.layout.events.mousePress = async:callback(mousePress)
+followerUI.root.layout.events.mouseMove = async:callback(mouseMove)
+followerUI.root.layout.events.mouseRelease = async:callback(mouseRelease)
+followerUI.root:update()
 
 return followerUI

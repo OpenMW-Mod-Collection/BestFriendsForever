@@ -8,15 +8,16 @@ Featuring:
 
 - Follower status HUD with:
   - Current and total health, magicka and fatigue
-  - Equipped weapon, spell or lack of them
-  - Currently active effects
-  - Notifications about diseases and damaged stats
+  - Equipped weapon, spell, disease or lack of them
+  <!-- - Currently active temporary effects -->
 - Followers teleport to you if they get unloaded
 - Followers speed up to catch up to you
 - Immortal followers:
   - Instead of dying, followers are knocked down until the end of combat
   - Enemies switch aggro from the follower to you
   - Summoned creatures and followers under any Command effect are excluded from immortality
+  - Knocked down followers lose aggro, so this can be also used as more punishing alternative to [Friendlier Fire's](https://www.nexusmods.com/morrowind/mods/57975) aggro prevention
+- Keybind to teleport all your followers to you
 
 ## Compatibility
 
