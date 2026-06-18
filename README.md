@@ -75,5 +75,6 @@ I.BestFriendsForever.getDownedFollowers()
 
 **Sosnoviy Bor** - Author  
 **urm** - Main inspiration and many UI elements ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))  
-**ownlyme** - Slider renderer, ideas and the mod's name  
-**atka** - Inspiration for Call feature
+**ownlyme** - Slider renderer and ideas  
+**Hyacinth** - Ideas  
+**atka** - Inspiration for the Call feature

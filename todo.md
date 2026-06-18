@@ -6,9 +6,6 @@ Change:
 
 Add:
 
-- Immortality: blacklist
-- Teleport: blacklist
-- Speed up: blacklist
 - Levitation and water walking sharing (?)
 - UI: hide on certain UI modes
 - UI: hide when UI is hidden

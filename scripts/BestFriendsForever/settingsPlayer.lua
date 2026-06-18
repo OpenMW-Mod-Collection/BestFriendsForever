@@ -43,6 +43,7 @@ I.Settings.registerGroup {
                 key = "BestFriendsForever_call",
                 type = "action",
             },
+            default = "None",
         },
         {
             key = 'callDistance',

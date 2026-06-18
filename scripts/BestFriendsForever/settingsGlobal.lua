@@ -40,10 +40,25 @@ I.Settings.registerGroup {
     order = 1,
     settings = {
         {
+            key = 'globalBlacklistByScript',
+            name = 'globalBlacklistByScript_name',
+            description = 'globalBlacklistByScript_desc',
+            renderer = 'AttendMeList',
+            default = {
+                'CharGenWalkNPC',
+               'ab01wlcrFishFreshScript',
+            },
+        },
+        {
             key = 'teleportBlacklistMWScript',
             name = 'teleportBlacklistMWScript_name',
             renderer = 'checkbox',
             default = false,
+        },
+        {
+            key = 'teleportBlacklistByScript',
+            name = 'teleportBlacklistByScript_name',
+            renderer = 'AttendMeList',
         },
         {
             key = 'immortalityBlacklistMWScript',
@@ -52,10 +67,9 @@ I.Settings.registerGroup {
             default = false,
         },
         {
-            key = 'catchUpBlacklistMWScript',
-            name = 'catchUpBlacklistMWScript_name',
-            renderer = 'checkbox',
-            default = false,
+            key = 'immortalityBlacklistByScript',
+            name = 'immortalityBlacklistByScript_name',
+            renderer = 'AttendMeList',
         },
     }
 }

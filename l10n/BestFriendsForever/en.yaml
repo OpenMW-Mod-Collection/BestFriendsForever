@@ -11,9 +11,13 @@ enableImmortality_name: Enable Immortal Followers
 enableCatchUp_name: Enable Catch Up
 
 blacklist_groupName: Blacklisting
+globalBlacklistByScript_name: Global Blacklist by MWScripts
+globalBlacklistByScript_desc: >
+  Disables every feature of the mod for actors with these MWScripts attached.
 teleportBlacklistMWScript_name: Disable Teleporting for Everyone with MWScripts
+teleportBlacklistByScript_name: Teleporting Blacklist by MWScripts
 immortalityBlacklistMWScript_name: Disable Immortality for Everyone with MWScripts
-catchUpBlacklistMWScript_name: Disable Catching Up for Everyone with MWScripts
+immortalityBlacklistByScript_name: Immortality Blacklist by MWScripts
 
 immortality_groupName: Immortality
 immortality_groupDesc: |

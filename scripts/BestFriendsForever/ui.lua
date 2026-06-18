@@ -28,6 +28,11 @@ local settingsLocalUI = settingsCache.new(
     async,
     settingsUpdated
 )
+local settingsBlacklists = settingsCache.new(
+    storage.globalSection("SettingsBestFriendsForever_blacklist"),
+    async,
+    settingsUpdated
+)
 
 ---@class IconData
 ---@field container openmw.ui.Layout|nil
@@ -87,6 +92,18 @@ local magicIcon = ui.texture {
 local h2hIcon = ui.texture { path = 'icons/k/stealth_handtohand.dds' }
 local iconCache = {}
 local rootFlex
+
+local function blacklisted(actor, blacklist)
+    local mwscript = actor.type.records[actor.recordId].mwscript
+    if mwscript then
+        for _, blacklistedScript in ipairs(blacklist) do
+            if mwscript == blacklistedScript then
+                return true
+            end
+        end
+    end
+    return false
+end
 
 -- +--------------------+
 -- | Draggable UI logic |
@@ -548,10 +565,11 @@ followerUI.new = function(followers)
         and I.BestFriendsForever.getDownedFollowers()
         or {}
 
-    for _, state in pairs(followers) do
-        local myFollower = state.superLeader and state.superLeader.id == self.id
-            or state.leader and state.leader.id == self.id
-        if not myFollower then
+    for _, fState in pairs(followers) do
+        local myFollower = fState.superLeader and fState.superLeader.id == self.id
+            or fState.leader and fState.leader.id == self.id
+        local banned = blacklisted(fState.actor, settingsBlacklists.globalBlacklistByScript)
+        if not myFollower or banned then
             goto continue
         end
 
@@ -583,8 +601,8 @@ followerUI.new = function(followers)
             rootFlex.content:add(delimiter)
         end
 
-        local down = downedFollowers[state.actor.id]
-        rootFlex.content:add(createFollowerFlex(state.actor, down))
+        local down = downedFollowers[fState.actor.id]
+        rootFlex.content:add(createFollowerFlex(fState.actor, down))
 
         ::continue::
     end
