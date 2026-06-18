@@ -430,46 +430,11 @@ followerUI.new = function(followers)
     followerUI.root:update()
 end
 
-local function updateStats(fData, down)
-    local barSize = v2(settingsLocalUI.barLength, settingsLocalUI.barWidth)
-    for _, statData in ipairs(fData.stats) do
-        local label = statData.bar.label
-        if label then
-            if down then
-                label.props.text = nil
-            else
-                label.props.text = barsUI.labelText(statData.stat.current, statData.stat.base)
-            end
-        end
-        local imgLayout = statData.bar.imgLayout
-        if imgLayout then
-            if down then
-                statData.bar.imgLayout.props.color = util.color.rgb(.5, .5, .5)
-                imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.base, statData.stat.base)
-            else
-                imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.current, statData.stat.base)
-                statData.bar.imgLayout.props.color = statData.bar.color
-            end
-        end
-    end
-end
-
-local function updateIcons(fData, down)
-    fData.icons.container.props.visible = not down
-    if not down then
-        fData.icons.combatLayout.content = iconsUI.renderCombat(fData.actor).content
-        local disease, effect = iconsUI.getDebuff(fData.actor)
-        fData.icons.debuffLayout.content = iconsUI.renderDebuff(disease, effect).content
-        fData.icons.container.content = ui.content {}
-        iconsUI.placeIconsIntoContainers(fData, disease or effect)
-    end
-end
-
 followerUI.updateData = function()
     for _, fData in pairs(followerUI.followerData) do
         local down = fData.down and settingsLocalUI.immortalityIntegration
-        updateStats(fData, down)
-        updateIcons(fData, down)
+        barsUI.updateStats(fData, down)
+        iconsUI.updateIcons(fData, down)
     end
     followerUI.root:update()
 end

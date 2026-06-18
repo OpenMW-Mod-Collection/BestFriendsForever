@@ -194,4 +194,17 @@ iconsUI.placeIconsIntoContainers = function(fData, debuffed)
     end
 end
 
+---@param fData FollowerData
+---@param down boolean
+iconsUI.updateIcons = function(fData, down)
+    fData.icons.container.props.visible = not down
+    if not down then
+        fData.icons.combatLayout.content = iconsUI.renderCombat(fData.actor).content
+        local disease, effect = iconsUI.getDebuff(fData.actor)
+        fData.icons.debuffLayout.content = iconsUI.renderDebuff(disease, effect).content
+        fData.icons.container.content = ui.content {}
+        iconsUI.placeIconsIntoContainers(fData, disease or effect)
+    end
+end
+
 return iconsUI
