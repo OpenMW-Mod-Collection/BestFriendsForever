@@ -3,7 +3,7 @@
 local self = require("openmw.self")
 local core = require("openmw.core")
 
-local raycast = require("scripts.GoodCompany.utils.raycast")
+local raycast = require("scripts.BestFriendsForever.utils.raycast")
 
 if self.type.isDead(self) then return end
 
@@ -24,7 +24,7 @@ local function onInactive()
         pos = raycast.findSafeTpPos(leader, BEHIND_DISTANCE),
         options = { onGround = true }
     }
-    core.sendGlobalEvent("GoodCompany_teleport", eventData)
+    core.sendGlobalEvent("BestFriendsForever_teleport", eventData)
 end
 
 local function onSave()
@@ -49,9 +49,9 @@ return {
     },
     eventHandlers = {
         Died = function()
-            core.sendGlobalEvent("GoodCompany_detachScript", {
+            core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
-                script = "scripts/GoodCompany/followerScripts/teleport.lua"
+                script = "scripts/BestFriendsForever/followerScripts/teleport.lua"
             })
         end,
     }

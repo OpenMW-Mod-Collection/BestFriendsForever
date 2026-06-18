@@ -3,9 +3,9 @@
 local I = require('openmw.interfaces')
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_toggles',
-    page = 'GoodCompany',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_toggles',
+    page = 'BestFriendsForever',
+    l10n = 'BestFriendsForever',
     name = 'toggles_groupName',
     permanentStorage = true,
     order = 0,
@@ -32,9 +32,9 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_blacklist',
-    page = 'GoodCompany',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_blacklist',
+    page = 'BestFriendsForever',
+    l10n = 'BestFriendsForever',
     name = 'blacklist_groupName',
     permanentStorage = true,
     order = 1,
@@ -61,9 +61,9 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_immortality',
-    page = 'GoodCompany',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_immortality',
+    page = 'BestFriendsForever',
+    l10n = 'BestFriendsForever',
     name = 'immortality_groupName',
     description = "immortality_groupDesc",
     permanentStorage = true,
@@ -87,7 +87,6 @@ I.Settings.registerGroup {
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
-                unit = "HP",
             }
         },
         {
@@ -101,9 +100,9 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_catchUp',
-    page = 'GoodCompany',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_catchUp',
+    page = 'BestFriendsForever',
+    l10n = 'BestFriendsForever',
     name = 'catchUp_groupName',
     description = "catchUp_groupDesc",
     permanentStorage = true,
@@ -122,7 +121,6 @@ I.Settings.registerGroup {
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
-                unit = "units",
             }
         },
         {
@@ -138,7 +136,6 @@ I.Settings.registerGroup {
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
-                unit = "units",
             }
         },
     }

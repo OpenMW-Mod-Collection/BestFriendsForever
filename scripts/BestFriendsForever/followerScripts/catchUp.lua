@@ -9,7 +9,7 @@ local types = require("openmw.types")
 
 if types.Actor.isDead(self) then return end
 
-local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 ---@type GameObject
 local leader
@@ -17,7 +17,7 @@ local leaderSpeed
 local selfSpeed = types.Actor.stats.attributes.speed(self)
 
 local settings = settingsCache.new(
-    storage.globalSection("SettingsGoodCompany_catchUp"),
+    storage.globalSection("SettingsBestFriendsForever_catchUp"),
     async
 )
 
@@ -78,9 +78,9 @@ return {
     eventHandlers = {
         Died = function()
             onCleanup()
-            core.sendGlobalEvent("GoodCompany_detachScript", {
+            core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
-                script = "scripts/GoodCompany/followerScripts/catchUp.lua"
+                script = "scripts/BestFriendsForever/followerScripts/catchUp.lua"
             })
         end,
     }

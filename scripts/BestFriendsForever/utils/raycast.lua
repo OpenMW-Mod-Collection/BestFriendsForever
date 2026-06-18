@@ -11,7 +11,7 @@ local SPAWN_Z_OFFSET = 50
 local GROUND_CHECK_Z = 200
 
 ---@param obj GameObject
----@param distance openmw.util.Vector3    Positive numbers = backward, negative = forward
+---@param distance number    Positive numbers = backward, negative = forward
 ---@return openmw.util.Vector3
 R.findSafeTpPos = function(obj, distance)
     local backward      = obj.rotation:apply(util.vector3(0, -1, 0))

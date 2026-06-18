@@ -1,4 +1,4 @@
-# Good Company (OpenMW)
+# Best Friends Forever (OpenMW)
 
 ## 1.0
 

@@ -3,7 +3,7 @@ local I = require("openmw.interfaces")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
 
-local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 -- [==========================================================]
 -- currently here's only logic for switching enemy aggro
@@ -15,7 +15,7 @@ local downedFollowersToLeaders = {}
 
 local settings = {}
 settings = settingsCache.new(
-    storage.globalSection("SettingsGoodCompany_immortality"),
+    storage.globalSection("SettingsBestFriendsForever_immortality"),
     async,
     function (key)
         if key == "changeAggro" and not settings[key] then
@@ -81,7 +81,7 @@ return {
             downedFollowersToLeaders = {}
             noOneDowned = true
         end,
-        GoodCompany_followerDown = followerDown,
-        GoodCompany_followerUp = followerUp,
+        BestFriendsForever_followerDown = followerDown,
+        BestFriendsForever_followerUp = followerUp,
     }
 }

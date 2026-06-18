@@ -19,16 +19,16 @@ local presetColors = {
 }
 
 I.Settings.registerPage {
-    key = 'GoodCompany',
-    l10n = 'GoodCompany',
+    key = 'BestFriendsForever',
+    l10n = 'BestFriendsForever',
     name = 'page_name',
     description = 'page_description',
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_call',
-    page = 'GoodCompany',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_call',
+    page = 'BestFriendsForever',
+    l10n = 'BestFriendsForever',
     name = 'call_groupName',
     description = "call_groupDesc",
     permanentStorage = true,
@@ -40,10 +40,9 @@ I.Settings.registerGroup {
             description = "callKeybind_desc",
             renderer = 'inputBinding',
             argument = {
-                key = "GoodCompany_call",
+                key = "BestFriendsForever_call",
                 type = "action",
             },
-            default = "g",
         },
         {
             key = 'callDistance',
@@ -61,23 +60,22 @@ I.Settings.registerGroup {
                 bottomRow = true,
                 minLabel = "In front of",
                 maxLabel = "Behind",
-                unit = "units",
             }
         },
     }
 }
 
 I.Settings.registerPage {
-    key = 'GoodCompany_UI',
-    l10n = 'GoodCompany',
+    key = 'BestFriendsForever_UI',
+    l10n = 'BestFriendsForever',
     name = 'page_UI_name',
     description = 'page_UI_description',
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_UIWrapper',
-    page = 'GoodCompany_UI',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_UIWrapper',
+    page = 'BestFriendsForever_UI',
+    l10n = 'BestFriendsForever',
     name = 'UIWrapper_groupName',
     permanentStorage = true,
     order = 20,
@@ -123,7 +121,6 @@ I.Settings.registerGroup {
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
-                unit = "px",
             }
         },
         {
@@ -138,7 +135,6 @@ I.Settings.registerGroup {
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
-                unit = "px",
             }
         },
         {
@@ -147,14 +143,14 @@ I.Settings.registerGroup {
             description = 'expansionDirection_desc',
             renderer = 'select',
             argument = {
-                l10n = "GoodCompany",
+                l10n = "BestFriendsForever",
                 items = {
                     "Start",
                     "Center",
                     "End",
                 },
             },
-            default = "Center",
+            default = "Start",
         },
         {
             key = 'enableBordersAndBg',
@@ -172,9 +168,9 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsGoodCompany_UIFollower',
-    page = 'GoodCompany_UI',
-    l10n = 'GoodCompany',
+    key = 'SettingsBestFriendsForever_UIFollower',
+    page = 'BestFriendsForever_UI',
+    l10n = 'BestFriendsForever',
     name = 'UIFollower_groupName',
     permanentStorage = true,
     order = 21,
@@ -206,7 +202,7 @@ I.Settings.registerGroup {
             name = 'uiAlign_name',
             renderer = 'select',
             argument = {
-                l10n = "GoodCompany",
+                l10n = "BestFriendsForever",
                 items = {
                     "Left",
                     "Center",

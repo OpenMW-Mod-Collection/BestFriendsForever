@@ -8,15 +8,15 @@ local I = require("openmw.interfaces")
 local input = require("openmw.input")
 local core = require("openmw.core")
 
-local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
-local raycast = require("scripts.GoodCompany.utils.raycast")
-local followerUI = require("scripts.GoodCompany.ui")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local raycast = require("scripts.BestFriendsForever.utils.raycast")
+local followerUI = require("scripts.BestFriendsForever.ui")
 
-local sectionWrapper = storage.playerSection("SettingsGoodCompany_UIWrapper")
+local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_UIWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
-local settingsCall = settingsCache.new(storage.playerSection("SettingsGoodCompany_call"), async)
+local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
 
-local deps = require("scripts.GoodCompany.utils.dependencies")
+local deps = require("scripts.BestFriendsForever.utils.dependencies")
 deps.checkAll("Good Company", {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
@@ -39,16 +39,16 @@ if settingsWrapper.enable then
 end
 
 input.registerAction {
-    key = "GoodCompany_call",
+    key = "BestFriendsForever_call",
     type = input.ACTION_TYPE.Boolean,
-    l10n = "GoodCompany",
+    l10n = "BestFriendsForever",
     name = "callAction_name",
     description = "",
     defaultValue = false,
 }
 
 input.registerActionHandler(
-    "GoodCompany_call",
+    "BestFriendsForever_call",
     async:callback(function(pressed)
         if pressed or I.UI.getMode() then return end
 
@@ -58,7 +58,7 @@ input.registerActionHandler(
                 or state.leader and state.leader.id == self.id
             if myFollower then
                 core.sendGlobalEvent(
-                    "GoodCompany_teleport",
+                    "BestFriendsForever_teleport",
                     {
                         actor = state.actor,
                         pos = pos,
@@ -115,7 +115,7 @@ end
 local function combatTargetAdded(actor)
     combatTargets[actor.id] = true
     if not inCombat then
-        notifyFollowers("GoodCompany_combatMode", true)
+        notifyFollowers("BestFriendsForever_combatMode", true)
     end
     inCombat = true
 end
@@ -124,7 +124,7 @@ local function combatTargetRemoved(actor)
     combatTargets[actor.id] = nil
     local currentlyInComabt = next(combatTargets) == true
     if not currentlyInComabt then
-        notifyFollowers("GoodCompany_combatMode", false)
+        notifyFollowers("BestFriendsForever_combatMode", false)
     end
     inCombat = currentlyInComabt
 end
@@ -156,13 +156,13 @@ end
 
 local function followerDown(data)
     downedFollowers[data.follower.id] = data.follower
-    fillNotifList(data.follower, "GoodCompany_followerDown")
+    fillNotifList(data.follower, "BestFriendsForever_followerDown")
     followerUI.followerData[data.follower.id].down = true
 end
 
 local function followerUp(data)
     downedFollowers[data.follower.id] = nil
-    fillNotifList(data.follower, "GoodCompany_followerUp")
+    fillNotifList(data.follower, "BestFriendsForever_followerUp")
     followerUI.followerData[data.follower.id].down = false
 end
 
@@ -188,10 +188,10 @@ return {
         FDU_UpdateFollowerList = followerListUpdated,
         S3CombatTargetAdded = combatTargetAdded,
         S3CombatTargetRemoved = combatTargetRemoved,
-        GoodCompany_followerDown = followerDown,
-        GoodCompany_followerUp = followerUp,
+        BestFriendsForever_followerDown = followerDown,
+        BestFriendsForever_followerUp = followerUp,
     },
-    interfaceName = "GoodCompany",
+    interfaceName = "BestFriendsForever",
     interface = {
         version = 1,
         getDownedFollowers = function()

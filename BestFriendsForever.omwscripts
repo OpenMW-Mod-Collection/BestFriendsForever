@@ -1,0 +1,12 @@
+MENU: scripts/BestFriendsForever/utils/sliderRenderer.lua
+MENU: scripts/BestFriendsForever/utils/colorPicker.lua
+PLAYER: scripts/BestFriendsForever/settingsPlayer.lua
+GLOBAL: scripts/BestFriendsForever/settingsGlobal.lua
+
+PLAYER: scripts/BestFriendsForever/player.lua
+NPC, CREATURE: scripts/BestFriendsForever/actor.lua
+GLOBAL: scripts/BestFriendsForever/global.lua
+
+CUSTOM: scripts/BestFriendsForever/followerScripts/immortality.lua
+CUSTOM: scripts/BestFriendsForever/followerScripts/teleport.lua
+CUSTOM: scripts/BestFriendsForever/followerScripts/catchUp.lua

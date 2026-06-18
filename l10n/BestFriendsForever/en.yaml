@@ -1,9 +1,9 @@
 msg_followerDown: "{npc_name} is down!"
 
-page_name: Good Company
+page_name: Best Friends Forever
 page_description: Several utilities for you and your followers.
-page_UI_name: "Good Company: UI"
-page_UI_description: Settings for Good Company's UI.
+page_UI_name: "Best Friends Forever: UI"
+page_UI_description: Settings for Best Friends Forever's UI.
 
 toggles_groupName: Toggles
 enableTeleport_name: Enable Teleporting

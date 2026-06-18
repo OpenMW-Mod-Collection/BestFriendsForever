@@ -6,15 +6,15 @@ local I = require("openmw.interfaces")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
 
-local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 if self.type.isDead(self) then return end
 
 local settings = settingsCache.new(
-    storage.globalSection("SettingsGoodCompany_immortality"),
+    storage.globalSection("SettingsBestFriendsForever_immortality"),
     async
 )
-local l10n = core.l10n("GoodCompany")
+local l10n = core.l10n("BestFriendsForever")
 local selfName = self.type.records[self.recordId].name
 local selfEffects = self.type.activeEffects(self)
 local health = self.type.stats.dynamic.health(self)
@@ -30,8 +30,8 @@ local leader
 
 local function selfDown()
     down = true
-    leader:sendEvent("GoodCompany_followerDown", eventData)
-    core.sendGlobalEvent("GoodCompany_followerDown", eventData)
+    leader:sendEvent("BestFriendsForever_followerDown", eventData)
+    core.sendGlobalEvent("BestFriendsForever_followerDown", eventData)
     if inCombat then
         leader:sendEvent("ShowMessage", {
             message = l10n("msg_followerDown", { npc_name = selfName })
@@ -58,8 +58,8 @@ local function onUpdate()
             down = false
             health.current = settings.threshold
             fatigue.current = 1
-            leader:sendEvent("GoodCompany_followerUp", eventData)
-            core.sendGlobalEvent("GoodCompany_followerUp", eventData)
+            leader:sendEvent("BestFriendsForever_followerUp", eventData)
+            core.sendGlobalEvent("BestFriendsForever_followerUp", eventData)
             -- stop combat because if immortality was triggered due to infighting
             -- they would have a chance to remove their aggro
             I.AI.removePackages("Combat")
@@ -106,12 +106,12 @@ return {
     },
     eventHandlers = {
         Died = function()
-            core.sendGlobalEvent("GoodCompany_detachScript", {
+            core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
-                script = "scripts/GoodCompany/followerScripts/teleport.lua"
+                script = "scripts/BestFriendsForever/followerScripts/teleport.lua"
             })
         end,
-        GoodCompany_combatMode = function(data)
+        BestFriendsForever_combatMode = function(data)
             inCombat = data
         end,
     }

@@ -1,7 +1,7 @@
 ---@omw-context global
 local storage = require("openmw.storage")
 local async = require("openmw.async")
-local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 local settings = {}
 
@@ -17,19 +17,19 @@ local scripts = {
             and fState.followsPlayer
             and settings.enableImmortality
         end,
-        path = "scripts/GoodCompany/followerScripts/immortality.lua"
+        path = "scripts/BestFriendsForever/followerScripts/immortality.lua"
     },
     {
         cond = function(fState)
             return settings.enableTeleport
         end,
-        path = "scripts/GoodCompany/followerScripts/teleport.lua"
+        path = "scripts/BestFriendsForever/followerScripts/teleport.lua"
     },
     {
         cond = function(fState)
             return settings.enableCatchUp
         end,
-        path = "scripts/GoodCompany/followerScripts/catchUp.lua"
+        path = "scripts/BestFriendsForever/followerScripts/catchUp.lua"
     }
 }
 
@@ -54,7 +54,7 @@ local function resyncAll()
 end
 
 settings = settingsCache.new(
-    storage.globalSection("SettingsGoodCompany_toggles"),
+    storage.globalSection("SettingsBestFriendsForever_toggles"),
     async,
     function(key)
         resyncAll()
@@ -111,7 +111,7 @@ end
 return {
     eventHandlers = {
         FDU_FollowerListUpdated = followerListUpdated,
-        GoodCompany_detachScript = detachScript,
-        GoodCompany_teleport = tp,
+        BestFriendsForever_detachScript = detachScript,
+        BestFriendsForever_teleport = tp,
     }
 }

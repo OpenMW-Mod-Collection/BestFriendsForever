@@ -10,11 +10,11 @@ local types = require("openmw.types")
 local self = require("openmw.self")
 local core = require("openmw.core")
 
-local settingsCache = require("scripts.GoodCompany.utils.settingsCache")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 local followerUI = {}
 
-local wrapperSection = storage.playerSection("SettingsGoodCompany_UIWrapper")
+local wrapperSection = storage.playerSection("SettingsBestFriendsForever_UIWrapper")
 local function settingsUpdated(key)
     followerUI.new(I.FollowerDetectionUtil.getFollowerList())
 end
@@ -24,7 +24,7 @@ local settingsWrapper = settingsCache.new(
     settingsUpdated
 )
 local settingsLocalUI = settingsCache.new(
-    storage.playerSection("SettingsGoodCompany_UIFollower"),
+    storage.playerSection("SettingsBestFriendsForever_UIFollower"),
     async,
     settingsUpdated
 )
@@ -124,7 +124,7 @@ local function mouseRelease(data, elem)
         elem.userData.isDragging = false
     end
     -- kinda idiotic way of doing things, but it works
-    I.GoodCompany.setPosSettings(
+    I.BestFriendsForever.setPosSettings(
         math.floor(followerUI.root.layout.props.position.x),
         math.floor(followerUI.root.layout.props.position.y)
     )
@@ -503,9 +503,9 @@ local function createFollowerFlex(follower, down)
                 },
                 events = {
                     mouseClick = async:callback(function()
-                        self:sendEvent("GoodCompany_followerWidgetClicked", follower)
-                        follower:sendEvent("GoodCompany_followerWidgetClicked")
-                        core.sendGlobalEvent("GoodCompany_followerWidgetClicked", follower)
+                        self:sendEvent("BestFriendsForever_followerWidgetClicked", follower)
+                        follower:sendEvent("BestFriendsForever_followerWidgetClicked")
+                        core.sendGlobalEvent("BestFriendsForever_followerWidgetClicked", follower)
                     end),
                 },
                 content = ui.content {
@@ -544,8 +544,8 @@ followerUI.new = function(followers)
     followerUI.root:destroy()
     followerUI.root = createRoot()
     followerUI.followerData = {}
-    local downedFollowers = I.GoodCompany
-        and I.GoodCompany.getDownedFollowers()
+    local downedFollowers = I.BestFriendsForever
+        and I.BestFriendsForever.getDownedFollowers()
         or {}
 
     for _, state in pairs(followers) do

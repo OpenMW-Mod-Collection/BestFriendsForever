@@ -1,8 +1,8 @@
-# Good Company (OpenMW)
+# Best Friends Forever (OpenMW)
 
 A collection of utilities for followers made with performance in mind. Modernized Attend Me, if you will.
 
-[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Good Company - performant and modernized alternative to Attend Me!
+[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Best Friends Forever - performant and modernized alternative to Attend Me!
 
 Featuring:
 
@@ -30,7 +30,7 @@ It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowin
 
 ## Requirements
 
-Load Good Company as high as possible in the load order - before any mods that might alter melee damage calculations.
+Load Best Friends Forever as high as possible in the load order - before any mods that might alter melee damage calculations.
 
 Dependency load order doesn't matter.
 
@@ -50,16 +50,16 @@ Dependency load order doesn't matter.
 -- Sent when the player clicks certain follower's widget
 -- Payload: Actor (follower object)
 -- Scope: Player, Global
-GoodCompany_followerWidgetClicked
+BestFriendsForever_followerWidgetClicked
 
 -- Sent when the follower enters Down state
 -- Payload: { follower: Actor, leader: Actor }
 -- Scope: Player, Global
-GoodCompany_followerDown
+BestFriendsForever_followerDown
 
 -- Sent when the follower eis released from the Down state
 -- Payload: { follower: Actor, leader: Actor }
-GoodCompany_followerUp
+BestFriendsForever_followerUp
 ```
 
 ### Interfaces
@@ -68,7 +68,7 @@ GoodCompany_followerUp
 -- Returns downed followers of the player
 -- Returns: table<string, Actor>
 -- Scope: Player
-I.GoodCompany.getDownedFollowers()
+I.BestFriendsForever.getDownedFollowers()
 ```
 
 ## Credits
