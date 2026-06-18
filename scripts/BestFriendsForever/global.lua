@@ -5,7 +5,7 @@ local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local resyncAll = function() end
+local resyncAll
 
 local settingToggles = settingsCache.new(
     storage.globalSection("SettingsBestFriendsForever_toggles"),

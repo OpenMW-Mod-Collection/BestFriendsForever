@@ -10,7 +10,7 @@ local core = require("openmw.core")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local raycast = require("scripts.BestFriendsForever.utils.raycast")
-local followerUI = require("scripts.BestFriendsForever.ui")
+local followerUI = require("scripts.BestFriendsForever.ui.main")
 
 local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_UIWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
