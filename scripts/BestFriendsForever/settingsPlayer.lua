@@ -211,9 +211,9 @@ I.Settings.registerGroup {
             argument = {
                 l10n = "BestFriendsForever",
                 items = {
-                    "Start",
+                    "Left",
                     "Center",
-                    "End",
+                    "Right",
                 },
             },
             default = "Center",

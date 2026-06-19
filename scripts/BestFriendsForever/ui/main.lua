@@ -201,6 +201,9 @@ local wrapperEventCallbacks = {
 -- +------------------+
 
 local function createRoot()
+    print(settingsLocalHUD.uiAlign)
+    print(sideToAlignment[settingsLocalHUD.uiAlign])
+    print(ui.ALIGNMENT[sideToAlignment[settingsLocalHUD.uiAlign]])
     rootFlex = {
         name = "rootFlex",
         type = ui.TYPE.Flex,
@@ -378,7 +381,7 @@ local function createFollowerFlex(follower, down)
         type = ui.TYPE.Flex,
         props = {
             horizontal = false,
-            arrange = ui.ALIGNMENT[settingsLocalHUD.uiAlign],
+            arrange = ui.ALIGNMENT[sideToAlignment[settingsLocalHUD.uiAlign]],
         },
         userData = {
             actor = follower,
