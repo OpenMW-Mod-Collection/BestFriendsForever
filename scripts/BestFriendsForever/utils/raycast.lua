@@ -50,6 +50,7 @@ R.findSafeTpPos = function(obj)
                 end
             end
         end
+        searchFactor = searchFactor * 2
     end
     return obj.position
 end

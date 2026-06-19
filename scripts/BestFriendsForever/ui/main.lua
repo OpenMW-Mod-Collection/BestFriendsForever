@@ -201,9 +201,6 @@ local wrapperEventCallbacks = {
 -- +------------------+
 
 local function createRoot()
-    print(settingsLocalHUD.uiAlign)
-    print(sideToAlignment[settingsLocalHUD.uiAlign])
-    print(ui.ALIGNMENT[sideToAlignment[settingsLocalHUD.uiAlign]])
     rootFlex = {
         name = "rootFlex",
         type = ui.TYPE.Flex,
