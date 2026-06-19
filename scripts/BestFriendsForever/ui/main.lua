@@ -462,6 +462,7 @@ followerHUD.updateData = function()
         barsUI.updateStats(fData, down)
         iconsUI.updateIcons(fData, down)
     end
+    followerHUD.root.layout.props.visible = I.UI.isHudVisible()
     followerHUD.root:update()
 end
 
