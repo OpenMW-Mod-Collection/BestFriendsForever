@@ -10,9 +10,9 @@ local core = require("openmw.core")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local raycast = require("scripts.BestFriendsForever.utils.raycast")
-local followerUI = require("scripts.BestFriendsForever.ui.main")
+local followerHUD = require("scripts.BestFriendsForever.ui.main")
 
-local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_UIWrapper")
+local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
 local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
 
@@ -35,7 +35,7 @@ local notifListPerFollower = {}
 local downedFollowers = {}
 
 if settingsWrapper.enable then
-    followerUI.new(followers)
+    followerHUD.new(followers)
 end
 
 input.registerAction {
@@ -93,15 +93,15 @@ local function onFrame(dt)
     onFrameAccumulator = 0
 
     if settingsWrapper.enable then
-        if not followerUI.root then
-            followerUI.new(followers)
+        if not followerHUD.root then
+            followerHUD.new(followers)
         else
-            followerUI.updateData()
-            followerUI.root:update()
+            followerHUD.updateData()
+            followerHUD.root:update()
         end
     else
-        if followerUI.root then
-            followerUI.root:destroy()
+        if followerHUD.root then
+            followerHUD.root:destroy()
         end
     end
 end
@@ -150,20 +150,30 @@ end
 local function followerListUpdated(data)
     followers = data.followers
     if settingsWrapper.enable then
-        followerUI.new(followers)
+        followerHUD.new(followers)
     end
 end
 
 local function followerDown(data)
     downedFollowers[data.follower.id] = data.follower
     fillNotifList(data.follower, "BestFriendsForever_followerDown")
-    followerUI.followerData[data.follower.id].down = true
+    followerHUD.followerData[data.follower.id].down = true
 end
 
 local function followerUp(data)
     downedFollowers[data.follower.id] = nil
     fillNotifList(data.follower, "BestFriendsForever_followerUp")
-    followerUI.followerData[data.follower.id].down = false
+    followerHUD.followerData[data.follower.id].down = false
+end
+
+local function uiModeChanged(data)
+    if not I.UI.isHudVisible() then
+        followerHUD.root.layout.props.visible =  false
+    else
+        local checkVisibility = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
+        followerHUD.root.layout.props.visible = checkVisibility(data.newMode)
+    end
+    followerHUD.root:update()
 end
 
 local function onSave()
@@ -185,6 +195,7 @@ return {
         onLoad = onLoad,
     },
     eventHandlers = {
+        UiModeChanged = uiModeChanged,
         FDU_UpdateFollowerList = followerListUpdated,
         S3CombatTargetAdded = combatTargetAdded,
         S3CombatTargetRemoved = combatTargetRemoved,

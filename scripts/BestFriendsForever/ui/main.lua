@@ -14,7 +14,7 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local iconsUI = require("scripts.BestFriendsForever.ui.icons")
 local barsUI = require("scripts.BestFriendsForever.ui.bars")
 
-local followerUI = {}
+local followerHUD = {}
 
 ---@class IconData
 ---@field container openmw.ui.Layout|nil
@@ -24,8 +24,8 @@ local followerUI = {}
 ---@class BarData
 ---@field enabled boolean                   Whether this bar is shown
 ---@field color openmw.util.Color           Bar fill color
----@field imgLayout openmw.ui.Layout|nil    Layout node for the bar image; nil until the follower's UI is built
----@field label openmw.ui.Layout|nil        Layout node for the current/base label; nil if barLabels is off or UI not yet built
+---@field imgLayout openmw.ui.Layout|nil    Layout node for the bar image; nil until the follower's HUD is built
+---@field label openmw.ui.Layout|nil        Layout node for the current/base label; nil if barLabels is off or HUD not yet built
 
 ---@class StatEntry
 ---@field name "health"|"magicka"|"fatigue"
@@ -39,24 +39,47 @@ local followerUI = {}
 ---@field down boolean
 
 ---@type table<string, FollowerData>
-followerUI.followerData = {}
+followerHUD.followerData = {}
+
+followerHUD.hudDisplayMap = {
+    ---@param uiMode string
+    ---@return boolean
+    ["Always"] = function(uiMode)
+        return true
+    end,
+    ---@param uiMode string
+    ---@return boolean
+    ["Interface Only"] = function(uiMode)
+        return uiMode ~= nil
+    end,
+    ---@param uiMode string
+    ---@return boolean
+    ["Hide on Interface"] = function(uiMode)
+        return not uiMode
+    end,
+    ---@param uiMode string
+    ---@return boolean
+    ["Hide on Dialogue Only"] = function(uiMode)
+        return uiMode ~= I.UI.MODE.Dialogue
+    end
+}
 
 -- +---------------------+
 -- | Settings Management |
 -- +---------------------+
 
 local function settingsUpdated()
-    followerUI.new(I.FollowerDetectionUtil.getFollowerList())
+    followerHUD.new(I.FollowerDetectionUtil.getFollowerList())
 end
 
-local wrapperSection = storage.playerSection("SettingsBestFriendsForever_UIWrapper")
+local wrapperSection = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 local settingsWrapper = settingsCache.new(
     wrapperSection,
     async,
     settingsUpdated
 )
-local settingsLocalUI = settingsCache.new(
-    storage.playerSection("SettingsBestFriendsForever_UIFollower"),
+local settingsLocalHUD = settingsCache.new(
+    storage.playerSection("SettingsBestFriendsForever_HUDFollower"),
     async,
     settingsUpdated
 )
@@ -125,7 +148,7 @@ local delimiter = {
 local rootFlex
 
 -- +--------------------+
--- | Draggable UI logic |
+-- | Dragging HUD logic |
 -- +--------------------+
 
 local function mousePress(data, elem)
@@ -135,10 +158,10 @@ local function mousePress(data, elem)
     end
     elem.userData.isDragging = true
     elem.userData.dragStartPosition = data.position
-    elem.userData.windowStartPosition = followerUI.root.layout.props.position
+    elem.userData.windowStartPosition = followerHUD.root.layout.props.position
         or v2(settingsWrapper.posX, settingsWrapper.posY)
 
-    followerUI.root:update()
+    followerHUD.root:update()
 end
 
 local function mouseMove(data, elem)
@@ -150,9 +173,9 @@ local function mouseMove(data, elem)
         elem.userData.windowStartPosition.x + deltaX,
         elem.userData.windowStartPosition.y + deltaY
     )
-    followerUI.root.layout.props.position = newPosition
+    followerHUD.root.layout.props.position = newPosition
 
-    followerUI.root:update()
+    followerHUD.root:update()
 end
 
 local function mouseRelease(data, elem)
@@ -161,10 +184,10 @@ local function mouseRelease(data, elem)
     end
     -- kinda idiotic way of doing things, but it works
     I.BestFriendsForever.setPosSettings(
-        math.floor(followerUI.root.layout.props.position.x),
-        math.floor(followerUI.root.layout.props.position.y)
+        math.floor(followerHUD.root.layout.props.position.x),
+        math.floor(followerHUD.root.layout.props.position.y)
     )
-    followerUI.root:update()
+    followerHUD.root:update()
 end
 
 local wrapperEventCallbacks = {
@@ -183,7 +206,7 @@ local function createRoot()
         type = ui.TYPE.Flex,
         props = {
             horizontal = settingsWrapper.horizontalLayout,
-            arrange = ui.ALIGNMENT[sideToAlignment[settingsLocalUI.uiAlign]],
+            arrange = ui.ALIGNMENT[sideToAlignment[settingsLocalHUD.uiAlign]],
         },
         content = ui.content {}
     }
@@ -233,14 +256,14 @@ end
 ---@param follower GameObject
 ---@param down boolean
 local function newFollowerData(follower, down)
-    followerUI.followerData[follower.id] = {
+    followerHUD.followerData[follower.id] = {
         actor = follower,
         down = down,
         icons = {
             container = {
                 type = ui.TYPE.Flex,
                 props = {
-                    horizontal = settingsLocalUI.horizontalIcons,
+                    horizontal = settingsLocalHUD.horizontalIcons,
                 },
                 content = ui.content {},
             },
@@ -252,8 +275,8 @@ local function newFollowerData(follower, down)
                 name = "health",
                 stat = types.Actor.stats.dynamic.health(follower),
                 bar = {
-                    enabled = settingsLocalUI.healthBarEnabled,
-                    color = settingsLocalUI.healthBarColor,
+                    enabled = settingsLocalHUD.healthBarEnabled,
+                    color = settingsLocalHUD.healthBarColor,
                     imgLayout = nil,
                     label = nil,
                 },
@@ -262,8 +285,8 @@ local function newFollowerData(follower, down)
                 name = "magicka",
                 stat = types.Actor.stats.dynamic.magicka(follower),
                 bar = {
-                    enabled = settingsLocalUI.magickaBarEnabled,
-                    color = settingsLocalUI.magickaBarColor,
+                    enabled = settingsLocalHUD.magickaBarEnabled,
+                    color = settingsLocalHUD.magickaBarColor,
                     imgLayout = nil,
                     label = nil,
                 },
@@ -272,8 +295,8 @@ local function newFollowerData(follower, down)
                 name = "fatigue",
                 stat = types.Actor.stats.dynamic.fatigue(follower),
                 bar = {
-                    enabled = settingsLocalUI.fatigueBarEnabled,
-                    color = settingsLocalUI.fatigueBarColor,
+                    enabled = settingsLocalHUD.fatigueBarEnabled,
+                    color = settingsLocalHUD.fatigueBarColor,
                     imgLayout = nil,
                     label = nil,
                 },
@@ -304,7 +327,7 @@ local function prepareDataContainers(fData)
         content = ui.content(bars)
     }
 
-    if settingsLocalUI.combatIcon then
+    if settingsLocalHUD.combatIcon then
         fData.icons.combatLayout = iconsUI.renderCombat(fData.actor)
 
         local disease, effect = iconsUI.getDebuff(fData.actor)
@@ -321,7 +344,7 @@ end
 ---@return openmw.ui.Layout
 local function createFollowerFlex(follower, down)
     newFollowerData(follower, down)
-    local fData = followerUI.followerData[follower.id]
+    local fData = followerHUD.followerData[follower.id]
 
     local barsContainer = prepareDataContainers(fData)
 
@@ -333,9 +356,9 @@ local function createFollowerFlex(follower, down)
             arrange = ui.ALIGNMENT.Center,
         },
         content = ui.content {
-            settingsLocalUI.rightIcons and barsContainer or fData.icons.container,
+            settingsLocalHUD.rightIcons and barsContainer or fData.icons.container,
             interval,
-            settingsLocalUI.rightIcons and fData.icons.container or barsContainer,
+            settingsLocalHUD.rightIcons and fData.icons.container or barsContainer,
         },
     }
 
@@ -344,9 +367,9 @@ local function createFollowerFlex(follower, down)
         template = I.MWUI.templates.textNormal,
         props = {
             text = follower.type.records[follower.recordId].name,
-            textSize = settingsLocalUI.nameTextSize,
+            textSize = settingsLocalHUD.nameTextSize,
             textShadow = true,
-            textColor = settingsLocalUI.nameColor,
+            textColor = settingsLocalHUD.nameColor,
         },
     }
 
@@ -355,7 +378,7 @@ local function createFollowerFlex(follower, down)
         type = ui.TYPE.Flex,
         props = {
             horizontal = false,
-            arrange = ui.ALIGNMENT[settingsLocalUI.uiAlign],
+            arrange = ui.ALIGNMENT[settingsLocalHUD.uiAlign],
         },
         userData = {
             actor = follower,
@@ -399,11 +422,11 @@ local function makeDelimiter()
     end
 end
 
-followerUI.new = function(followers)
+followerHUD.new = function(followers)
     rootFlex.content = ui.content {}
-    followerUI.root:destroy()
-    followerUI.root = createRoot()
-    followerUI.followerData = {}
+    followerHUD.root:destroy()
+    followerHUD.root = createRoot()
+    followerHUD.followerData = {}
     local downedFollowers = I.BestFriendsForever
         and I.BestFriendsForever.getDownedFollowers()
         or {}
@@ -426,19 +449,19 @@ followerUI.new = function(followers)
         ::continue::
     end
 
-    followerUI.root.layout.props.visible = #rootFlex.content ~= 0
-    followerUI.root:update()
+    followerHUD.root.layout.props.visible = #rootFlex.content ~= 0
+    followerHUD.root:update()
 end
 
-followerUI.updateData = function()
-    for _, fData in pairs(followerUI.followerData) do
-        local down = fData.down and settingsLocalUI.immortalityIntegration
+followerHUD.updateData = function()
+    for _, fData in pairs(followerHUD.followerData) do
+        local down = fData.down and settingsLocalHUD.immortalityIntegration
         barsUI.updateStats(fData, down)
         iconsUI.updateIcons(fData, down)
     end
-    followerUI.root:update()
+    followerHUD.root:update()
 end
 
-followerUI.root = createRoot()
+followerHUD.root = createRoot()
 
-return followerUI
+return followerHUD

@@ -67,17 +67,17 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerPage {
-    key = 'BestFriendsForever_UI',
+    key = 'BestFriendsForever_HUD',
     l10n = 'BestFriendsForever',
-    name = 'page_UI_name',
-    description = 'page_UI_description',
+    name = 'page_HUD_name',
+    description = 'page_HUD_description',
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsBestFriendsForever_UIWrapper',
-    page = 'BestFriendsForever_UI',
+    key = 'SettingsBestFriendsForever_HUDWrapper',
+    page = 'BestFriendsForever_HUD',
     l10n = 'BestFriendsForever',
-    name = 'UIWrapper_groupName',
+    name = 'HUDWrapper_groupName',
     permanentStorage = true,
     order = 20,
     settings = {
@@ -88,20 +88,26 @@ I.Settings.registerGroup {
             default = true,
         },
         {
+            key = 'hudDisplay',
+            name = 'hudDisplay_name',
+            renderer = 'select',
+            argument = {
+                l10n = "BestFriendsForever",
+                items = {
+                    "Always",
+                    "Interface Only",
+                    "Hide on Interface",
+                    "Hide on Dialogue Only",
+                },
+            },
+            default = "Hide on Dialogue Only",
+        },
+        {
             key = 'pollingRate',
             name = 'pollingRate_name',
             description = 'pollingRate_desc',
-            renderer = "SuperSlider4",
+            renderer = "number",
             default = .1,
-            argument = {
-                max = 2,
-                step = .1,
-                default = .1,
-                showDefaultMark = true,
-                showResetButton = true,
-                bottomRow = true,
-                unit = "sec",
-            }
         },
         {
             key = 'lockPosition',
@@ -169,10 +175,10 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'SettingsBestFriendsForever_UIFollower',
-    page = 'BestFriendsForever_UI',
+    key = 'SettingsBestFriendsForever_HUDFollower',
+    page = 'BestFriendsForever_HUD',
     l10n = 'BestFriendsForever',
-    name = 'UIFollower_groupName',
+    name = 'HUDFollower_groupName',
     permanentStorage = true,
     order = 21,
     settings = {

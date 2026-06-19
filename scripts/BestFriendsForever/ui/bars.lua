@@ -9,8 +9,8 @@ local async = require("openmw.async")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local settingsLocalUI = settingsCache.new(
-    storage.playerSection("SettingsBestFriendsForever_UIFollower"),
+local settingsLocalHUD = settingsCache.new(
+    storage.playerSection("SettingsBestFriendsForever_HUDFollower"),
     async
 )
 local barTexture = ui.texture { path = 'textures/menu_bar_gray.dds' }
@@ -35,10 +35,10 @@ end
 ---@param fData FollowerData
 ---@return openmw.ui.Layout
 barsUI.barElement = function(fData)
-    local barSize = v2(settingsLocalUI.barLength, settingsLocalUI.barWidth)
+    local barSize = v2(settingsLocalHUD.barLength, settingsLocalHUD.barWidth)
 
     local label
-    if settingsLocalUI.barLabels then
+    if settingsLocalHUD.barLabels then
         label = {
             type = ui.TYPE.Text,
             props = {
@@ -46,7 +46,7 @@ barsUI.barElement = function(fData)
                 anchor = v2(0.5, 0.5),
                 text = barsUI.labelText(fData.stat.current, fData.stat.base),
                 textColor = util.color.rgb(1, 1, 1),
-                textSize = settingsLocalUI.barWidth,
+                textSize = settingsLocalHUD.barWidth,
             },
         }
     end
@@ -81,7 +81,7 @@ end
 ---@param fData FollowerData
 ---@param down boolean
 barsUI.updateStats = function(fData, down)
-    local barSize = v2(settingsLocalUI.barLength, settingsLocalUI.barWidth)
+    local barSize = v2(settingsLocalHUD.barLength, settingsLocalHUD.barWidth)
     for _, statData in ipairs(fData.stats) do
         local label = statData.bar.label
         if label then
