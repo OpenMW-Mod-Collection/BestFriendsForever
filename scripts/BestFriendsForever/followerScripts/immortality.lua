@@ -8,8 +8,6 @@ local async = require("openmw.async")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-if self.type.isDead(self) then return end
-
 local settings = settingsCache.new(
     storage.globalSection("SettingsBestFriendsForever_immortality"),
     async

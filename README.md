@@ -1,28 +1,27 @@
 # Best Friends Forever (OpenMW)
 
-A collection of utilities for followers made with performance in mind. Modernized Attend Me, if you will.
+A collection of utilities for followers made with performance in mind. Follower HUD, teleportation, immortality and more. Modernized Attend Me, if you will.
 
-[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Best Friends Forever - performant and modernized alternative to Attend Me!
+[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Best Friends Forever - performant and modernized alternative to Attend Me with extra flair!
 
 Featuring:
 
 - Follower status HUD with:
   - Current and total health, magicka and fatigue
-  - Equipped weapon, spell, disease or lack of them
-  <!-- - Currently active temporary effects -->
+  - Equipped weapon, spell, disease or the lack of them
 - Followers teleport to you if they get unloaded
 - Followers speed up to catch up to you
 - Immortal followers:
-  - Instead of dying, followers are knocked down until the end of combat
-  - Enemies switch aggro from the follower to you
+  - Instead of dying, followers get knocked down until the end of combat
   - Summoned creatures and followers under any Command effect are excluded from immortality
+  - Enemies switch aggro from the follower to you
   - Knocked down followers lose aggro, so this can be also used as more punishing alternative to [Friendlier Fire's](https://www.nexusmods.com/morrowind/mods/57975) aggro prevention
 - Keybind to teleport all your followers to you
 
 ## Compatibility
 
 Safe to install or update mid-playthrough.  
-When removing the mod, make sure no follower is currently downed.
+When removing the mod, make sure no follower is currently downed and they don't have a speed boost.
 
 Should be compatible with anything.
 
@@ -32,9 +31,7 @@ It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowin
 
 Load Best Friends Forever as high as possible in the load order - before any mods that might alter melee damage calculations.
 
-Dependency load order doesn't matter.
-
-- [Follower Detection Util](https://www.nexusmods.com/morrowind/mods/58053)
+- [Follower Detection Util](https://www.nexusmods.com/morrowind/mods/58053) - Load before BFF
 - [H3lp Yours3lf](https://www.nexusmods.com/morrowind/mods/56417)
 
 ## Recommended Mods
@@ -52,12 +49,12 @@ Dependency load order doesn't matter.
 -- Scope: Player, Global
 BestFriendsForever_followerWidgetClicked
 
--- Sent when the follower enters Down state
+-- Sent when the follower enters Downed state
 -- Payload: { follower: Actor, leader: Actor }
 -- Scope: Player, Global
 BestFriendsForever_followerDown
 
--- Sent when the follower eis released from the Down state
+-- Sent when the follower is released from the Downed state
 -- Payload: { follower: Actor, leader: Actor }
 BestFriendsForever_followerUp
 ```

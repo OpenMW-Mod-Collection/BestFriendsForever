@@ -1,59 +1,57 @@
 ---@diagnostic disable: missing-fields, undefined-field
 ---@omw-context local
---  Taken from Dangers of Broken Artifacts by Foxunder
--- https://www.nexusmods.com/morrowind/mods/58227
+-- Taken from Attend Me by urm
 local util = require("openmw.util")
 local nearby = require("openmw.nearby")
 
 local R = {}
 
-local SPAWN_Z_OFFSET = 50
-local GROUND_CHECK_Z = 200
+local maxTeleportDistance = 200
+local teleportPadding = 60
+local unit = util.vector3(1, 0, 0)
+local verticalAxis = util.vector3(0, 0, 1)
+local waistOffset = verticalAxis * teleportPadding
 
----@param obj GameObject
----@param distance number    Positive numbers = backward, negative = forward
----@return openmw.util.Vector3
-R.findSafeTpPos = function(obj, distance)
-    local backward      = obj.rotation:apply(util.vector3(0, -1, 0))
-    local right         = obj.rotation:apply(util.vector3(1, 0, 0))
+local function findTarget(obj, direction)
+    local targetPosition = obj.position + direction * maxTeleportDistance
 
-    local candidateDirs = {
-        backward,
-        backward + right * 0.4,
-        backward - right * 0.4,
-        backward + right * 0.8,
-        backward - right * 0.8,
-    }
+    local navmeshPosition = nearby.castNavigationRay(obj.position, targetPosition, {
+        includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.UsePathgrid,
+    })
+    if not navmeshPosition then return end
 
-    for _, dir in ipairs(candidateDirs) do
-        local candidate = obj.position + dir:normalize() * distance
+    local physicsPosition = nearby.castRay(
 
-        local wallCheck = nearby.castRay(
-            obj.position + util.vector3(0, 0, 60),
-            candidate + util.vector3(0, 0, 60),
-            {
-                collisionType = nearby.COLLISION_TYPE.World,
-                ignore = { obj }
-            }
-        )
+        obj.position + waistOffset,
+        navmeshPosition + waistOffset,
+        { ignore = obj }).
+    hitPos
+    if not physicsPosition then return navmeshPosition end
 
-        if not wallCheck.hit then
-            local groundCheck = nearby.castRay(
-                candidate + util.vector3(0, 0, SPAWN_Z_OFFSET),
-                candidate - util.vector3(0, 0, GROUND_CHECK_Z),
-                { collisionType = nearby.COLLISION_TYPE.World }
-            )
+    local physicsDirection, physicsDistance = (physicsPosition - obj.position):normalize()
+    if physicsDistance < teleportPadding then
+        return nil
+    end
 
-            if groundCheck.hit then
-                local heightDiff = math.abs(groundCheck.hitPos.z - obj.position.z)
-                if heightDiff < 120 then
-                    return groundCheck.hitPos + util.vector3(0, 0, 10)
+    local offsetDirection = physicsDirection * (physicsDistance - teleportPadding)
+    return obj.position + offsetDirection
+end
+
+R.findSafeTpPos = function(obj)
+    local searchFactor = 2
+    while searchFactor <= 32 do
+        for offset = 1, searchFactor do
+            if offset % 2 == 1 or searchFactor == 2 then
+                local angle = offset * math.pi / searchFactor
+                local rotatedUnit = util.transform.rotate(angle, verticalAxis) * unit
+                local target = findTarget(obj, rotatedUnit)
+                if target then
+                    return target
                 end
             end
         end
     end
-
-    return obj.position + backward:normalize() * distance
+    return obj.position
 end
 
 return R

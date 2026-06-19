@@ -17,7 +17,7 @@ local settingsWrapper = settingsCache.new(sectionWrapper, async)
 local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
 
 local deps = require("scripts.BestFriendsForever.utils.dependencies")
-deps.checkAll("Good Company", {
+deps.checkAll("Best Friends Forever", {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
         interface = I.FollowerDetectionUtil,
@@ -28,6 +28,7 @@ deps.checkAll("Good Company", {
     }
 })
 
+local BEHIND_DISTANCE = 300
 local inCombat = false
 local combatTargets = {}
 local followers = I.FollowerDetectionUtil.getFollowerList()
@@ -52,7 +53,7 @@ input.registerActionHandler(
     async:callback(function(pressed)
         if pressed or I.UI.getMode() then return end
 
-        local pos = raycast.findSafeTpPos(self, settingsCall.callDistance)
+        local pos = raycast.findSafeTpPos(self)
         for _, state in pairs(followers) do
             local myFollower = state.superLeader and state.superLeader.id == self.id
                 or state.leader and state.leader.id == self.id
@@ -154,6 +155,16 @@ local function followerListUpdated(data)
     end
 end
 
+local function followerUnloaded(follower)
+    local eventData = {
+        actor = follower,
+        cell = self.cell.name,
+        pos = raycast.findSafeTpPos(self),
+        options = { onGround = true }
+    }
+    core.sendGlobalEvent("BestFriendsForever_teleport", eventData)
+end
+
 local function followerDown(data)
     downedFollowers[data.follower.id] = data.follower
     fillNotifList(data.follower, "BestFriendsForever_followerDown")
@@ -168,7 +179,7 @@ end
 
 local function uiModeChanged(data)
     if not I.UI.isHudVisible() then
-        followerHUD.root.layout.props.visible =  false
+        followerHUD.root.layout.props.visible = false
     else
         local checkVisibility = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
         followerHUD.root.layout.props.visible = checkVisibility(data.newMode)
@@ -199,6 +210,7 @@ return {
         FDU_UpdateFollowerList = followerListUpdated,
         S3CombatTargetAdded = combatTargetAdded,
         S3CombatTargetRemoved = combatTargetRemoved,
+        BestFriendsForever_followerUnloaded = followerUnloaded,
         BestFriendsForever_followerDown = followerDown,
         BestFriendsForever_followerUp = followerUp,
     },

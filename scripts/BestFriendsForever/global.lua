@@ -78,6 +78,10 @@ local followers = {}
 -- Adds scripts whose cond is now true, removes those whose cond is now false.
 resyncAll = function()
     for _, fState in pairs(followers) do
+        if types.Actor.isDead(fState.actor) then
+            goto continue
+        end
+
         for _, script in ipairs(scripts) do
             local has = fState.actor:hasScript(script.path)
             local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
@@ -90,13 +94,16 @@ resyncAll = function()
                 fState.actor:removeScript(script.path)
             end
         end
+
+        ::continue::
     end
 end
 
 local function syncScripts(fState, addingScript)
     for _, script in ipairs(scripts) do
         local hasScript = fState.actor:hasScript(script.path)
-        if addingScript then
+        local dead = types.Actor.isDead(fState.actor)
+        if addingScript and not dead then
             local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
             if not hasScript and script.cond(fState) and not banned then
                 fState.actor:addScript(script.path, {
@@ -113,11 +120,13 @@ end
 
 local function followerListUpdated(data)
     local currFollowers = data.followers
+    -- add new scripts
     for id, fState in pairs(currFollowers) do
         if not followers[id] then
             syncScripts(fState, true)
         end
     end
+    -- remove redundant scripts
     for id, fState in pairs(followers) do
         if not currFollowers[id] then
             syncScripts(fState, false)

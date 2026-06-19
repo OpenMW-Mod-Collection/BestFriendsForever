@@ -7,8 +7,6 @@ local I = require("openmw.interfaces")
 local async = require("openmw.async")
 local types = require("openmw.types")
 
-if types.Actor.isDead(self) then return end
-
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 ---@type GameObject
