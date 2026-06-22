@@ -1,7 +1,9 @@
+---@diagnostic disable: undefined-field
 ---@omw-context global
 local storage = require("openmw.storage")
 local async = require("openmw.async")
 local types = require("openmw.types")
+local I = require("openmw.interfaces")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
@@ -10,16 +12,12 @@ local resyncAll
 local settingToggles = settingsCache.new(
     storage.globalSection("SettingsBestFriendsForever_toggles"),
     async,
-    function(key)
-        resyncAll()
-    end
+    resyncAll
 )
 local settingsBlacklists = settingsCache.new(
     storage.globalSection("SettingsBestFriendsForever_blacklist"),
     async,
-    function(key)
-        resyncAll()
-    end
+    resyncAll
 )
 
 local function blacklisted(actor, noMwscripts, blacklist)
@@ -72,40 +70,14 @@ local scripts = {
     }
 }
 
-local followers = {}
-
--- Re-evaluate every script on every current follower.
--- Adds scripts whose cond is now true, removes those whose cond is now false.
-resyncAll = function()
-    for _, fState in pairs(followers) do
-        if types.Actor.isDead(fState.actor) then
-            goto continue
-        end
-
-        for _, script in ipairs(scripts) do
-            local has = fState.actor:hasScript(script.path)
-            local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
-            local want = script.cond(fState) and not banned
-            if want and not has then
-                fState.actor:addScript(script.path, {
-                    leader = fState.superLeader or fState.leader
-                })
-            elseif not want and has then
-                fState.actor:removeScript(script.path)
-            end
-        end
-
-        ::continue::
-    end
-end
-
 local function syncScripts(fState, addingScript)
     for _, script in ipairs(scripts) do
         local hasScript = fState.actor:hasScript(script.path)
+        local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
         local dead = types.Actor.isDead(fState.actor)
-        if addingScript and not dead then
-            local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
-            if not hasScript and script.cond(fState) and not banned then
+
+        if addingScript and not banned and not dead then
+            if not hasScript and script.cond(fState) then
                 fState.actor:addScript(script.path, {
                     leader = fState.superLeader or fState.leader
                 })
@@ -119,20 +91,17 @@ local function syncScripts(fState, addingScript)
 end
 
 local function followerListUpdated(data)
-    local currFollowers = data.followers
-    -- remove redundant scripts
-    for id, fState in pairs(currFollowers) do
-        if not followers[id] then
-            syncScripts(fState, false)
-        end
+    for _, fState in pairs(data.followers) do
+        syncScripts(fState, fState.followsPlayer)
     end
-    -- add new scripts
-    for id, fState in pairs(followers) do
-        if not currFollowers[id] then
-            syncScripts(fState, true)
-        end
-    end
-    followers = currFollowers
+end
+
+resyncAll = function()
+    followerListUpdated {
+        followers = I.FollowerDetectionUtil
+            and I.FollowerDetectionUtil.getFollowerList()
+            or {}
+    }
 end
 
 local function detachScript(data)

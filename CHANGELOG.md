@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.0.6
+
+- Streamlined and fixed script attachment/detachment mechanism. Again
+
 ## 1.0.5
 
 - Fixed follower HUD displaying when it shouldn't 2: Electric Boogaloo
