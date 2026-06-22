@@ -422,11 +422,13 @@ local function makeDelimiter()
     end
 end
 
-local function updateRootVisibility()
-    local allowedMode = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
+followerHUD.updateRootVisibility = function(uiMode)
+    if not followerHUD.root then return end
+
+    local isModeAllowed = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
     followerHUD.root.layout.props.visible = #rootFlex.content ~= 0
         and I.UI.isHudVisible()
-        and allowedMode(I.UI.getMode())
+        and isModeAllowed(uiMode)
 end
 
 followerHUD.new = function(followers)
@@ -456,7 +458,7 @@ followerHUD.new = function(followers)
         ::continue::
     end
 
-    updateRootVisibility()
+    followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()
 end
 
@@ -466,7 +468,7 @@ followerHUD.updateData = function()
         barsUI.updateStats(fData, down)
         iconsUI.updateIcons(fData, down)
     end
-    updateRootVisibility()
+    followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()
 end
 

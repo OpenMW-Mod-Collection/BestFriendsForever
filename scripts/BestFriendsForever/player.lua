@@ -178,12 +178,7 @@ local function followerUp(data)
 end
 
 local function uiModeChanged(data)
-    if not I.UI.isHudVisible() then
-        followerHUD.root.layout.props.visible = false
-    else
-        local checkVisibility = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
-        followerHUD.root.layout.props.visible = checkVisibility(data.newMode)
-    end
+    followerHUD.updateRootVisibility(data.newMode)
     followerHUD.root:update()
 end
 
