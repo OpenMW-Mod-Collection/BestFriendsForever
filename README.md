@@ -13,7 +13,7 @@ Featuring:
 - Followers speed up to catch up to you
 - Immortal followers:
   - Instead of dying, followers get knocked down until the end of combat
-  - Summoned creatures and followers under any Command effect are excluded from immortality
+  - Summoned creatures and followers under any Command effect die as usual instead of being knocked down. Command effects on already downed actors don't do anything, though
   - Enemies switch aggro from the follower to you
   - Knocked down followers lose aggro, so this can be also used as more punishing alternative to [Friendlier Fire's](https://www.nexusmods.com/morrowind/mods/57975) aggro prevention
 - Keybind to teleport all your followers to you

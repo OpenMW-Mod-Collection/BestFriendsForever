@@ -1,5 +1,14 @@
 # Best Friends Forever (OpenMW)
 
+## 1.0.4
+
+- Fixed script detachment
+- Fixed Command spell handling
+- Fixed follower HUD displaying when it shouldn't
+- Fixed Call being able to trigger when the world is paused
+- Improved "Command Effects Prevent Getting Knocked Down" setting description
+- Hopefully made the mod a bug-free experience
+
 ## 1.0.3
 
 - Fixed infinite loop during teleportation position calculation

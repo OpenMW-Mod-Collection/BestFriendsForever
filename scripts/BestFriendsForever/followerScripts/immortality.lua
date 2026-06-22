@@ -26,6 +26,12 @@ local down = false
 local inCombat = false
 local leader
 
+local function isCommanded()
+    local hasEffect = selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
+        or selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandHumanoid).magnitude > 0
+    return hasEffect and not settings.ingoreCommanded
+end
+
 local function selfDown()
     down = true
     leader:sendEvent("BestFriendsForever_followerDown", eventData)
@@ -39,9 +45,7 @@ end
 
 local function onUpdate()
     if not down and health.current < settings.threshold then
-        local isCommanded = selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
-            or selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandHumanoid).magnitude > 0
-        if not isCommanded or settings.ingoreCommanded then
+        if not isCommanded() then
             selfDown()
         end
     end
@@ -82,9 +86,16 @@ local function onLoad(data)
 end
 
 I.Combat.addOnHitHandler(function(attack)
-    if down then return false end
-    if not attack.successful or not attack.damage.health then return end
-    if attack.damage.health > health.current - settings.threshold then
+    if down then
+        return false
+    end
+
+    if not attack.successful or not attack.damage.health then
+        return
+    end
+
+    local lethalDamage = attack.damage.health > health.current - settings.threshold
+    if lethalDamage and not isCommanded() then
         if not down then
             selfDown()
         end

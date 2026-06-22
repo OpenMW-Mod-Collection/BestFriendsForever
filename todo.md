@@ -8,3 +8,4 @@ Add:
 - Immortality: change automatic getting up to a "select" setting
   - Automatic
   - Require to heal back 25% of max health to get the follower up
+- Immortality: take some ideas from [Follower Death and Injury Chance - Followers Can Die](https://www.nexusmods.com/skyrimspecialedition/mods/38043)

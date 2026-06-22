@@ -24,8 +24,13 @@ immortality_groupDesc: |
   Instead of dying, your followers will get knocked down until the end of combat.
   
   Doesn't affect summons.
-ingoreCommanded_name: Ignore Followers Under Command Spells
-ingoreCommanded_desc: Any Command effect, any magnitude.
+ingoreCommanded_name: Command Effects Prevent Getting Knocked Down
+ingoreCommanded_desc: |
+  Followers under Command effects don't get knocked down and die as usual.
+  
+  Casting command spells on already downed followers won't do anything.
+
+  Any Command effect, any magnitude.
 threshold_name: Health Threshold
 threshold_desc: At which health follower will get knocked down.
 changeAggro_name: Change Enemy Aggro if the Follower is Down

@@ -120,16 +120,16 @@ end
 
 local function followerListUpdated(data)
     local currFollowers = data.followers
-    -- add new scripts
+    -- remove redundant scripts
     for id, fState in pairs(currFollowers) do
         if not followers[id] then
-            syncScripts(fState, true)
+            syncScripts(fState, false)
         end
     end
-    -- remove redundant scripts
+    -- add new scripts
     for id, fState in pairs(followers) do
         if not currFollowers[id] then
-            syncScripts(fState, false)
+            syncScripts(fState, true)
         end
     end
     followers = currFollowers

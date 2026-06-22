@@ -51,7 +51,7 @@ input.registerAction {
 input.registerActionHandler(
     "BestFriendsForever_call",
     async:callback(function(pressed)
-        if pressed or I.UI.getMode() then return end
+        if pressed or I.UI.getMode() or core.isWorldPaused() then return end
 
         local pos = raycast.findSafeTpPos(self)
         for _, state in pairs(followers) do
