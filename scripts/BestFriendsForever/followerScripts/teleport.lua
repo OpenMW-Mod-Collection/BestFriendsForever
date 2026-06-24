@@ -7,7 +7,7 @@ local core = require("openmw.core")
 local leader
 
 local function onInactive()
-    if not leader then return end
+    if not leader or not self.enabled then return end
     leader:sendEvent("BestFriendsForever_followerUnloaded", self)
 end
 

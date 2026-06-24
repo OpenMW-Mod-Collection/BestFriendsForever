@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.0.7
+
+- Fixed teleportation not taking "enabled" flag into account
+
 ## 1.0.6
 
 - Streamlined and fixed script attachment/detachment mechanism. Again
