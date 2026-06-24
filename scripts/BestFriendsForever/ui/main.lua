@@ -45,7 +45,7 @@ followerHUD.hudDisplayMap = {
     ---@param uiMode string
     ---@return boolean
     ["Always"] = function(uiMode)
-        return true
+        return I.UI.isHudVisible()
     end,
     ---@param uiMode string
     ---@return boolean
@@ -56,6 +56,7 @@ followerHUD.hudDisplayMap = {
     ---@return boolean
     ["Hide on Interface"] = function(uiMode)
         return not uiMode
+            or uiMode == "MainMenu"
     end,
     ---@param uiMode string
     ---@return boolean
@@ -424,10 +425,9 @@ end
 
 followerHUD.updateRootVisibility = function(uiMode)
     if not followerHUD.root then return end
-
+    
     local isModeAllowed = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
     followerHUD.root.layout.props.visible = #rootFlex.content ~= 0
-        and I.UI.isHudVisible()
         and isModeAllowed(uiMode)
 end
 

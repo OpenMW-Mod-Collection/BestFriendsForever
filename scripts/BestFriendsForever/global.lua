@@ -37,6 +37,8 @@ end
 
 local scripts = {
     {
+        name = "Immortality",
+        path = "scripts/BestFriendsForever/followerScripts/immortality.lua",
         cond = function(fState)
             local isSummon = string.find(fState.actor.recordId, "_summon$")
                 or fState.actor.recordId == "bonewalker_greater_summ"
@@ -49,9 +51,10 @@ local scripts = {
                 and settingToggles.enableImmortality
                 and not banned
         end,
-        path = "scripts/BestFriendsForever/followerScripts/immortality.lua"
     },
     {
+        name = "Teleport",
+        path = "scripts/BestFriendsForever/followerScripts/teleport.lua",
         cond = function(fState)
             local banned = blacklisted(
                 fState.actor,
@@ -60,13 +63,13 @@ local scripts = {
             return settingToggles.enableTeleport
                 and not banned
         end,
-        path = "scripts/BestFriendsForever/followerScripts/teleport.lua"
     },
     {
+        name = "Catch Up",
+        path = "scripts/BestFriendsForever/followerScripts/catchUp.lua",
         cond = function(fState)
             return settingToggles.enableCatchUp
         end,
-        path = "scripts/BestFriendsForever/followerScripts/catchUp.lua"
     }
 }
 
@@ -81,10 +84,12 @@ local function syncScripts(fState, addingScript)
                 fState.actor:addScript(script.path, {
                     leader = fState.superLeader or fState.leader
                 })
+                -- print(("Attaching script '%s' to %s"):format(script.name, fState.actor.recordId))
             end
         else
             if hasScript then
                 fState.actor:removeScript(script.path)
+                -- print(("Removing script '%s' from %s"):format(script.name, fState.actor.recordId))
             end
         end
     end

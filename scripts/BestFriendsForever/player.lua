@@ -28,7 +28,6 @@ deps.checkAll("Best Friends Forever", {
     }
 })
 
-local BEHIND_DISTANCE = 300
 local inCombat = false
 local combatTargets = {}
 local followers = I.FollowerDetectionUtil.getFollowerList()

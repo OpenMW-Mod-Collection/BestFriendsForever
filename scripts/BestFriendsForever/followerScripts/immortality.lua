@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-field
 ---@omw-context local
 ---@diagnostic disable: assign-type-mismatch
 local self = require("openmw.self")
@@ -21,6 +22,7 @@ local eventData = {
     follower = self,
     leader = nil
 }
+local followerList = I.FollowerDetectionUtil.getFollowerList()
 
 local down = false
 local inCombat = false
@@ -94,8 +96,10 @@ I.Combat.addOnHitHandler(function(attack)
         return
     end
 
+    -- for some reason the hit handler doesn't get detached together with the script
+    local stillFollowing = followerList[self.id] and followerList[self.id].followsPlayer
     local lethalDamage = attack.damage.health > health.current - settings.threshold
-    if lethalDamage and not isCommanded() then
+    if lethalDamage and not isCommanded() and stillFollowing then
         if not down then
             selfDown()
         end
@@ -123,5 +127,8 @@ return {
         BestFriendsForever_combatMode = function(data)
             inCombat = data
         end,
+        FDU_FollowerListUpdated = function(followers)
+            followerList = followers
+        end
     }
 }

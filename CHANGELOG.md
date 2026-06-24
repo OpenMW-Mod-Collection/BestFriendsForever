@@ -1,5 +1,10 @@
 # Best Friends Forever (OpenMW)
 
+## 1.0.8
+
+- Fixed "When to Show Follower HUD" setting not always behaving as you'd expect it to
+- Fixed immortality hit handlers not being detached correctly
+
 ## 1.0.7
 
 - Fixed teleportation not taking "enabled" flag into account
