@@ -9,12 +9,12 @@ local input = require("openmw.input")
 local core = require("openmw.core")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
-local raycast = require("scripts.BestFriendsForever.utils.raycast")
+local tp = require("scripts.BestFriendsForever.utils.teleport")
 local followerHUD = require("scripts.BestFriendsForever.ui.main")
 
 local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
-local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
+-- local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
 
 local deps = require("scripts.BestFriendsForever.utils.dependencies")
 deps.checkAll("Best Friends Forever", {
@@ -22,17 +22,14 @@ deps.checkAll("Best Friends Forever", {
         plugin = "FollowerDetectionUtil.omwscripts",
         interface = I.FollowerDetectionUtil,
     },
-    {
-        plugin = "h3lp_yours3lf.omwscripts",
-        interface = true,
-    }
 })
 
-local inCombat = false
-local combatTargets = {}
+local wasInCombat = false
+local targetedBy = {}
 local followers = I.FollowerDetectionUtil.getFollowerList()
 local notifListPerFollower = {}
 local downedFollowers = {}
+local unloadedFollowers = {}
 
 if settingsWrapper.enable then
     followerHUD.new(followers)
@@ -52,26 +49,22 @@ input.registerActionHandler(
     async:callback(function(pressed)
         if pressed or I.UI.getMode() or core.isWorldPaused() then return end
 
-        local pos = raycast.findSafeTpPos(self)
+        local myFollowers = {}
         for _, state in pairs(followers) do
             local myFollower = state.superLeader and state.superLeader.id == self.id
                 or state.leader and state.leader.id == self.id
             if myFollower then
-                core.sendGlobalEvent(
-                    "BestFriendsForever_teleport",
-                    {
-                        actor = state.actor,
-                        pos = pos,
-                        cell = self.cell.name,
-                        options = { onGround = true },
-                    }
-                )
+                myFollowers[#myFollowers+1] = state.actor
             end
         end
+
+        tp.teleportBatch(myFollowers, "BestFriendsForever_teleport")
     end)
 )
 
-local function onUpdate()
+local teleportAccumulator = 0
+local teleportCooldown = .1
+local function onUpdate(dt)
     -- sparce notification sending
     -- for enemy aggro redirection
     for followerId, notifList in pairs(notifListPerFollower) do
@@ -82,15 +75,26 @@ local function onUpdate()
             notif.actor:sendEvent(notif.eventName, notif)
         end
     end
-end
-
-local onFrameAccumulator = 0
-local function onFrame(dt)
-    onFrameAccumulator = onFrameAccumulator + dt
-    if settingsWrapper.pollingRate >= onFrameAccumulator then
+    
+    -- teleporting everyone on a cooldown to place them the nice way
+    teleportAccumulator = teleportAccumulator + dt
+    if teleportCooldown >= teleportAccumulator then
         return
     end
-    onFrameAccumulator = 0
+    teleportAccumulator = 0
+    if #unloadedFollowers ~= 0 then
+        tp.teleportBatch(unloadedFollowers, "BestFriendsForever_teleport")
+        unloadedFollowers = {}
+    end
+end
+
+local uiUpdateAccumulator = 0
+local function onFrame(dt)
+    uiUpdateAccumulator = uiUpdateAccumulator + dt
+    if settingsWrapper.pollingRate >= uiUpdateAccumulator then
+        return
+    end
+    uiUpdateAccumulator = 0
 
     if settingsWrapper.enable then
         if not followerHUD.root then
@@ -112,21 +116,31 @@ local function notifyFollowers(event, data)
     end
 end
 
-local function combatTargetAdded(actor)
-    combatTargets[actor.id] = true
-    if not inCombat then
-        notifyFollowers("BestFriendsForever_combatMode", true)
+local function combatTargetsChanged(data)
+    local playerTargeted = false
+    local hasTargets = false
+    for _, target in ipairs(data.targets) do
+        hasTargets = true
+        if target.id == self.id then
+            playerTargeted = true
+            break
+        end
     end
-    inCombat = true
-end
 
-local function combatTargetRemoved(actor)
-    combatTargets[actor.id] = nil
-    local currentlyInComabt = next(combatTargets) == true
-    if not currentlyInComabt then
-        notifyFollowers("BestFriendsForever_combatMode", false)
+    if playerTargeted then
+        targetedBy[data.actor.id] = true
+        if not wasInCombat then
+            notifyFollowers("BestFriendsForever_combatMode", true)
+        end
+        wasInCombat = true
+    elseif not hasTargets then
+        targetedBy[data.actor.id] = nil
+        local currentlyInComabt = next(targetedBy) == true
+        if wasInCombat and not currentlyInComabt then
+            notifyFollowers("BestFriendsForever_combatMode", false)
+        end
+        wasInCombat = currentlyInComabt
     end
-    inCombat = currentlyInComabt
 end
 
 local function fillNotifList(follower, eventName)
@@ -155,13 +169,7 @@ local function followerListUpdated(data)
 end
 
 local function followerUnloaded(follower)
-    local eventData = {
-        actor = follower,
-        cell = self.cell.name,
-        pos = raycast.findSafeTpPos(self),
-        options = { onGround = true }
-    }
-    core.sendGlobalEvent("BestFriendsForever_teleport", eventData)
+    unloadedFollowers[#unloadedFollowers+1] = follower
 end
 
 local function followerDown(data)
@@ -201,9 +209,8 @@ return {
     },
     eventHandlers = {
         UiModeChanged = uiModeChanged,
+        OMWMusicCombatTargetsChanged = combatTargetsChanged,
         FDU_UpdateFollowerList = followerListUpdated,
-        S3CombatTargetAdded = combatTargetAdded,
-        S3CombatTargetRemoved = combatTargetRemoved,
         BestFriendsForever_followerUnloaded = followerUnloaded,
         BestFriendsForever_followerDown = followerDown,
         BestFriendsForever_followerUp = followerUp,

@@ -6,6 +6,7 @@ local core = require("openmw.core")
 local I = require("openmw.interfaces")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
+local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
@@ -24,6 +25,7 @@ local eventData = {
 }
 local followerList = I.FollowerDetectionUtil.getFollowerList()
 
+local dead = types.Actor.isDead(self)
 local down = false
 local inCombat = false
 local leader
@@ -92,7 +94,7 @@ I.Combat.addOnHitHandler(function(attack)
         return false
     end
 
-    if not attack.successful or not attack.damage.health then
+    if not attack.successful or not attack.damage.health or dead then
         return
     end
 
@@ -119,6 +121,7 @@ return {
     },
     eventHandlers = {
         Died = function()
+            dead = true
             core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
                 script = "scripts/BestFriendsForever/followerScripts/teleport.lua"

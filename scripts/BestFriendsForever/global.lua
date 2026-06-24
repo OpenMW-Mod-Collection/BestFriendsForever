@@ -116,18 +116,18 @@ local function detachScript(data)
 end
 
 local function tp(data)
-    -- teleport method throws harmless errors
-    -- if two teleports occur in the same frame
-    -- or when the summon gets despawned
-    pcall(function()
-        data.actor:teleport(data.cell, data.pos, data.options)
-    end)
+    data.object:teleport(data.cellName, data.position, data.options)
 end
 
 return {
     eventHandlers = {
         FDU_FollowerListUpdated = followerListUpdated,
         BestFriendsForever_detachScript = detachScript,
-        BestFriendsForever_teleport = tp,
+        BestFriendsForever_teleport = function(data)
+            -- teleport method throws harmless errors
+            -- if two teleports occur in the same frame
+            -- or when the summon gets despawned
+            pcall(tp, data)
+        end,
     }
 }

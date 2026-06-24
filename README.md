@@ -32,7 +32,6 @@ It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowin
 Load Best Friends Forever as high as possible in the load order - before any mods that might alter melee damage calculations.
 
 - [Follower Detection Util](https://www.nexusmods.com/morrowind/mods/58053) - Load before BFF
-- [H3lp Yours3lf](https://www.nexusmods.com/morrowind/mods/56417)
 
 ## Recommended Mods
 

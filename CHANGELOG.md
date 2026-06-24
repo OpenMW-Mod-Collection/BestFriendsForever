@@ -1,5 +1,10 @@
 # Best Friends Forever (OpenMW)
 
+## 1.1
+
+- Removed H3lp Yours3lf dependency
+- Improved teleportation position heuristics to look better
+
 ## 1.0.8
 
 - Fixed "When to Show Follower HUD" setting not always behaving as you'd expect it to
