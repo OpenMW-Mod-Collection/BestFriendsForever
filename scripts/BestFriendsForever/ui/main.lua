@@ -64,6 +64,7 @@ followerHUD.hudDisplayMap = {
     ---@return boolean
     ["Hide on Dialogue Only"] = function(uiMode)
         return uiMode ~= I.UI.MODE.Dialogue
+            and I.UI.isHudVisible()
     end
 }
 

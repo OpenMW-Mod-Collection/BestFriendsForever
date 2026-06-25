@@ -1,8 +1,12 @@
 # Best Friends Forever (OpenMW)
 
+## 1.1.2
+
+- Fixud HUD visibility settings. Again
+
 ## 1.1.1
 
-- Fixed HUD visibility settings again
+- Fixed HUD visibility settings. Again
 
 ## 1.1
 
