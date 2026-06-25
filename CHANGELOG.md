@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.1.1
+
+- Fixed HUD visibility settings again
+
 ## 1.1
 
 - Removed H3lp Yours3lf dependency

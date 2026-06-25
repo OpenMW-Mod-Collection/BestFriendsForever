@@ -51,12 +51,14 @@ followerHUD.hudDisplayMap = {
     ---@return boolean
     ["Interface Only"] = function(uiMode)
         return uiMode ~= nil
+            and uiMode ~= "MainMenu"
+            and I.UI.isHudVisible()
     end,
     ---@param uiMode string
     ---@return boolean
     ["Hide on Interface"] = function(uiMode)
-        return not uiMode
-            or uiMode == "MainMenu"
+        return (not uiMode or uiMode == "MainMenu")
+            and I.UI.isHudVisible()
     end,
     ---@param uiMode string
     ---@return boolean
