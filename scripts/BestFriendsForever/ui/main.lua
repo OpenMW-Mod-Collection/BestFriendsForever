@@ -427,8 +427,9 @@ local function makeDelimiter()
 end
 
 followerHUD.updateRootVisibility = function(uiMode)
-    if not followerHUD.root then return end
-    
+    -- why is this even being triggered?
+    if not followerHUD.root or not followerHUD.root.layout then return end
+
     local isModeAllowed = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
     followerHUD.root.layout.props.visible = #rootFlex.content ~= 0
         and isModeAllowed(uiMode)

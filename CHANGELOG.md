@@ -1,8 +1,13 @@
 # Best Friends Forever (OpenMW)
 
+## 1.1.3
+
+- Fixed melee hits not triggering immortality
+- Added a guardrail for HUD visibility updater
+
 ## 1.1.2
 
-- Fixud HUD visibility settings. Again
+- Fixed HUD visibility settings. Again
 
 ## 1.1.1
 

@@ -102,7 +102,7 @@ I.Combat.addOnHitHandler(function(attack)
     local stillFollowing = followerList[self.id] and followerList[self.id].followsPlayer
     local lethalDamage = attack.damage.health > health.current - settings.threshold
     if lethalDamage and not isCommanded() and stillFollowing then
-        if not down then
+        if not down and inCombat then
             selfDown()
         end
         health.current = settings.threshold
@@ -130,8 +130,8 @@ return {
         BestFriendsForever_combatMode = function(data)
             inCombat = data
         end,
-        FDU_FollowerListUpdated = function(followers)
-            followerList = followers
+        FDU_UpdateFollowerList = function(data)
+            followerList = data.followers
         end
     }
 }
