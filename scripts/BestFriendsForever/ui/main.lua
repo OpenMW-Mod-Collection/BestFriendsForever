@@ -452,7 +452,7 @@ followerHUD.new = function(followers)
 
     local widgetCount = 0
     for _, fState in pairs(followers) do
-        if widgetCount > settingsWrapper.maxWidgets then
+        if widgetCount >= settingsWrapper.maxWidgets then
             break
         end
 
