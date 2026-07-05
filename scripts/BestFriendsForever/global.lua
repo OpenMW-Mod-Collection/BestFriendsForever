@@ -26,6 +26,12 @@ local function blacklisted(actor, noMwscripts, blacklist)
         if noMwscripts then
             return true
         end
+
+        -- Water Life bullshit filter
+        if mwscript:find("^ab01wlcr") then
+            return true
+        end
+
         for _, blacklistedScript in ipairs(blacklist) do
             if mwscript == blacklistedScript then
                 return true

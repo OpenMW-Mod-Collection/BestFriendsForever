@@ -1,5 +1,11 @@
 # Best Friends Forever (OpenMW)
 
+## 1.1.4
+
+- Added compatibility for abot's Water Life
+- Added follower widget count limit setting
+- Split the "HUD Expansion Direction" settings into separate vertical and horizontal fields
+
 ## 1.1.3
 
 - Fixed melee hits not triggering immortality

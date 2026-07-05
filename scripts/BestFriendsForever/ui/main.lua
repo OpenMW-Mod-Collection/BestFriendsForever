@@ -104,6 +104,10 @@ end
 local function blacklisted(actor, blacklist)
     local mwscript = actor.type.records[actor.recordId].mwscript
     if mwscript then
+        if mwscript:find("^ab01wlcr") then
+            return true
+        end
+
         for _, blacklistedScript in ipairs(blacklist) do
             if mwscript == blacklistedScript then
                 return true
@@ -120,9 +124,11 @@ end
 local delimiterW = 10
 local delimiterH = 15
 local alignToAnchor = {
-    Start = 0,
+    Right = 0,
+    Down = 0,
     Center = .5,
-    End = 1
+    Left = 1,
+    Up = 1,
 }
 local sideToAlignment = {
     Left = "Start",
@@ -245,8 +251,8 @@ local function createRoot()
             alpha = settingsWrapper.enableBordersAndBg and 1 or 0,
             position = v2(settingsWrapper.posX, settingsWrapper.posY),
             anchor = v2(
-                alignToAnchor[settingsWrapper.expansionDirection],
-                alignToAnchor[settingsWrapper.expansionDirection]
+                alignToAnchor[settingsWrapper.expansionDirectionH],
+                alignToAnchor[settingsWrapper.expansionDirectionV]
             )
         },
         events = wrapperEventCallbacks,
@@ -444,7 +450,12 @@ followerHUD.new = function(followers)
         and I.BestFriendsForever.getDownedFollowers()
         or {}
 
+    local widgetCount = 0
     for _, fState in pairs(followers) do
+        if widgetCount > settingsWrapper.maxWidgets then
+            break
+        end
+
         local myFollower = fState.superLeader and fState.superLeader.id == self.id
             or fState.leader and fState.leader.id == self.id
         local banned = blacklisted(fState.actor, settingsBlacklists.globalBlacklistByScript)
@@ -458,6 +469,7 @@ followerHUD.new = function(followers)
 
         local down = downedFollowers[fState.actor.id]
         rootFlex.content:add(createFollowerFlex(fState.actor, down))
+        widgetCount = widgetCount + 1
 
         ::continue::
     end

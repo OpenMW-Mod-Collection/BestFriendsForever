@@ -46,7 +46,6 @@ I.Settings.registerGroup {
             renderer = 'AttendMeList',
             default = {
                 'CharGenWalkNPC',
-               'ab01wlcrFishFreshScript',
             },
         },
         {

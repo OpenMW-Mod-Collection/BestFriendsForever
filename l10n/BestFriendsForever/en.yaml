@@ -65,15 +65,11 @@ pollingRate_desc: Set it to zero to update HUD every frame.
 lockPosition_name: Lock Position
 lockPosition_desc: >
   If disabled, you can drag the HUD around by holding it with LMB.
+maxWidgets_name: Max Follower Widgets
 posX_name: X Position
 posY_name: Y Position
-expansionDirection_name: Expansion Direction
-expansionDirection_desc: |
-  Direction to which the HUD will expand when new followers will be added.
-
-  Start = Right/Bottom
-  Center = Center
-  End = Left/Top
+expansionDirectionV_name: Expand HUD Vertically
+expansionDirectionH_name: Expand HUD Horizontally
 enableBordersAndBg_name: Enable Borders and Background
 horizontalLayout_name: Horizontal Layout
 

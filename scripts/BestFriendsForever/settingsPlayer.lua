@@ -117,6 +117,12 @@ I.Settings.registerGroup {
             default = true,
         },
         {
+            key = 'maxWidgets',
+            name = 'maxWidgets_name',
+            renderer = "number",
+            default = 5,
+        },
+        {
             key = 'posX',
             name = 'posX_name',
             renderer = "SuperSlider4",
@@ -145,19 +151,32 @@ I.Settings.registerGroup {
             }
         },
         {
-            key = 'expansionDirection',
-            name = 'expansionDirection_name',
-            description = 'expansionDirection_desc',
+            key = 'expansionDirectionV',
+            name = 'expansionDirectionV_name',
             renderer = 'select',
             argument = {
                 l10n = "BestFriendsForever",
                 items = {
-                    "Start",
+                    "Up",
                     "Center",
-                    "End",
+                    "Down",
                 },
             },
-            default = "Start",
+            default = "Down",
+        },
+        {
+            key = 'expansionDirectionH',
+            name = 'expansionDirectionH_name',
+            renderer = 'select',
+            argument = {
+                l10n = "BestFriendsForever",
+                items = {
+                    "Left",
+                    "Center",
+                    "Right",
+                },
+            },
+            default = "Right",
         },
         {
             key = 'enableBordersAndBg',
