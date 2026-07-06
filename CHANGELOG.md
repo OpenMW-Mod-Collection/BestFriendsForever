@@ -3,7 +3,7 @@
 ## 1.1.5
 
 - Fixed setting "Enable Icons" to False breaking the mod
-- Fixed immortality breaking Loafy's Necormancy zombie death script
+- Fixed immortality breaking Loafy's Necromancy zombie death script
 
 ## 1.1.4
 
