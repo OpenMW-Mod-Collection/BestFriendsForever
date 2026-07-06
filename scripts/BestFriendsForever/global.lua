@@ -46,16 +46,20 @@ local scripts = {
         name = "Immortality",
         path = "scripts/BestFriendsForever/followerScripts/immortality.lua",
         cond = function(fState)
+            local record = fState.actor.type.records[fState.actor.recordId]
             local isSummon = string.find(fState.actor.recordId, "_summon$")
                 or fState.actor.recordId == "bonewalker_greater_summ"
             local banned = blacklisted(
                 fState.actor,
                 settingsBlacklists.immortalityBlacklistMWScript,
                 settingsBlacklists.immortalityBlacklistByScript)
+            -- for Loafy's Necromancy https://www.nexusmods.com/morrowind/mods/58901
+            local isZombie = record.name:lower():find("'s zombie")
             return not isSummon
                 and fState.followsPlayer
                 and settingToggles.enableImmortality
                 and not banned
+                and not isZombie
         end,
     },
     {

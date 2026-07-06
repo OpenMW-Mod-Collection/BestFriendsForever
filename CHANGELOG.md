@@ -1,5 +1,10 @@
 # Best Friends Forever (OpenMW)
 
+## 1.1.5
+
+- Fixed setting "Enable Icons" to False breaking the mod
+- Fixed immortality breaking Loafy's Necormancy zombie death script
+
 ## 1.1.4
 
 - Added compatibility for abot's Water Life

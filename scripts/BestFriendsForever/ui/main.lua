@@ -482,7 +482,9 @@ followerHUD.updateData = function()
     for _, fData in pairs(followerHUD.followerData) do
         local down = fData.down and settingsLocalHUD.immortalityIntegration
         barsUI.updateStats(fData, down)
-        iconsUI.updateIcons(fData, down)
+        if settingsLocalHUD.combatIcon then
+            iconsUI.updateIcons(fData, down)
+        end
     end
     followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()

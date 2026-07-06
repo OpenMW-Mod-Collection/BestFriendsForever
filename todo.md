@@ -8,4 +8,3 @@ Add:
   - Automatic
   - Require to heal back 25% of max health to get the follower up
 - Immortality: take some ideas from [Follower Death and Injury Chance - Followers Can Die](https://www.nexusmods.com/skyrimspecialedition/mods/38043)
-- Check what breaks Loafy's Necromancy

@@ -27,6 +27,11 @@ Should be compatible with anything.
 
 It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but they should not be used together.
 
+Supported edge case mods:
+
+- [Loafy's Necromancy - Reanimate Dead](https://www.nexusmods.com/morrowind/mods/58901) by TheLoafyOne
+- [Water Life](https://www.nexusmods.com/morrowind/mods/42417) by abot
+
 ## Requirements
 
 Load Best Friends Forever as high as possible in the load order - before any mods that might alter melee damage calculations.
