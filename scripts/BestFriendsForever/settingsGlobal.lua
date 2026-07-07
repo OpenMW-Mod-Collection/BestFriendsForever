@@ -46,6 +46,7 @@ I.Settings.registerGroup {
             renderer = 'AttendMeList',
             default = {
                 'CharGenWalkNPC',
+                "RM_GuardSneak",
             },
         },
         {
@@ -83,13 +84,6 @@ I.Settings.registerGroup {
     order = 10,
     settings = {
         {
-            key = 'ingoreCommanded',
-            name = 'ingoreCommanded_name',
-            description = "ingoreCommanded_desc",
-            renderer = 'checkbox',
-            default = true,
-        },
-        {
             key = 'threshold',
             name = 'threshold_name',
             description = "threshold_desc",
@@ -101,6 +95,40 @@ I.Settings.registerGroup {
                 showResetButton = true,
                 bottomRow = true,
             }
+        },
+        {
+            key = 'upDelay',
+            name = 'upDelay_name',
+            renderer = "SuperSlider4",
+            default = 10,
+            argument = {
+                default = 10,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "sec",
+            }
+        },
+        {
+            key = 'deathChance',
+            name = 'deathChance_name',
+            renderer = "SuperSlider4",
+            default = 1,
+            argument = {
+                min = 0,
+                max = 100,
+                default = 1,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "%",
+            }
+        },
+        {
+            key = 'ingoreCommanded',
+            name = 'ingoreCommanded_name',
+            description = "ingoreCommanded_desc",
+            renderer = 'checkbox',
+            default = true,
         },
         {
             key = 'changeAggro',

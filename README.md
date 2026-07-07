@@ -31,6 +31,7 @@ Supported edge case mods:
 
 - [Loafy's Necromancy - Reanimate Dead](https://www.nexusmods.com/morrowind/mods/58901) by TheLoafyOne
 - [Water Life](https://www.nexusmods.com/morrowind/mods/42417) by abot
+- [Inquisitive Guards](https://www.nexusmods.com/morrowind/mods/46538) by RubberMan
 
 ## Requirements
 

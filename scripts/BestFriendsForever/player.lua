@@ -24,8 +24,6 @@ deps.checkAll("Best Friends Forever", {
     },
 })
 
-local wasInCombat = false
-local targetedBy = {}
 local followers = I.FollowerDetectionUtil.getFollowerList()
 local notifListPerFollower = {}
 local downedFollowers = {}
@@ -110,39 +108,6 @@ local function onFrame(dt)
     end
 end
 
-local function notifyFollowers(event, data)
-    for _, fState in pairs(followers) do
-        fState.actor:sendEvent(event, data)
-    end
-end
-
-local function combatTargetsChanged(data)
-    local playerTargeted = false
-    local hasTargets = false
-    for _, target in ipairs(data.targets) do
-        hasTargets = true
-        if target.id == self.id then
-            playerTargeted = true
-            break
-        end
-    end
-
-    if playerTargeted then
-        targetedBy[data.actor.id] = true
-        if not wasInCombat then
-            notifyFollowers("BestFriendsForever_combatMode", true)
-        end
-        wasInCombat = true
-    elseif not hasTargets then
-        targetedBy[data.actor.id] = nil
-        local currentlyInComabt = next(targetedBy) == true
-        if wasInCombat and not currentlyInComabt then
-            notifyFollowers("BestFriendsForever_combatMode", false)
-        end
-        wasInCombat = currentlyInComabt
-    end
-end
-
 local function fillNotifList(follower, eventName)
     notifListPerFollower[follower.id] = {}
     local notifList = notifListPerFollower[follower.id]
@@ -209,7 +174,6 @@ return {
     },
     eventHandlers = {
         UiModeChanged = uiModeChanged,
-        OMWMusicCombatTargetsChanged = combatTargetsChanged,
         FDU_UpdateFollowerList = followerListUpdated,
         BestFriendsForever_followerUnloaded = followerUnloaded,
         BestFriendsForever_followerDown = followerDown,

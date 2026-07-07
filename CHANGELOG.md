@@ -1,5 +1,11 @@
 # Best Friends Forever (OpenMW)
 
+## 1.2
+
+- Changed how downed followers get up: instead of waiting till the end of combat, they lie down for a fixed amount of time. This would make it more reliable, probably more performant and feel more natural when knowcking them down when not in combat (accidentally or on purpose)
+- Added "Death Chance" setting to Immortality
+- Added script blacklist for Inquisitive Guards
+
 ## 1.1.5
 
 - Fixed setting "Enable Icons" to False breaking the mod

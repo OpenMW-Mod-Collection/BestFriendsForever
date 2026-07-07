@@ -21,7 +21,7 @@ immortalityBlacklistByScript_name: Immortality Blacklist by MWScripts
 
 immortality_groupName: Immortality
 immortality_groupDesc: |
-  Instead of dying, your followers will get knocked down until the end of combat.
+  Instead of dying, your followers will get knocked for a set amount of time.
   
   Doesn't affect summons.
 ingoreCommanded_name: Command Effects Prevent Getting Knocked Down
@@ -36,6 +36,8 @@ threshold_desc: At which health follower will get knocked down.
 changeAggro_name: Change Enemy Aggro if the Follower is Down
 changeAggro_desc: >
   If an enemy targets the downed follower, they will change aggro onto you.
+upDelay_name: Getting Up Delay
+deathChance_name: Death Chance
 
 call_groupName: Call
 call_groupDesc: Keybind which teleports your followers to you.

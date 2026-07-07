@@ -94,11 +94,11 @@ barsUI.updateStats = function(fData, down)
         local imgLayout = statData.bar.imgLayout
         if imgLayout then
             if down then
-                statData.bar.imgLayout.props.color = util.color.rgb(.5, .5, .5)
+                imgLayout.props.color = util.color.rgb(.5, .5, .5)
                 imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.base, statData.stat.base)
             else
+                imgLayout.props.color = statData.bar.color
                 imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.current, statData.stat.base)
-                statData.bar.imgLayout.props.color = statData.bar.color
             end
         end
     end
