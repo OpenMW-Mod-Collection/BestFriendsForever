@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.2.1
+
+- Added a leader check guardrail for attaching scripts
+
 ## 1.2
 
 - Changed how downed followers get up: instead of waiting till the end of combat, they lie down for a fixed amount of time. This would make it more reliable, probably more performant and feel more natural when knowcking them down when not in combat (accidentally or on purpose)
