@@ -34,7 +34,7 @@ local timerStarted = false
 local function isCommanded()
     local hasEffect = selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
         or selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandHumanoid).magnitude > 0
-    return hasEffect and not settings.ingoreCommanded
+    return hasEffect and settings.ingoreCommanded
 end
 
 local function selfDown()

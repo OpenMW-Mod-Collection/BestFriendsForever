@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.2.2
+
+- Fixed "Command Effects Prevent Getting Knocked Down" setting being inverted
+
 ## 1.2.1
 
 - Added a leader check guardrail for attaching scripts
