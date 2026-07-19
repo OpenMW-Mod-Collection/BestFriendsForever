@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.2.3
+
+- Fixed lethal melee hits breaking the immortality script. Again
+
 ## 1.2.2
 
 - Fixed "Command Effects Prevent Getting Knocked Down" setting being inverted

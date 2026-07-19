@@ -24,7 +24,6 @@ local eventData = {
     follower = self,
     leader = nil
 }
-local followerList = I.FollowerDetectionUtil.getFollowerList()
 
 local dead = types.Actor.isDead(self)
 local down = false
@@ -105,12 +104,16 @@ I.Combat.addOnHitHandler(function(attack)
     end
 
     -- for some reason the hit handler doesn't get detached together with the script
+    local followerList = I.FollowerDetectionUtil.getFollowerList()
     local stillFollowing = followerList[self.id] and followerList[self.id].followsPlayer
     local lethalDamage = attack.damage.health > health.current - settings.threshold
-    if lethalDamage and not isCommanded() and stillFollowing then
-        if math.random() * 100 < settings.deathChance then
-            return
-        end
+    local unluck = math.random() * 100 < settings.deathChance
+    local dontDown = lethalDamage
+        and not isCommanded()
+        and stillFollowing
+        and not unluck
+
+    if dontDown then
         if not down then
             selfDown()
         end
@@ -136,8 +139,5 @@ return {
                 script = "scripts/BestFriendsForever/followerScripts/teleport.lua"
             })
         end,
-        FDU_UpdateFollowerList = function(data)
-            followerList = data.followers
-        end
     }
 }

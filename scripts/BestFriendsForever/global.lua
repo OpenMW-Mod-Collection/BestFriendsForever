@@ -87,14 +87,13 @@ local function syncScripts(fState, addingScript)
     local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
     local dead = types.Actor.isDead(fState.actor)
     local leader = fState.superLeader or fState.leader
+    local add = addingScript
+        and not banned
+        and not dead
+        and leader
 
     for _, script in ipairs(scripts) do
         local hasScript = fState.actor:hasScript(script.path)
-        local add = addingScript
-            and not banned
-            and not dead
-            and leader
-
         if add then
             if not hasScript and script.cond(fState) then
                 fState.actor:addScript(script.path, { leader = leader })
