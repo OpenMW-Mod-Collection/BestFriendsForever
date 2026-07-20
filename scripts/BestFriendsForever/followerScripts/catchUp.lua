@@ -20,7 +20,7 @@ local settings = settingsCache.new(
 )
 
 local function getTargetBoost()
-    if not leader then return 0 end
+    if not leader or not leader:isValid() then return 0 end
 
     local distance = (self.position - leader.position):length()
 

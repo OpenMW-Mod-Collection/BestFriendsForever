@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.2.5
+
+- Added a guardrail for the leader check to Catch Up script
+
 ## 1.2.4
 
 - Added Morrowind Comes Alive guard and adventurer scripts to the default global blacklist
