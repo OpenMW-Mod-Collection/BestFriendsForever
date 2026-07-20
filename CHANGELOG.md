@@ -1,5 +1,9 @@
 # Best Friends Forever (OpenMW)
 
+## 1.2.4
+
+- Added Morrowind Comes Alive guard and adventurer scripts to the default global blacklist
+
 ## 1.2.3
 
 - Fixed lethal melee hits breaking the immortality script. Again

@@ -45,8 +45,9 @@ I.Settings.registerGroup {
             description = 'globalBlacklistByScript_desc',
             renderer = 'AttendMeList',
             default = {
-                'CharGenWalkNPC',
                 "RM_GuardSneak",
+                "mca_guards",
+                "mca_adventurers",
             },
         },
         {
