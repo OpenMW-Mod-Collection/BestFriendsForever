@@ -60,9 +60,11 @@ input.registerActionHandler(
     end)
 )
 
-local teleportAccumulator = 0
 local teleportCooldown = .1
+local teleportAccumulator = teleportCooldown
+local uiUpdateAccumulator = settingsWrapper.pollingRate
 local function onUpdate(dt)
+    -- Logic part
     -- sparce notification sending
     -- for enemy aggro redirection
     for followerId, notifList in pairs(notifListPerFollower) do
@@ -84,10 +86,8 @@ local function onUpdate(dt)
         tp.teleportBatch(unloadedFollowers, "BestFriendsForever_teleport")
         unloadedFollowers = {}
     end
-end
 
-local uiUpdateAccumulator = 0
-local function onFrame(dt)
+    -- UI part
     uiUpdateAccumulator = uiUpdateAccumulator + dt
     if settingsWrapper.pollingRate >= uiUpdateAccumulator then
         return
@@ -168,7 +168,6 @@ end
 return {
     engineHandlers = {
         onUpdate = onUpdate,
-        onFrame = onFrame,
         onSave = onSave,
         onLoad = onLoad,
     },
