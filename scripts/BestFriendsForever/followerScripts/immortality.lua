@@ -62,6 +62,11 @@ end
 local revivalTimer = time.registerTimerCallback("Revival Timer", revive)
 
 local function setCombatStatus(status)
+    -- don't loop please
+    local target = I.AI.getActiveTarget("Combat")
+    if target and target.id == leader.id then
+        return
+    end
     combatActive = status
 end
 

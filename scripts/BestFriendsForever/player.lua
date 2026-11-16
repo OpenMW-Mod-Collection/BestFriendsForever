@@ -69,9 +69,7 @@ local function onCombatEnter()
 
     for _, follower in pairs(downedFollowers) do
         if follower:isValid() then
-            follower:sendEvent("BestFriendsForever_setCombatStatus", {
-                inCombat = true,
-            })
+            follower:sendEvent("BestFriendsForever_setCombatStatus", true)
         end
     end
 end
@@ -197,9 +195,7 @@ end
 local function followerDown(data, updateCombatStatus)
     downedFollowers[data.follower.id] = data.follower
     if updateCombatStatus ~= false then
-        data.follower:sendEvent("BestFriendsForever_setCombatStatus", {
-            inCombat = isPlayerGroupInCombat(),
-        })
+        data.follower:sendEvent("BestFriendsForever_setCombatStatus", isPlayerGroupInCombat())
     end
     notifyCombatants(data, "BestFriendsForever_followerDown")
     local followerData = followerHUD.followerData[data.follower.id]
