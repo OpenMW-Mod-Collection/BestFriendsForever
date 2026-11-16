@@ -12,6 +12,7 @@ local sectionToggles = storage.globalSection("SettingsBestFriendsForever_toggles
 local sectionBlacklists = storage.globalSection("SettingsBestFriendsForever_blacklist")
 local settingToggles = settingsCache.new(sectionToggles, async, ResyncAll)
 local settingsBlacklists = settingsCache.new(sectionBlacklists, async, ResyncAll)
+local immortalitySpell = "BFF_Immortality"
 
 local function blacklisted(actor, noMwscripts, blacklist)
     local mwscript = actor.type.records[actor.recordId].mwscript
@@ -32,11 +33,21 @@ local function blacklisted(actor, noMwscripts, blacklist)
     return false
 end
 
+local function makeScript(name, path, cond, onAdd, onRemove)
+    return {
+        name = name,
+        path = path,
+        cond = cond,
+        onAdd = onAdd,
+        onRemove = onRemove,
+    }
+end
+
 local scripts = {
-    {
-        name = "Immortality",
-        path = "scripts/BestFriendsForever/followerScripts/immortality.lua",
-        cond = function(fState)
+    makeScript(
+        "Immortality",
+        "scripts/BestFriendsForever/followerScripts/immortality.lua",
+        function(fState)
             local record = fState.actor.type.records[fState.actor.recordId]
             local isSummon = FDU.isSummon(fState.actor)
             local banned = blacklisted(
@@ -52,33 +63,41 @@ local scripts = {
                 and not banned
                 and not isZombie
         end,
-    },
-    {
-        name = "Teleport",
-        path = "scripts/BestFriendsForever/followerScripts/teleport.lua",
-        cond = function(fState)
+        function(fState)
+            local follower = fState.actor
+            types.Actor.spells(follower):add(immortalitySpell)
+        end,
+        function(fState)
+            local follower = fState.actor
+            types.Actor.spells(follower):remove(immortalitySpell)
+        end
+    ),
+    makeScript(
+        "Teleport",
+        "scripts/BestFriendsForever/followerScripts/teleport.lua",
+        function(fState)
             local banned = blacklisted(
                 fState.actor,
                 settingsBlacklists.teleportBlacklistMWScript,
                 settingsBlacklists.teleportScriptBlacklist
             )
             return settingToggles.enableTeleport and not banned
-        end,
-    },
-    {
-        name = "Catch Up",
-        path = "scripts/BestFriendsForever/followerScripts/catchUp.lua",
-        cond = function()
+        end
+    ),
+    makeScript(
+        "Catch Up",
+        "scripts/BestFriendsForever/followerScripts/catchUp.lua",
+        function()
             return settingToggles.enableCatchUp
-        end,
-    },
-    {
-        name = "Ward",
-        path = "scripts/BestFriendsForever/followerScripts/ward.lua",
-        cond = function()
+        end
+    ),
+    makeScript(
+        "Ward",
+        "scripts/BestFriendsForever/followerScripts/ward.lua",
+        function()
             return settingToggles.enableWard
-        end,
-    },
+        end
+    ),
 }
 
 local function syncScripts(fState, addingScript)
@@ -93,10 +112,16 @@ local function syncScripts(fState, addingScript)
         if shouldHaveScript then
             if not hasScript then
                 fState.actor:addScript(script.path, { leader = leader })
+                if script.onAdd then
+                    script.onAdd(fState)
+                end
                 -- print(("Attaching script '%s' to %s"):format(script.name, fState.actor.recordId))
             end
         elseif hasScript then
             fState.actor:removeScript(script.path)
+            if script.onRemove then
+                script.onRemove(fState)
+            end
             -- print(("Removing script '%s' from %s"):format(script.name, fState.actor.recordId))
         end
     end

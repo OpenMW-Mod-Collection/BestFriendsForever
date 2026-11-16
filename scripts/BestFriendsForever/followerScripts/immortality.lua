@@ -1,6 +1,5 @@
----@diagnostic disable: undefined-field, param-type-mismatch, redundant-parameter
+---@diagnostic disable: undefined-field, param-type-mismatch, redundant-parameter, assign-type-mismatch
 ---@omw-context local
----@diagnostic disable: assign-type-mismatch
 local self = require("openmw.self")
 local core = require("openmw.core")
 local I = require("openmw.interfaces")
@@ -11,10 +10,11 @@ local time = require("openmw_aux.time")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async)
+local immortalitySection = storage.globalSection("SettingsBestFriendsForever_immortality")
+local settings = settingsCache.new(immortalitySection, async)
 local l10n = core.l10n("BestFriendsForever")
 local selfName = self.type.records[self.recordId].name
-local selfEffects = self.type.activeEffects(self)
+local selfEffects = types.Actor.activeEffects(self)
 local health = self.type.stats.dynamic.health(self)
 local fatigue = self.type.stats.dynamic.fatigue(self)
 local eventData = {
@@ -117,6 +117,7 @@ I.Combat.addOnHitHandler(function(attack)
         return false
     end
 end)
+
 
 return {
     engineHandlers = {

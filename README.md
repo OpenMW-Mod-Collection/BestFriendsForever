@@ -23,7 +23,7 @@ Featuring:
 Safe to install or update mid-playthrough.  
 When removing the mod, make sure no follower is currently downed and they don't have a speed boost.
 
-Should be compatible with anything.
+Should be compatible with anything. Though Immortality and Teleport modules might break certain scripts - please report such cases so I could expand the default blacklist.
 
 It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but they should not be used together.
 
@@ -38,7 +38,8 @@ Supported edge case mods:
 
 Load Best Friends Forever as high as possible in the load order - before any mods that might alter melee damage calculations.
 
-- [Follower Detection Util](https://www.nexusmods.com/morrowind/mods/58053) - Load before BFF
+- OpenMW 0.52 or newer
+- [Follower Detection Util](https://www.nexusmods.com/morrowind/mods/58053) version 3.1 - Load before BFF
 
 ## Recommended Mods
 

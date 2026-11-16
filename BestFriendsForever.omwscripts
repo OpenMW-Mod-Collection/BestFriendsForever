@@ -11,6 +11,7 @@ GLOBAL: scripts/BestFriendsForever/settingsGlobal.lua
 PLAYER: scripts/BestFriendsForever/player.lua
 NPC, CREATURE: scripts/BestFriendsForever/actor.lua
 GLOBAL: scripts/BestFriendsForever/global.lua
+LOAD: scripts/BestFriendsForever/load.lua
 
 CUSTOM: scripts/BestFriendsForever/followerScripts/immortality.lua
 CUSTOM: scripts/BestFriendsForever/followerScripts/teleport.lua

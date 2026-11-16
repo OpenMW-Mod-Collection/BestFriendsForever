@@ -7,9 +7,10 @@
 - Updated the dependency checking module
 - Updated the Follower Detection Util integration
 - Improved Immortality's enemy retargeting system
+- Added Water Breathing and Slowfall abilities to Immortality module, fixing followers being permanently stuck when downed in water
 - Added option to display labels on bars in percents (for some reason)
 - Added more script names to the default blacklists (from Death and Taxes and TR)
-- Mod now requires Follower Detection Util 3.1 or newer
+- Mod now requires OpenMW 0.52 and Follower Detection Util 3.1
 
 ## 2.0
 
