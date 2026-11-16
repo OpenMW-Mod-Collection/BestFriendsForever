@@ -9,9 +9,9 @@ local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
----@type openmw.GObject
+---@type openmw.GObject|nil
 local leader
-local leaderSpeed = types.Actor.stats.attributes.speed(leader)
+local leaderSpeed
 local selfSpeed = types.Actor.stats.attributes.speed(self)
 
 local settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_catchUp"), async)
@@ -61,12 +61,14 @@ end
 local function onLoad(data)
     data = data or {}
     leader = data.leader or leader
+    leaderSpeed = types.Actor.stats.attributes.speed(leader)
 end
 
 return {
     engineHandlers = {
         onInit = function(data)
             leader = data.leader
+            leaderSpeed = types.Actor.stats.attributes.speed(leader)
         end,
         onUpdate = onUpdate,
         onSave = onSave,

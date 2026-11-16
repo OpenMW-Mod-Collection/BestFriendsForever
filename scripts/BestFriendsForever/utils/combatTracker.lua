@@ -12,12 +12,7 @@
     combat targets changes:  { actor = <GameObject>, targets = { <GameObject>... } }
     An empty / nil `targets` means the actor is no longer fighting.
 
-    NOTE: this event is internal to OpenMW's music system and is not part of the
-    documented public API. The payload shape above is what the stock scripts use,
-    but verify it against your OpenMW version. The module tolerates a missing
-    `targets` field and ignores events without an `actor`.
-
-    Must be used from a PLAYER script (the event is only sent to players).
+    Must be used from a PLAYER script.
 
     -----------------------------------------------------------------------
     Usage (player script):
@@ -74,40 +69,20 @@
     State is transient: it is rebuilt from incoming events and is not saved.
 ]]
 
-local core = require("openmw.core")
 local types = require("openmw.types")
 
 local M = {}
 
-local function safeCall(fn, ...)
-    if not fn then
-        return
-    end
-    local ok, err = pcall(fn, ...)
-    if not ok then
-        print("[CombatTracker] callback error: " .. tostring(err))
-    end
-end
-
 -- True if the object can no longer be in combat (deleted or dead).
 local function isGone(actor)
-    local ok, valid = pcall(actor.isValid, actor)
-    if not ok or not valid then
-        return true
-    end
-    local okDead, dead = pcall(types.Actor.isDead, actor)
-    return okDead and dead == true
+    return not actor:isValid() or types.Actor.isDead(actor)
 end
 
 -- Copy only valid game objects from a (possibly nil) targets list.
 local function sanitizeTargets(targets)
     local result = {}
-    if type(targets) ~= "table" then
-        return result
-    end
     for _, target in ipairs(targets) do
-        local ok, valid = pcall(target.isValid, target)
-        if ok and valid then
+        if target:isValid() then
             result[#result + 1] = target
         end
     end
@@ -131,7 +106,9 @@ function M.new(options)
     local function add(actor, targets)
         tracked[actor.id] = { actor = actor, targets = targets }
         trackedCount = trackedCount + 1
-        safeCall(onEnter, actor, targets)
+        if onEnter then
+            onEnter(actor, targets)
+        end
     end
 
     local function remove(id)
@@ -141,22 +118,21 @@ function M.new(options)
         end
         tracked[id] = nil
         trackedCount = trackedCount - 1
-        safeCall(onLeave, entry.actor)
+        if onLeave then
+            onLeave(entry.actor)
+        end
     end
 
     ---------------------------------------------------------------------
     -- Event handler: plug into eventHandlers.OMWMusicCombatTargetsChanged
     ---------------------------------------------------------------------
     function self.onCombatTargetsChanged(eventData)
-        if type(eventData) ~= "table" then
-            return
-        end
         local actor = eventData.actor
         if actor == nil then
             return
         end
 
-        if ignorePlayer and actor.type == types.Player then
+        if ignorePlayer and types.Player.objectIsInstance(actor) then
             return
         end
 
@@ -195,10 +171,12 @@ function M.new(options)
         if pruneInterval <= 0 or trackedCount == 0 then
             return
         end
+
         nextPrune = nextPrune - dt
         if nextPrune > 0 then
             return
         end
+
         nextPrune = pruneInterval
         self.prune()
     end

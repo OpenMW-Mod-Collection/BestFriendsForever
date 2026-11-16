@@ -107,7 +107,7 @@ local function updateHUD(dt)
 end
 
 local function onUpdate(dt)
-    combatTracker.onUpdate()
+    combatTracker.onUpdate(dt)
     if not teleportUnloadedFollowers(dt) then
         return
     end
@@ -133,6 +133,7 @@ local function notifyCombatants(data, eventName)
 end
 
 local function followerListUpdated(data)
+    followers = data
     if settingsWrapper.enable then
         followerHUD.new(data)
     else
@@ -180,6 +181,10 @@ end
 local function onLoad(data)
     data = data or {}
     downedFollowers = data.downedFollowers or downedFollowers
+
+    for _, downedFollower in pairs(downedFollowers) do
+        followerDown { follower = downedFollower }
+    end
 end
 
 return {
