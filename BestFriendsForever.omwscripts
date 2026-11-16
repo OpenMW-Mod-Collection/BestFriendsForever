@@ -15,3 +15,4 @@ GLOBAL: scripts/BestFriendsForever/global.lua
 CUSTOM: scripts/BestFriendsForever/followerScripts/immortality.lua
 CUSTOM: scripts/BestFriendsForever/followerScripts/teleport.lua
 CUSTOM: scripts/BestFriendsForever/followerScripts/catchUp.lua
+CUSTOM: scripts/BestFriendsForever/followerScripts/ward.lua

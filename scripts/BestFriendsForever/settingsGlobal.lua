@@ -284,6 +284,9 @@ I.Settings.registerGroup {
             description = "statDamageCheckFrequency_desc",
             renderer = "number",
             default = 300,
+            argument = {
+                min = 0
+            }
         },
     },
 }

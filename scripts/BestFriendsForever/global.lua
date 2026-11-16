@@ -6,12 +6,12 @@ local types = require("openmw.types")
 local I = require("openmw.interfaces")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local FDU = I.FollowerDetectionUtil
 
-local resyncAll
-
-local settingToggles = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_toggles"), async, resyncAll)
-local settingsBlacklists =
-    settingsCache.new(storage.globalSection("SettingsBestFriendsForever_blacklist"), async, resyncAll)
+local sectionToggles = storage.globalSection("SettingsBestFriendsForever_toggles")
+local sectionBlacklists = storage.globalSection("SettingsBestFriendsForever_blacklist")
+local settingToggles = settingsCache.new(sectionToggles, async, ResyncAll)
+local settingsBlacklists = settingsCache.new(sectionBlacklists, async, ResyncAll)
 
 local function blacklisted(actor, noMwscripts, blacklist)
     local mwscript = actor.type.records[actor.recordId].mwscript
@@ -38,8 +38,7 @@ local scripts = {
         path = "scripts/BestFriendsForever/followerScripts/immortality.lua",
         cond = function(fState)
             local record = fState.actor.type.records[fState.actor.recordId]
-            local isSummon = string.find(fState.actor.recordId, "_summon$")
-                or fState.actor.recordId == "bonewalker_greater_summ"
+            local isSummon = FDU.isSummon(fState.actor)
             local banned = blacklisted(
                 fState.actor,
                 settingsBlacklists.immortalityBlacklistMWScript,
@@ -69,8 +68,15 @@ local scripts = {
     {
         name = "Catch Up",
         path = "scripts/BestFriendsForever/followerScripts/catchUp.lua",
-        cond = function(fState)
+        cond = function()
             return settingToggles.enableCatchUp
+        end,
+    },
+    {
+        name = "Ward",
+        path = "scripts/BestFriendsForever/followerScripts/ward.lua",
+        cond = function()
+            return settingToggles.enableWard
         end,
     },
 }
@@ -78,35 +84,32 @@ local scripts = {
 local function syncScripts(fState, addingScript)
     local banned = blacklisted(fState.actor, false, settingsBlacklists.globalScriptBlacklist)
     local dead = types.Actor.isDead(fState.actor)
-    local leader = fState.superLeader or fState.leader
+    local leader = fState.rootLeader
     local add = addingScript and not banned and not dead and leader
 
     for _, script in ipairs(scripts) do
         local hasScript = fState.actor:hasScript(script.path)
-        if add then
-            if not hasScript and script.cond(fState) then
+        local shouldHaveScript = add and script.cond(fState)
+        if shouldHaveScript then
+            if not hasScript then
                 fState.actor:addScript(script.path, { leader = leader })
                 -- print(("Attaching script '%s' to %s"):format(script.name, fState.actor.recordId))
             end
-        else
-            if hasScript then
-                fState.actor:removeScript(script.path)
-                -- print(("Removing script '%s' from %s"):format(script.name, fState.actor.recordId))
-            end
+        elseif hasScript then
+            fState.actor:removeScript(script.path)
+            -- print(("Removing script '%s' from %s"):format(script.name, fState.actor.recordId))
         end
     end
 end
 
-local function followerListUpdated(data)
-    for _, fState in pairs(data.followers) do
+local function followerListUpdated(followers)
+    for _, fState in pairs(followers) do
         syncScripts(fState, fState.followsPlayer)
     end
 end
 
-resyncAll = function()
-    followerListUpdated {
-        followers = I.FollowerDetectionUtil and I.FollowerDetectionUtil.getFollowerList() or {},
-    }
+ResyncAll = function()
+    followerListUpdated(FDU and FDU.getFollowerList() or {})
 end
 
 local function detachScript(data)
@@ -121,7 +124,7 @@ end
 
 return {
     eventHandlers = {
-        FDU_FollowerListUpdated = followerListUpdated,
+        FDU_SyncFollowerList = followerListUpdated,
         BestFriendsForever_detachScript = detachScript,
         BestFriendsForever_teleport = function(data)
             -- teleport method throws harmless errors
