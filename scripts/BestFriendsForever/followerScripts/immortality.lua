@@ -25,7 +25,8 @@ local eventData = {
 local dead = types.Actor.isDead(self)
 local down = false
 local leader
-local timerStarted = false
+local revivngStarted = false
+local combatActive = false
 
 local function isCommanded()
     local hasEffect = selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
@@ -42,8 +43,8 @@ local function selfDown()
     })
 end
 
-local revivalTimer = time.registerTimerCallback("Revival Timer", function()
-    timerStarted = false
+local function revive()
+    revivngStarted = false
     down = false
 
     self:enableAI(true)
@@ -56,7 +57,21 @@ local revivalTimer = time.registerTimerCallback("Revival Timer", function()
 
     leader:sendEvent("BestFriendsForever_followerUp", eventData)
     core.sendGlobalEvent("BestFriendsForever_followerUp", eventData)
-end)
+end
+
+local revivalTimer = time.registerTimerCallback("Revival Timer", revive)
+
+local function setCombatStatus(status)
+    combatActive = status
+end
+
+local function onCombatEnded()
+    combatActive = false
+    if down then
+        revivngStarted = false
+        revive()
+    end
+end
 
 local function onUpdate()
     if not down then
@@ -66,13 +81,17 @@ local function onUpdate()
             end
             selfDown()
         end
+    elseif down and not combatActive then
+        revive()
     else
         health.current = 10000
         fatigue.current = -100
-        if not timerStarted then
+        if not revivngStarted then
             self:enableAI(false)
-            timerStarted = true
-            time.newSimulationTimer(settings.upDelay, revivalTimer) -- TODO add revival timer setting
+            revivngStarted = true
+            if not settings.waitUntilCombatEnds then
+                time.newSimulationTimer(settings.upDelay, revivalTimer)
+            end
         end
     end
 end
@@ -81,15 +100,15 @@ local function onSave()
     return {
         down = down,
         leader = leader,
+        timerStarted = revivngStarted,
     }
 end
 
 local function onLoad(data)
-    if not data then
-        return
-    end
+    data = data or {}
     down = data.down or down
     leader = data.leader or leader
+    revivngStarted = data.timerStarted or revivngStarted
     eventData.leader = data.leader or leader
 end
 
@@ -129,6 +148,8 @@ return {
         onLoad = onLoad,
     },
     eventHandlers = {
+        BestFriendsForever_setCombatStatus = setCombatStatus,
+        BestFriendsForever_combatEnded = onCombatEnded,
         Died = function()
             dead = true
             core.sendGlobalEvent("BestFriendsForever_detachScript", {

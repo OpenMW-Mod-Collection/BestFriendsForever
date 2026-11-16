@@ -162,26 +162,26 @@ I.Settings.registerGroup {
             key = "threshold",
             name = "threshold_name",
             description = "threshold_desc",
-            renderer = "SuperSlider6",
+            renderer = "number",
             default = 10,
             argument = {
-                default = 10,
-                showDefaultMark = true,
-                showResetButton = true,
-                bottomRow = true,
+                min = 0,
             },
+        },
+        {
+            key = "waitUntilCombatEnds",
+            name = "waitUntilCombatEnds_name",
+            renderer = "checkbox",
+            default = true,
         },
         {
             key = "upDelay",
             name = "upDelay_name",
-            renderer = "SuperSlider6",
+            description = "upDelay_desc",
+            renderer = "number",
             default = 10,
             argument = {
-                default = 10,
-                showDefaultMark = true,
-                showResetButton = true,
-                bottomRow = true,
-                unit = "sec",
+                min = 0,
             },
         },
         {
@@ -229,11 +229,11 @@ I.Settings.registerGroup {
             name = "startDist_name",
             description = "startDist_desc",
             renderer = "SuperSlider6",
-            default = 200,
+            default = 500,
             argument = {
                 max = 5000,
                 step = 50,
-                default = 200,
+                default = 500,
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
@@ -244,11 +244,11 @@ I.Settings.registerGroup {
             name = "maxDist_name",
             description = "maxDist_desc",
             renderer = "SuperSlider6",
-            default = 2000,
+            default = 4000,
             argument = {
                 max = 5000,
                 step = 50,
-                default = 2000,
+                default = 4000,
                 showDefaultMark = true,
                 showResetButton = true,
                 bottomRow = true,
@@ -285,8 +285,8 @@ I.Settings.registerGroup {
             renderer = "number",
             default = 300,
             argument = {
-                min = 0
-            }
+                min = 0,
+            },
         },
     },
 }

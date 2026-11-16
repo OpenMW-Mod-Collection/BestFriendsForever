@@ -15,7 +15,7 @@ local combatTrackerConstructor = require("scripts.BestFriendsForever.utils.comba
 -- Initialization
 local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
-local combatTracker = combatTrackerConstructor.new()
+local combatTracker
 local FDU = I.FollowerDetectionUtil
 
 local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
@@ -31,6 +31,55 @@ deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
 local followers = FDU.getFollowerList()
 local downedFollowers = {}
 local unloadedFollowers = {}
+
+local function isPlayerGroupInCombat()
+    local inCombat = false
+    combatTracker.forEach(function(actor, targets)
+        if actor.id == self.id or followers[actor.id] then
+            inCombat = true
+            return
+        end
+
+        for _, target in ipairs(targets) do
+            if target.id == self.id or followers[target.id] then
+                inCombat = true
+                return
+            end
+        end
+    end)
+    return inCombat
+end
+
+local function onCombatLeave()
+    if isPlayerGroupInCombat() then
+        return
+    end
+
+    for _, follower in pairs(downedFollowers) do
+        if follower:isValid() then
+            follower:sendEvent("BestFriendsForever_combatEnded")
+        end
+    end
+end
+
+local function onCombatEnter()
+    if not isPlayerGroupInCombat() then
+        return
+    end
+
+    for _, follower in pairs(downedFollowers) do
+        if follower:isValid() then
+            follower:sendEvent("BestFriendsForever_setCombatStatus", {
+                inCombat = true,
+            })
+        end
+    end
+end
+
+combatTracker = combatTrackerConstructor.new {
+    onEnter = onCombatEnter,
+    onLeave = onCombatLeave,
+}
 
 -- HUD lifecycle
 if settingsWrapper.enable then
@@ -145,8 +194,13 @@ local function followerUnloaded(follower)
     unloadedFollowers[#unloadedFollowers + 1] = follower
 end
 
-local function followerDown(data)
+local function followerDown(data, updateCombatStatus)
     downedFollowers[data.follower.id] = data.follower
+    if updateCombatStatus ~= false then
+        data.follower:sendEvent("BestFriendsForever_setCombatStatus", {
+            inCombat = isPlayerGroupInCombat(),
+        })
+    end
     notifyCombatants(data, "BestFriendsForever_followerDown")
     local followerData = followerHUD.followerData[data.follower.id]
     if followerData then
@@ -183,8 +237,9 @@ local function onLoad(data)
     downedFollowers = data.downedFollowers or downedFollowers
 
     for _, downedFollower in pairs(downedFollowers) do
-        followerDown { follower = downedFollower }
+        followerDown({ follower = downedFollower }, false)
     end
+    onCombatEnter()
 end
 
 return {

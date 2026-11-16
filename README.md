@@ -34,7 +34,7 @@ Younger brother to Teleportation. Simply put, your followers will speed up the f
 
 Ever been annoyed that your story-rich follower constantly dies in combat, borking the questline and requiring you to reload the save? Yeah, I did too. Well, you will never lose your followers again. Again.
 
-This module will make sure your followers won't ever get killed pernanently. Instead, they will fall on the ground for set amount of time. Additionally, all enemies will ignore them lying on the ground, keeping the difficulty mostly in tact.
+This module will make sure your followers won't ever get killed pernanently. Instead, they will fall on the ground for set amount of time or until the end of the combat. Additionally, all enemies will ignore them lying on the ground, keeping the difficulty mostly in tact.
 
 Does not apply to:
 
@@ -119,3 +119,5 @@ I.BestFriendsForever.getDownedFollowers()
 **ownlyme** - Slider renderer and ideas  
 **Hyacinth** - Ideas  
 **atka** - Inspiration for the Call feature
+
+Powered by [Super Settings Renderers](https://www.nexusmods.com/morrowind/mods/59673) and [Drop-in Utils](https://www.nexusmods.com/morrowind/mods/60374)
