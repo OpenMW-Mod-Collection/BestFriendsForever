@@ -4,19 +4,56 @@ A collection of utilities for followers made with performance in mind. Follower 
 
 [Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Best Friends Forever - performant and modernized alternative to Attend Me with extra flair!
 
-Featuring:
+## Features
 
-- Follower status HUD with:
-  - Current and total health, magicka and fatigue
-  - Equipped weapon, spell, disease or the lack of them
-- Followers teleport to you if they get unloaded
-- Followers speed up to catch up to you
-- Immortal followers:
-  - Instead of dying, followers get knocked down for some time
-  - Summoned creatures and followers under any Command effect die as usual instead of being knocked down. Command effects on already downed actors don't do anything, though
-  - Enemies switch aggro from the follower to you
-  - Knocked down followers lose aggro, so this can be also used as more punishing alternative to [Friendlier Fire's](https://www.nexusmods.com/morrowind/mods/57975) aggro prevention
-- Keybind to teleport all your followers to you
+Note that effectively everything in this mod toggleable and configurable.
+
+### Follower HUD
+
+Convenient way to see you followers' status.
+
+- Current and total health, magicka and fatigue
+- Equipped weapon, spell, disease or the lack of them
+
+### Teleportation Module
+
+You will never lose your followers again. Everywhere you go - they will be teleported to you, including:
+
+- Cell transitions
+- Recall and intervention
+- Travel services
+- Scripted teleports
+
+> Note: this module might break certain scripted events like follower departure. If you encounter this, use script blacklist and let me know about the issue somewhere so I could add a rule to the default config.
+
+### Catch Up Module
+
+Younger brother to Teleportation. Simply put, your followers will speed up the further they get from you. Meaning they will keep up with you even without needing to wear the Boots of Blinding Speed.
+
+### Immortality Module
+
+Ever been annoyed that your story-rich follower constantly dies in combat, borking the questline and requiring you to reload the save? Yeah, I did too. Well, you will never lose your followers again. Again.
+
+This module will make sure your followers won't ever get killed pernanently. Instead, they will fall on the ground for set amount of time. Additionally, all enemies will ignore them lying on the ground, keeping the difficulty mostly in tact.
+
+Does not apply to:
+
+- Summons
+- Actors under any Command effect
+
+> Note: this module might break scripted events when your followers have to engage in combat with you. The solution is the same as with TP module.
+
+### Ward Module
+
+Module to remove one more friction point in playing with followers. Ward will protect your followers from all diseases and stat damage.
+
+Disabled by default.
+
+### Call Keybind
+
+A keybing to unstuck your followers. Teleport everyone to you at the press of a button.
+
+Unbound by default.
 
 ## Compatibility
 
