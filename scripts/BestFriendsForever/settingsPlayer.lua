@@ -190,6 +190,7 @@ I.Settings.registerGroup {
                     "Hide on Interface",
                     "Hide on Dialogue Only",
                 },
+                width = 200,
             },
             default = "Hide on Dialogue Only",
         },
@@ -290,6 +291,7 @@ I.Settings.registerGroup {
             key = "labelDisplayMode",
             name = "labelDisplayMode_name",
             renderer = "SuperSelect3",
+            default = "Current/Max",
             argument = {
                 l10n = "BestFriendsForever",
                 items = {
@@ -297,8 +299,8 @@ I.Settings.registerGroup {
                     "Current/Max",
                     "Percent",
                 },
+                width = 200,
             },
-            default = "Current/Max",
         },
         {
             key = "horizontalIcons",

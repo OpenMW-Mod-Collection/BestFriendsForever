@@ -1,6 +1,6 @@
 # Best Friends Forever (OpenMW)
 
-## 3.0
+## 2.0
 
 - Added Ward module - module that will protect your followers from any diseases and stat damage
 - Updated settings page with new renderers
@@ -15,10 +15,6 @@
 - Added more script names to the default blacklists (from Death and Taxes and TR)
 - Adjusted some default settings values (I already forgot which ones myself)
 - Mod now requires OpenMW 0.52 and Follower Detection Util 3.1
-
-## 2.0
-
-- Updated slider renderer from v4 to v6
 
 ## 1.2.7
 
