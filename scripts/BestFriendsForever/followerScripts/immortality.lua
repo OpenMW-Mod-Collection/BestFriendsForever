@@ -6,7 +6,6 @@ local I = require("openmw.interfaces")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
 local types = require("openmw.types")
-local time = require("openmw_aux.time")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
@@ -25,7 +24,8 @@ local eventData = {
 local dead = types.Actor.isDead(self)
 local down = false
 local leader
-local revivngStarted = false
+local reviveTimerStarted = false
+local revivalTimeRemaining
 local combatActive = false
 
 local function isCommanded()
@@ -44,7 +44,8 @@ local function selfDown()
 end
 
 local function revive()
-    revivngStarted = false
+    reviveTimerStarted = false
+    revivalTimeRemaining = nil
     down = false
 
     self:enableAI(true)
@@ -59,8 +60,6 @@ local function revive()
     core.sendGlobalEvent("BestFriendsForever_followerUp", eventData)
 end
 
-local revivalTimer = time.registerTimerCallback("Revival Timer", revive)
-
 local function setCombatStatus(status)
     -- don't loop please
     local target = I.AI.getActiveTarget("Combat")
@@ -73,12 +72,12 @@ end
 local function onCombatEnded()
     combatActive = false
     if down then
-        revivngStarted = false
+        reviveTimerStarted = false
         revive()
     end
 end
 
-local function onUpdate()
+local function onUpdate(dt)
     if not down then
         if health.current < settings.threshold and not isCommanded() then
             if math.random() * 100 < settings.deathChance then
@@ -91,11 +90,17 @@ local function onUpdate()
     else
         health.current = 10000
         fatigue.current = -100
-        if not revivngStarted then
+
+        if not reviveTimerStarted then
             self:enableAI(false)
-            revivngStarted = true
+            reviveTimerStarted = true
             if not settings.waitUntilCombatEnds then
-                time.newSimulationTimer(settings.upDelay, revivalTimer)
+                revivalTimeRemaining = settings.upDelay
+            end
+        elseif revivalTimeRemaining then
+            revivalTimeRemaining = revivalTimeRemaining - dt
+            if revivalTimeRemaining <= 0 then
+                revive()
             end
         end
     end
@@ -105,7 +110,8 @@ local function onSave()
     return {
         down = down,
         leader = leader,
-        timerStarted = revivngStarted,
+        reviveTimerStarted = reviveTimerStarted,
+        revivalTimeRemaining = revivalTimeRemaining,
     }
 end
 
@@ -113,8 +119,13 @@ local function onLoad(data)
     data = data or {}
     down = data.down or down
     leader = data.leader or leader
-    revivngStarted = data.timerStarted or revivngStarted
+    reviveTimerStarted = data.reviveTimerStarted or reviveTimerStarted
+    revivalTimeRemaining = data.revivalTimeRemaining or revivalTimeRemaining
     eventData.leader = data.leader or leader
+
+    if revivalTimeRemaining == nil and reviveTimerStarted and not settings.waitUntilCombatEnds then
+        revivalTimeRemaining = settings.upDelay
+    end
 end
 
 I.Combat.addOnHitHandler(function(attack)

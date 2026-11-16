@@ -9,9 +9,11 @@
 - Improved Immortality's enemy retargeting system
 - Added Water Breathing and Slowfall abilities to Immortality module, fixing followers being permanently stuck when downed in water and dying to fall damage
 - Added a setting to Immortality to keep the follower down until the end of the combat
+- Simplified Immortality's timer logic
 - Improved teleporting heuristics, increasing max teleport distance and preferring tp positions out of the way of the player
 - Added option to display labels on bars in percents (for some reason)
 - Added more script names to the default blacklists (from Death and Taxes and TR)
+- Adjusted some default settings values (I already forgot which ones myself)
 - Mod now requires OpenMW 0.52 and Follower Detection Util 3.1
 
 ## 2.0

@@ -13,7 +13,8 @@ local spellcastRecordDecoder = require("scripts.BestFriendsForever.utils.spellca
 local applyWard
 local wardSection = storage.globalSection("SettingsBestFriendsForever_ward")
 local wardSettings = settingsCache.new(wardSection, async, applyWard)
-local activeSpells = types.Actor.activeEffects(self)
+local selfActiveSpells = types.Actor.activeEffects(self)
+local selfSpells = types.Actor.spells(self)
 local nextStatDamageCheck = 0
 local attributes = {}
 local skills = {}
@@ -29,28 +30,35 @@ if types.NPC.objectIsInstance(self) then
 end
 
 local function removeDiseases()
-    local spells = types.Actor.spells(self)
+    if not wardSettings.disableDiseases then
+        return
+    end
+
     local diseaseIds = {}
-    for _, spell in pairs(spells) do
+    for _, spell in pairs(selfSpells) do
         if spell.type == core.magic.SPELL_TYPE.Blight or spell.type == core.magic.SPELL_TYPE.Disease then
             diseaseIds[#diseaseIds + 1] = spell.id
         end
     end
 
     for _, spellId in ipairs(diseaseIds) do
-        spells:remove(spellId)
+        selfSpells:remove(spellId)
     end
 end
 
 local function restoreStat(stats, drainEffect)
     for statId, stat in pairs(stats) do
         if stat.damage > 0 then
-            stat.damage = activeSpells:getEffect(drainEffect, statId).magnitude
+            stat.damage = selfActiveSpells:getEffect(drainEffect, statId).magnitude
         end
     end
 end
 
 local function restoreAllStats()
+    if not wardSettings.disableStatDamage then
+        return
+    end
+    
     restoreStat(attributes, core.magic.EFFECT_TYPE.DrainAttribute)
     restoreStat(skills, core.magic.EFFECT_TYPE.DrainSkill)
 end
@@ -70,16 +78,13 @@ end
 I.SpellCasting.addApplyMagicEffectsHandler(rejectDiseaseSpell)
 
 local function onUpdate(dt)
-    if not wardSettings.disableStatDamage then
-        return
-    end
-
     nextStatDamageCheck = nextStatDamageCheck - dt
     if nextStatDamageCheck > 0 then
         return
     end
 
     restoreAllStats()
+    removeDiseases()
     nextStatDamageCheck = wardSettings.statDamageCheckFrequency
 end
 
