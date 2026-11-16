@@ -9,11 +9,11 @@ local core = require("openmw.core")
 
 local interval = { template = I.MWUI.templates.interval }
 local magicIcon = ui.texture {
-    path = 'textures/menu_icon_magic.dds',
+    path = "textures/menu_icon_magic.dds",
     offset = v2(0, 0),
     size = v2(42, 42),
 }
-local h2hIcon = ui.texture { path = 'icons/k/stealth_handtohand.dds' }
+local h2hIcon = ui.texture { path = "icons/k/stealth_handtohand.dds" }
 ---@type table<string, openmw.ui.TextureResource>
 local iconCache = {}
 
@@ -23,10 +23,10 @@ local iconsUI = {}
 ---@return openmw.ui.TextureResource
 local function getEffectIcon(id)
     local effect = core.magic.effects.records[id]
-    local path = effect.icon:gsub('^(.*[/\\])(.*)$', '%1b_%2')
+    local path = effect.icon:gsub("^(.*[/\\])(.*)$", "%1b_%2")
 
     if not iconCache[path] then
-        iconCache[path] = ui.texture({ path = path })
+        iconCache[path] = ui.texture { path = path }
     end
     return iconCache[path]
 end
@@ -40,18 +40,18 @@ local function renderEquipmentIcon(icon, magic, tint)
         props = {
             size = v2(32, 32),
         },
-        content = ui.content({}),
+        content = ui.content {},
     }
 
     if magic then
-        box.content:add({
+        box.content:add {
             type = ui.TYPE.Image,
             props = {
                 resource = magicIcon,
                 position = v2(-5, -5),
                 size = v2(1, 1) * 40,
             },
-        })
+        }
     end
 
     box.content:add {
@@ -66,7 +66,7 @@ local function renderEquipmentIcon(icon, magic, tint)
     return {
         template = I.MWUI.templates.boxTransparent,
         props = { visible = true },
-        content = ui.content({ box }),
+        content = ui.content { box },
     }
 end
 
@@ -93,16 +93,16 @@ local function getSpellIcon(spell)
     end
 end
 
----@param item GameObject
+---@param item openmw.GObject
 ---@return openmw.ui.TextureResource
 ---@return boolean
 local function getItemIcon(item)
     local itemRecord = item.type.records[item.recordId]
     local path = itemRecord.icon
     if path then
-        local isMagical = itemRecord.enchant ~= nil and itemRecord.enchant ~= ''
+        local isMagical = itemRecord.enchant ~= nil and itemRecord.enchant ~= ""
         if not iconCache[path] then
-            iconCache[path] = ui.texture({ path = path })
+            iconCache[path] = ui.texture { path = path }
         end
         return iconCache[path], isMagical
     end
@@ -111,7 +111,7 @@ end
 
 local STANCE = types.Actor.STANCE
 local EQUIPMENT_SLOT = types.Actor.EQUIPMENT_SLOT
----@param actor GameObject
+---@param actor openmw.GObject
 ---@return openmw.ui.Layout
 iconsUI.renderCombat = function(actor)
     local icon
@@ -136,17 +136,21 @@ iconsUI.renderCombat = function(actor)
     return renderEquipmentIcon(icon, magic)
 end
 
----@param actor GameObject
+---@param actor openmw.GObject
+---@param showDiseases boolean
+---@param showDamagedStats boolean
 ---@return openmw.core.Spell|nil
 ---@return openmw.core.MagicEffect|nil
-iconsUI.getDebuff = function(actor)
+iconsUI.getDebuff = function(actor, showDiseases, showDamagedStats)
     local disease
-    for _, spell in pairs(types.Actor.spells(actor)) do
-        if spell.type == core.magic.SPELL_TYPE.Blight then
-            disease = spell
-            break
-        elseif spell.type == core.magic.SPELL_TYPE.Disease then
-            disease = spell
+    if showDiseases then
+        for _, spell in pairs(types.Actor.spells(actor)) do
+            if spell.type == core.magic.SPELL_TYPE.Blight then
+                disease = spell
+                break
+            elseif spell.type == core.magic.SPELL_TYPE.Disease then
+                disease = spell
+            end
         end
     end
 
@@ -155,12 +159,14 @@ iconsUI.getDebuff = function(actor)
     end
 
     local effect
-    for _, active in pairs(types.Actor.activeEffects(actor)) do
-        if active.id == core.magic.EFFECT_TYPE.DamageAttribute then
-            effect = active
-            break
-        elseif active.id == core.magic.EFFECT_TYPE.DamageSkill then
-            effect = active
+    if showDamagedStats then
+        for _, active in pairs(types.Actor.activeEffects(actor)) do
+            if active.id == core.magic.EFFECT_TYPE.DamageAttribute then
+                effect = active
+                break
+            elseif active.id == core.magic.EFFECT_TYPE.DamageSkill then
+                effect = active
+            end
         end
     end
 
@@ -181,12 +187,16 @@ iconsUI.renderDebuff = function(disease, effect)
 end
 
 ---@param fData FollowerData
+---@param showCombatIcon boolean
 ---@param debuffed boolean
-iconsUI.placeIconsIntoContainers = function(fData, debuffed)
-    if types.Actor.getStance(fData.actor) ~= STANCE.Nothing then
+iconsUI.placeIconsIntoContainers = function(fData, showCombatIcon, debuffed)
+    if showCombatIcon
+        and fData.icons.combatLayout
+        and types.Actor.getStance(fData.actor) ~= STANCE.Nothing
+    then
         fData.icons.container.content:add(fData.icons.combatLayout)
     end
-    if debuffed then
+    if debuffed and fData.icons.debuffLayout then
         if #fData.icons.container.content > 0 then
             fData.icons.container.content:add(interval)
         end
@@ -196,15 +206,44 @@ end
 
 ---@param fData FollowerData
 ---@param down boolean
-iconsUI.updateIcons = function(fData, down)
+---@param enabledElements table
+iconsUI.updateIcons = function(fData, down, enabledElements)
     fData.icons.container.props.visible = not down
-    if not down then
-        fData.icons.combatLayout.content = iconsUI.renderCombat(fData.actor).content
-        local disease, effect = iconsUI.getDebuff(fData.actor)
-        fData.icons.debuffLayout.content = iconsUI.renderDebuff(disease, effect).content
-        fData.icons.container.content = ui.content {}
-        iconsUI.placeIconsIntoContainers(fData, disease or effect)
+    fData.icons.container.content = ui.content {}
+    if down then
+        return
     end
+
+    local showCombatIcon = enabledElements.icons
+    if showCombatIcon then
+        local combatLayout = iconsUI.renderCombat(fData.actor)
+        if fData.icons.combatLayout then
+            fData.icons.combatLayout.content = combatLayout.content
+        else
+            fData.icons.combatLayout = combatLayout
+        end
+    else
+        fData.icons.combatLayout = nil
+    end
+
+    local disease, effect = iconsUI.getDebuff(
+        fData.actor,
+        enabledElements.diseases,
+        enabledElements.damagedStats
+    )
+    local debuffed = disease ~= nil or effect ~= nil
+    if debuffed then
+        local debuffLayout = iconsUI.renderDebuff(disease, effect)
+        if fData.icons.debuffLayout then
+            fData.icons.debuffLayout.content = debuffLayout.content
+        else
+            fData.icons.debuffLayout = debuffLayout
+        end
+    else
+        fData.icons.debuffLayout = nil
+    end
+
+    iconsUI.placeIconsIntoContainers(fData, showCombatIcon, debuffed)
 end
 
 return iconsUI

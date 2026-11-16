@@ -23,14 +23,14 @@ local navOptions = {
 local function findTarget(position, direction)
     local targetPosition = position + direction * maxTeleportDistance
     local navmeshPosition = nearby.castNavigationRay(position, targetPosition, navOptions)
-    if not navmeshPosition then return nil end
+    if not navmeshPosition then
+        return nil
+    end
 
-    local raycast = nearby.castRay(
-        position + waistOffset,
-        navmeshPosition + waistOffset,
-        { ignore = self.object }
-    )
-    if not raycast.hit then return navmeshPosition end
+    local raycast = nearby.castRay(position + waistOffset, navmeshPosition + waistOffset, { ignore = self.object })
+    if not raycast.hit then
+        return navmeshPosition
+    end
 
     return nil
 end
@@ -50,7 +50,9 @@ end
 local function scorePosition(pos, playerPos, forwardDir)
     local toPos = pos - playerPos
     local dist = toPos:length()
-    if dist < 1 then return -math.huge end
+    if dist < 1 then
+        return -math.huge
+    end
     local dot = toPos:normalize():dot(forwardDir)
     -- dot == -1 means directly behind, +1 means directly in front
     -- weight: 60% distance (normalized), 40% behind-ness
@@ -59,10 +61,12 @@ local function scorePosition(pos, playerPos, forwardDir)
     return distScore * 0.6 + behindScore * 0.4
 end
 
----@param objects GameObject[]
+---@param objects openmw.GObject[]
 ---@param tpEventName string
 TP.teleportBatch = function(objects, tpEventName)
-    if #objects == 0 then return end
+    if #objects == 0 then
+        return
+    end
 
     local playerPos = self.object.position
     local forwardDir = getForwardDirection()
@@ -83,7 +87,9 @@ TP.teleportBatch = function(objects, tpEventName)
             end
         end
         -- Keep widening the search until we have enough unique candidates
-        if #candidates >= needed then break end
+        if #candidates >= needed then
+            break
+        end
         searchFactor = searchFactor * 2
     end
 
@@ -98,7 +104,7 @@ TP.teleportBatch = function(objects, tpEventName)
             object = obj,
             cellName = cellName,
             position = candidates[i] or playerPos,
-            options = { onGround = true }
+            options = { onGround = true },
         })
     end
 end

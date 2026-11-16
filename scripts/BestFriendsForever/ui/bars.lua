@@ -9,20 +9,22 @@ local async = require("openmw.async")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local settingsLocalHUD = settingsCache.new(
-    storage.playerSection("SettingsBestFriendsForever_HUDFollower"),
-    async
-)
-local barTexture = ui.texture { path = 'textures/menu_bar_gray.dds' }
+local settingsLocalHUD = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_HUDFollower"), async)
+local barTexture = ui.texture { path = "textures/menu_bar_gray.dds" }
 
 local barsUI = {}
 
----@param curr number
----@param base number
----@return string
-barsUI.labelText = function(curr, base)
-    return ('%i/%i'):format(math.floor(curr), math.floor(base))
-end
+barsUI.labelConstructors = {
+    ["Percent"] = function(curr, base)
+        return ("%i%%"):format(math.floor(100 * curr / base))
+    end,
+    ["Current"] = function(curr, base)
+        return ("%i"):format(math.floor(curr))
+    end,
+    ["Current/Max"] = function(curr, base)
+        return ("%i/%i"):format(math.floor(curr), math.floor(base))
+    end,
+}
 
 ---@param barSize openmw.util.Vector2
 ---@param curr number
@@ -38,13 +40,14 @@ barsUI.barElement = function(fData)
     local barSize = v2(settingsLocalHUD.barLength, settingsLocalHUD.barWidth)
 
     local label
-    if settingsLocalHUD.barLabels then
+    if settingsLocalHUD.enabledElements.labels then
+        local labelConstructor = barsUI.labelConstructors[settingsLocalHUD.labelDisplayMode]
         label = {
             type = ui.TYPE.Text,
             props = {
                 relativePosition = v2(0.5, 0.5),
                 anchor = v2(0.5, 0.5),
-                text = barsUI.labelText(fData.stat.current, fData.stat.base),
+                text = labelConstructor(fData.stat.current, fData.stat.base),
                 textColor = util.color.rgb(1, 1, 1),
                 textSize = settingsLocalHUD.barWidth,
             },
@@ -52,19 +55,19 @@ barsUI.barElement = function(fData)
     end
 
     fData.bar.imgLayout = {
-        name = 'image',
+        name = "image",
         type = ui.TYPE.Image,
         props = {
             size = barsUI.barImgSize(barSize, fData.stat.current, fData.stat.base),
             resource = barTexture,
             color = fData.bar.color,
-        }
+        },
     }
     fData.bar.label = label
 
     return {
         template = I.MWUI.templates.boxTransparent,
-        content = ui.content({
+        content = ui.content {
             {
                 props = {
                     size = barSize,
@@ -74,7 +77,7 @@ barsUI.barElement = function(fData)
                     fData.bar.label,
                 },
             },
-        }),
+        },
     }
 end
 
@@ -88,13 +91,14 @@ barsUI.updateStats = function(fData, down)
             if down then
                 label.props.text = nil
             else
-                label.props.text = barsUI.labelText(statData.stat.current, statData.stat.base)
+                local labelConstructor = barsUI.labelConstructors[settingsLocalHUD.labelDisplayMode]
+                label.props.text = labelConstructor(statData.stat.current, statData.stat.base)
             end
         end
         local imgLayout = statData.bar.imgLayout
         if imgLayout then
             if down then
-                imgLayout.props.color = util.color.rgb(.5, .5, .5)
+                imgLayout.props.color = util.color.rgb(0.5, 0.5, 0.5)
                 imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.base, statData.stat.base)
             else
                 imgLayout.props.color = statData.bar.color

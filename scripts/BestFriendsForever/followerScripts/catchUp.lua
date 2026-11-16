@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-field, assign-type-mismatch, different-requires, param-type-mismatch
+---@diagnostic disable: undefined-field, assign-type-mismatch, different-requires, param-type-mismatch, need-check-nil
 ---@omw-context local
 local self = require("openmw.self")
 local core = require("openmw.core")
@@ -9,18 +9,17 @@ local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
----@type GameObject
+---@type openmw.GObject
 local leader
-local leaderSpeed
+local leaderSpeed = types.Actor.stats.attributes.speed(leader)
 local selfSpeed = types.Actor.stats.attributes.speed(self)
 
-local settings = settingsCache.new(
-    storage.globalSection("SettingsBestFriendsForever_catchUp"),
-    async
-)
+local settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_catchUp"), async)
 
 local function getTargetBoost()
-    if not leader or not leader:isValid() then return 0 end
+    if not leader or not leader:isValid() then
+        return 0
+    end
 
     local distance = (self.position - leader.position):length()
 
@@ -41,7 +40,9 @@ local function onCleanup()
 end
 
 local function onUpdate(dt)
-    if not leader then return end
+    if not leader then
+        return
+    end
 
     if I.AI.getActiveTarget("Combat") then
         onCleanup()
@@ -58,16 +59,14 @@ local function onSave()
 end
 
 local function onLoad(data)
-    if not data then return end
+    data = data or {}
     leader = data.leader or leader
-    leaderSpeed = types.Actor.stats.attributes.speed(leader)
 end
 
 return {
     engineHandlers = {
         onInit = function(data)
             leader = data.leader
-            leaderSpeed = types.Actor.stats.attributes.speed(leader)
         end,
         onUpdate = onUpdate,
         onSave = onSave,
@@ -78,8 +77,8 @@ return {
             onCleanup()
             core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
-                script = "scripts/BestFriendsForever/followerScripts/catchUp.lua"
+                script = "scripts/BestFriendsForever/followerScripts/catchUp.lua",
             })
         end,
-    }
+    },
 }

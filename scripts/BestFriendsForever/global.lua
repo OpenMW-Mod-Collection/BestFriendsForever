@@ -9,16 +9,9 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 local resyncAll
 
-local settingToggles = settingsCache.new(
-    storage.globalSection("SettingsBestFriendsForever_toggles"),
-    async,
-    resyncAll
-)
-local settingsBlacklists = settingsCache.new(
-    storage.globalSection("SettingsBestFriendsForever_blacklist"),
-    async,
-    resyncAll
-)
+local settingToggles = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_toggles"), async, resyncAll)
+local settingsBlacklists =
+    settingsCache.new(storage.globalSection("SettingsBestFriendsForever_blacklist"), async, resyncAll)
 
 local function blacklisted(actor, noMwscripts, blacklist)
     local mwscript = actor.type.records[actor.recordId].mwscript
@@ -32,10 +25,8 @@ local function blacklisted(actor, noMwscripts, blacklist)
             return true
         end
 
-        for _, blacklistedScript in ipairs(blacklist) do
-            if mwscript == blacklistedScript then
-                return true
-            end
+        if blacklist[mwscript] then
+            return true
         end
     end
     return false
@@ -52,7 +43,8 @@ local scripts = {
             local banned = blacklisted(
                 fState.actor,
                 settingsBlacklists.immortalityBlacklistMWScript,
-                settingsBlacklists.immortalityBlacklistByScript)
+                settingsBlacklists.immortalityScriptBlacklist
+            )
             -- for Loafy's Necromancy https://www.nexusmods.com/morrowind/mods/58901
             local isZombie = record.name:lower():find("'s zombie")
             return not isSummon
@@ -69,9 +61,9 @@ local scripts = {
             local banned = blacklisted(
                 fState.actor,
                 settingsBlacklists.teleportBlacklistMWScript,
-                settingsBlacklists.teleportBlacklistByScript)
-            return settingToggles.enableTeleport
-                and not banned
+                settingsBlacklists.teleportScriptBlacklist
+            )
+            return settingToggles.enableTeleport and not banned
         end,
     },
     {
@@ -80,17 +72,14 @@ local scripts = {
         cond = function(fState)
             return settingToggles.enableCatchUp
         end,
-    }
+    },
 }
 
 local function syncScripts(fState, addingScript)
-    local banned = blacklisted(fState.actor, false, settingsBlacklists.globalBlacklistByScript)
+    local banned = blacklisted(fState.actor, false, settingsBlacklists.globalScriptBlacklist)
     local dead = types.Actor.isDead(fState.actor)
     local leader = fState.superLeader or fState.leader
-    local add = addingScript
-        and not banned
-        and not dead
-        and leader
+    local add = addingScript and not banned and not dead and leader
 
     for _, script in ipairs(scripts) do
         local hasScript = fState.actor:hasScript(script.path)
@@ -116,9 +105,7 @@ end
 
 resyncAll = function()
     followerListUpdated {
-        followers = I.FollowerDetectionUtil
-            and I.FollowerDetectionUtil.getFollowerList()
-            or {}
+        followers = I.FollowerDetectionUtil and I.FollowerDetectionUtil.getFollowerList() or {},
     }
 end
 
@@ -142,5 +129,5 @@ return {
             -- or when the summon gets despawned
             pcall(tp, data)
         end,
-    }
+    },
 }

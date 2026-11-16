@@ -16,11 +16,13 @@ local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrap
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
 -- local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
 
-local deps = require("scripts.BestFriendsForever.utils.dependencies")
-deps.checkAll("Best Friends Forever", {
+local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
+deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
         interface = I.FollowerDetectionUtil,
+        minVersion = 7,
+        curVersion = I.FollowerDetectionUtil and I.FollowerDetectionUtil.version or -1,
     },
 })
 
@@ -31,6 +33,13 @@ local unloadedFollowers = {}
 
 if settingsWrapper.enable then
     followerHUD.new(followers)
+end
+
+local function destroyHUD()
+    if followerHUD.root then
+        followerHUD.root:destroy()
+        followerHUD.root = nil
+    end
 end
 
 input.registerAction {
@@ -45,14 +54,16 @@ input.registerAction {
 input.registerActionHandler(
     "BestFriendsForever_call",
     async:callback(function(pressed)
-        if pressed or I.UI.getMode() or core.isWorldPaused() then return end
+        if pressed or I.UI.getMode() or core.isWorldPaused() then
+            return
+        end
 
         local myFollowers = {}
         for _, state in pairs(followers) do
             local myFollower = state.superLeader and state.superLeader.id == self.id
                 or state.leader and state.leader.id == self.id
             if myFollower then
-                myFollowers[#myFollowers+1] = state.actor
+                myFollowers[#myFollowers + 1] = state.actor
             end
         end
 
@@ -60,7 +71,7 @@ input.registerActionHandler(
     end)
 )
 
-local teleportCooldown = .1
+local teleportCooldown = 0.1
 local teleportAccumulator = teleportCooldown
 local uiUpdateAccumulator = settingsWrapper.pollingRate
 local function onUpdate(dt)
@@ -75,7 +86,7 @@ local function onUpdate(dt)
             notif.actor:sendEvent(notif.eventName, notif)
         end
     end
-    
+
     -- teleporting everyone on a cooldown to place them the nice way
     teleportAccumulator = teleportAccumulator + dt
     if teleportCooldown >= teleportAccumulator then
@@ -102,9 +113,7 @@ local function onUpdate(dt)
             followerHUD.root:update()
         end
     else
-        if followerHUD.root then
-            followerHUD.root:destroy()
-        end
+        destroyHUD()
     end
 end
 
@@ -130,46 +139,53 @@ local function followerListUpdated(data)
     followers = data.followers
     if settingsWrapper.enable then
         followerHUD.new(followers)
+    else
+        destroyHUD()
     end
 end
 
 local function followerUnloaded(follower)
-    unloadedFollowers[#unloadedFollowers+1] = follower
+    unloadedFollowers[#unloadedFollowers + 1] = follower
 end
 
 local function followerDown(data)
     downedFollowers[data.follower.id] = data.follower
     fillNotifList(data.follower, "BestFriendsForever_followerDown")
-    followerHUD.followerData[data.follower.id].down = true
+    local followerData = followerHUD.followerData[data.follower.id]
+    if followerData then
+        followerData.down = true
+    end
 end
 
 local function followerUp(data)
     downedFollowers[data.follower.id] = nil
     fillNotifList(data.follower, "BestFriendsForever_followerUp")
-    followerHUD.followerData[data.follower.id].down = false
+    local followerData = followerHUD.followerData[data.follower.id]
+    if followerData then
+        followerData.down = false
+    end
 end
 
 local function uiModeChanged(data)
+    if not followerHUD.root then
+        return
+    end
     followerHUD.updateRootVisibility(data.newMode)
     followerHUD.root:update()
-end
-
-local function onSave()
-    return {
-        downedFollowers = downedFollowers
-    }
-end
-
-local function onLoad(data)
-    if not data then return end
-    downedFollowers = data.downedFollowers or downedFollowers
 end
 
 return {
     engineHandlers = {
         onUpdate = onUpdate,
-        onSave = onSave,
-        onLoad = onLoad,
+        onSave = function()
+            return {
+                downedFollowers = downedFollowers,
+            }
+        end,
+        onLoad = function(data)
+            data = data or {}
+            downedFollowers = data.downedFollowers or downedFollowers
+        end,
     },
     eventHandlers = {
         UiModeChanged = uiModeChanged,
@@ -188,5 +204,5 @@ return {
             sectionWrapper:set("posX", x)
             sectionWrapper:set("posY", y)
         end,
-    }
+    },
 }

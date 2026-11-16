@@ -18,14 +18,14 @@ local followerHUD = {}
 
 ---@class IconData
 ---@field container openmw.ui.Layout|nil
----@field combatLayout openmw.ui.Layout|nil     Layout node for the combat icon image; nil if combatIcon setting is off
+---@field combatLayout openmw.ui.Layout|nil     Layout node for the combat icon image; nil if icons are disabled
 ---@field debuffLayout openmw.ui.Layout|nil     Layout node for the debuff icon image; nil if no debuff or setting is off
 
 ---@class BarData
 ---@field enabled boolean                   Whether this bar is shown
 ---@field color openmw.util.Color           Bar fill color
 ---@field imgLayout openmw.ui.Layout|nil    Layout node for the bar image; nil until the follower's HUD is built
----@field label openmw.ui.Layout|nil        Layout node for the current/base label; nil if barLabels is off or HUD not yet built
+---@field label openmw.ui.Layout|nil        Layout node for the stat label; nil if labels are off or HUD not yet built
 
 ---@class StatEntry
 ---@field name "health"|"magicka"|"fatigue"
@@ -35,7 +35,7 @@ local followerHUD = {}
 ---@class FollowerData
 ---@field stats StatEntry[]     Ordered: [1]=health, [2]=magicka, [3]=fatigue
 ---@field icons IconData
----@field actor GameObject
+---@field actor openmw.GObject
 ---@field down boolean
 
 ---@type table<string, FollowerData>
@@ -72,12 +72,21 @@ followerHUD.hudDisplayMap = {
 -- | Settings Management |
 -- +---------------------+
 
+local settingsWrapper
+
 local function settingsUpdated()
+    if not settingsWrapper or not settingsWrapper.enable then
+        if followerHUD.root then
+            followerHUD.root:destroy()
+            followerHUD.root = nil
+        end
+        return
+    end
     followerHUD.new(I.FollowerDetectionUtil.getFollowerList())
 end
 
 local wrapperSection = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
-local settingsWrapper = settingsCache.new(
+settingsWrapper = settingsCache.new(
     wrapperSection,
     async,
     settingsUpdated
@@ -105,6 +114,10 @@ local function blacklisted(actor, blacklist)
     local mwscript = actor.type.records[actor.recordId].mwscript
     if mwscript then
         if mwscript:find("^ab01wlcr") then
+            return true
+        end
+
+        if blacklist[mwscript] then
             return true
         end
 
@@ -263,7 +276,7 @@ local function createRoot()
     }
 end
 
----@param follower GameObject
+---@param follower openmw.GObject
 ---@param down boolean
 local function newFollowerData(follower, down)
     followerHUD.followerData[follower.id] = {
@@ -285,7 +298,7 @@ local function newFollowerData(follower, down)
                 name = "health",
                 stat = types.Actor.stats.dynamic.health(follower),
                 bar = {
-                    enabled = settingsLocalHUD.healthBarEnabled,
+                    enabled = settingsLocalHUD.enabledElements.health,
                     color = settingsLocalHUD.healthBarColor,
                     imgLayout = nil,
                     label = nil,
@@ -295,7 +308,7 @@ local function newFollowerData(follower, down)
                 name = "magicka",
                 stat = types.Actor.stats.dynamic.magicka(follower),
                 bar = {
-                    enabled = settingsLocalHUD.magickaBarEnabled,
+                    enabled = settingsLocalHUD.enabledElements.magicka,
                     color = settingsLocalHUD.magickaBarColor,
                     imgLayout = nil,
                     label = nil,
@@ -305,7 +318,7 @@ local function newFollowerData(follower, down)
                 name = "fatigue",
                 stat = types.Actor.stats.dynamic.fatigue(follower),
                 bar = {
-                    enabled = settingsLocalHUD.fatigueBarEnabled,
+                    enabled = settingsLocalHUD.enabledElements.fatigue,
                     color = settingsLocalHUD.fatigueBarColor,
                     imgLayout = nil,
                     label = nil,
@@ -313,9 +326,10 @@ local function newFollowerData(follower, down)
             },
         },
     }
+    iconsUI.updateIcons(followerHUD.followerData[follower.id], down, settingsLocalHUD.enabledElements)
 end
 
----**Returns** bar container and **embeds** icon container into the fData if possible
+---Builds the enabled stat bars for a follower.
 ---@param fData FollowerData
 ---@return openmw.ui.Layout
 local function prepareDataContainers(fData)
@@ -337,26 +351,24 @@ local function prepareDataContainers(fData)
         content = ui.content(bars)
     }
 
-    if settingsLocalHUD.combatIcon then
-        fData.icons.combatLayout = iconsUI.renderCombat(fData.actor)
-
-        local disease, effect = iconsUI.getDebuff(fData.actor)
-        local debuffLayout = iconsUI.renderDebuff(disease, effect)
-        fData.icons.debuffLayout = debuffLayout
-
-        iconsUI.placeIconsIntoContainers(fData, disease or effect)
-    end
-
     return barsContainer
 end
 
----@param follower GameObject
+---@param follower openmw.GObject
 ---@return openmw.ui.Layout
 local function createFollowerFlex(follower, down)
     newFollowerData(follower, down)
     local fData = followerHUD.followerData[follower.id]
 
     local barsContainer = prepareDataContainers(fData)
+
+    local enabledElements = settingsLocalHUD.enabledElements
+    local dataContent = { barsContainer }
+    if enabledElements.icons or enabledElements.diseases or enabledElements.damagedStats then
+        dataContent = settingsLocalHUD.rightIcons
+            and { barsContainer, interval, fData.icons.container }
+            or { fData.icons.container, interval, barsContainer }
+    end
 
     local dataFlex = {
         name = "followex_V1_H1",
@@ -365,11 +377,7 @@ local function createFollowerFlex(follower, down)
             horizontal = true,
             arrange = ui.ALIGNMENT.Center,
         },
-        content = ui.content {
-            settingsLocalHUD.rightIcons and barsContainer or fData.icons.container,
-            interval,
-            settingsLocalHUD.rightIcons and fData.icons.container or barsContainer,
-        },
+        content = ui.content(dataContent),
     }
 
     local followerName = {
@@ -382,6 +390,11 @@ local function createFollowerFlex(follower, down)
             textColor = settingsLocalHUD.nameColor,
         },
     }
+
+    local followerContent = { dataFlex }
+    if enabledElements.name then
+        table.insert(followerContent, 1, followerName)
+    end
 
     local followerFlex = {
         name = "followerFlex_V1",
@@ -400,10 +413,7 @@ local function createFollowerFlex(follower, down)
                 core.sendGlobalEvent("BestFriendsForever_followerWidgetClicked", follower)
             end),
         },
-        content = ui.content {
-            followerName,
-            dataFlex,
-        },
+        content = ui.content(followerContent),
     }
 
     return {
@@ -442,8 +452,9 @@ followerHUD.updateRootVisibility = function(uiMode)
 end
 
 followerHUD.new = function(followers)
-    rootFlex.content = ui.content {}
-    followerHUD.root:destroy()
+    if followerHUD.root then
+        followerHUD.root:destroy()
+    end
     followerHUD.root = createRoot()
     followerHUD.followerData = {}
     local downedFollowers = I.BestFriendsForever
@@ -458,7 +469,7 @@ followerHUD.new = function(followers)
 
         local myFollower = fState.superLeader and fState.superLeader.id == self.id
             or fState.leader and fState.leader.id == self.id
-        local banned = blacklisted(fState.actor, settingsBlacklists.globalBlacklistByScript)
+        local banned = blacklisted(fState.actor, settingsBlacklists.globalScriptBlacklist)
         if not myFollower or banned then
             goto continue
         end
@@ -480,16 +491,12 @@ end
 
 followerHUD.updateData = function()
     for _, fData in pairs(followerHUD.followerData) do
-        local down = fData.down and settingsLocalHUD.immortalityIntegration
+        local down = fData.down
         barsUI.updateStats(fData, down)
-        if settingsLocalHUD.combatIcon then
-            iconsUI.updateIcons(fData, down)
-        end
+        iconsUI.updateIcons(fData, down, settingsLocalHUD.enabledElements)
     end
     followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()
 end
-
-followerHUD.root = createRoot()
 
 return followerHUD

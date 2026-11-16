@@ -7,27 +7,36 @@ page_HUD_description: Settings for Best Friends Forever's HUD.
 
 toggles_groupName: Toggles
 enableTeleport_name: Enable Teleporting
+enableTeleport_desc: >
+  Your followers follow you everywhere without any exceptions.
 enableImmortality_name: Enable Immortal Followers
+enableImmortality_desc: >
+  Instead of dying, your followers will get knocked down
+  for a set amount of time or until the end of combat.
 enableCatchUp_name: Enable Catch Up
+enableCatchUp_desc: >
+  Your followers will always keep up with you, no matter how fast you'll go.
+enableWard_name: Enable Ward
+enableWard_desc: Protects your followers from diseases and stat damage.
 
 blacklist_groupName: Blacklisting
-globalBlacklistByScript_name: Global Blacklist by MWScripts
-globalBlacklistByScript_desc: >
+globalScriptBlacklist_name: Global Blacklist by MWScripts
+globalScriptBlacklist_desc: >
   Disables every feature of the mod for actors with these MWScripts attached.
 teleportBlacklistMWScript_name: Disable Teleporting for Everyone with MWScripts
-teleportBlacklistByScript_name: Teleporting Blacklist by MWScripts
+teleportScriptBlacklist_name: Teleporting Blacklist by MWScripts
 immortalityBlacklistMWScript_name: Disable Immortality for Everyone with MWScripts
-immortalityBlacklistByScript_name: Immortality Blacklist by MWScripts
+immortalityScriptBlacklist_name: Immortality Blacklist by MWScripts
 
 immortality_groupName: Immortality
 immortality_groupDesc: |
   Instead of dying, your followers will get knocked for a set amount of time.
-  
+
   Doesn't affect summons.
 ingoreCommanded_name: Command Effects Prevent Getting Knocked Down
 ingoreCommanded_desc: |
   Followers under Command effects don't get knocked down and die as usual.
-  
+
   Casting command spells on already downed followers won't do anything.
 
   Any Command effect, any magnitude.
@@ -39,12 +48,19 @@ changeAggro_desc: >
 upDelay_name: Getting Up Delay
 deathChance_name: Death Chance
 
+ward_groupName: Ward
+ward_groupDesc: Protecting followers from diseases and stat damage.
+disableDiseases_name: Protect Followers from Diseases
+disableStatDamage_name: Protect Followers from Stat Damage
+statDamageCheckFrequency_name: Attribute Damage Check Frequency
+statDamageCheckFrequency_desc: How often, in seconds, to check follower's stats for damage.
+
 call_groupName: Call
 call_groupDesc: Keybind which teleports your followers to you.
 callKeybind_name: Keybind
 callKeybind_desc: |
   Teleports all your followers to you.
-  
+
   Triggers only on release.
 callAction_name: Call
 callDistance_name: Teleportation Distance
@@ -76,22 +92,36 @@ enableBordersAndBg_name: Enable Borders and Background
 horizontalLayout_name: Horizontal Layout
 
 HUDFollower_groupName: Follower Widgets
+enabledElements_name: Visible Elements
+enabledElements_desc: Select which elements appear in each follower widget.
+name: Follower Name
+health: Health
+magicka: Magicka
+fatigue: Fatigue
+labels: Bar Labels
+icons: Combat Icons
+diseases: Disease Icons
+damagedStats: Stat Damage
 nameTextSize_name: Name Text Size
 nameColor_name: Name Color
 uiAlign_name: Element Alignment
-healthBarEnabled_name: Enable Health Bar
 healthBarColor_name: Health Bar Color
-magickaBarEnabled_name: Enable Magicka Bar
 magickaBarColor_name: Magicka Bar Color
-fatigueBarEnabled_name: Enable Fatigue Bar
 fatigueBarColor_name: Fatigue Bar Color
 barLength_name: Bar Length
 barWidth_name: Bar Width
-barLabels_name: Enable Bar Labels
-combatIcon_name: Enable Icons
-combatIcon_desc: Equipped weapon, spell or a disease.
+labelDisplayMode_name: Bar Label Format
 horizontalIcons_name: Stack Icons Horizontally
 rightIcons_name: Stack Icons to the Right of Bars
-immortalityIntegration_name: Immortality Integration
-immortalityIntegration: >
-  If enabled, when your follower gets down, the HUD will properly display it.
+
+Up: Up
+Center: Center
+Down: Down
+Left: Left
+Right: Right
+Always: Always
+"Interface Only": Interface Only
+"Hide on Interface": Hide on Interface
+"Hide on Dialogue Only": Hide on Dialogue Only
+Current: Current Value
+"Current/Max": Current / Maximum

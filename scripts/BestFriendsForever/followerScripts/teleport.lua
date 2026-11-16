@@ -3,11 +3,13 @@
 local self = require("openmw.self")
 local core = require("openmw.core")
 
----@type GameObject
+---@type openmw.GObject
 local leader
 
 local function onInactive()
-    if not leader or not self.enabled then return end
+    if not leader or not self.enabled then
+        return
+    end
     leader:sendEvent("BestFriendsForever_followerUnloaded", self)
 end
 
@@ -18,7 +20,9 @@ local function onSave()
 end
 
 local function onLoad(data)
-    if not data then return end
+    if not data then
+        return
+    end
     leader = data.leader or leader
 end
 
@@ -35,8 +39,8 @@ return {
         Died = function()
             core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
-                script = "scripts/BestFriendsForever/followerScripts/teleport.lua"
+                script = "scripts/BestFriendsForever/followerScripts/teleport.lua",
             })
         end,
-    }
+    },
 }

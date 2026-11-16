@@ -11,10 +11,7 @@ local time = require("openmw_aux.time")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local settings = settingsCache.new(
-    storage.globalSection("SettingsBestFriendsForever_immortality"),
-    async
-)
+local settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async)
 local l10n = core.l10n("BestFriendsForever")
 local selfName = self.type.records[self.recordId].name
 local selfEffects = self.type.activeEffects(self)
@@ -22,7 +19,7 @@ local health = self.type.stats.dynamic.health(self)
 local fatigue = self.type.stats.dynamic.fatigue(self)
 local eventData = {
     follower = self,
-    leader = nil
+    leader = nil,
 }
 
 local dead = types.Actor.isDead(self)
@@ -41,7 +38,7 @@ local function selfDown()
     leader:sendEvent("BestFriendsForever_followerDown", eventData)
     core.sendGlobalEvent("BestFriendsForever_followerDown", eventData)
     leader:sendEvent("ShowMessage", {
-        message = l10n("msg_followerDown", { npc_name = selfName })
+        message = l10n("msg_followerDown", { npc_name = selfName }),
     })
 end
 
@@ -88,7 +85,9 @@ local function onSave()
 end
 
 local function onLoad(data)
-    if not data then return end
+    if not data then
+        return
+    end
     down = data.down or down
     leader = data.leader or leader
     eventData.leader = data.leader or leader
@@ -108,10 +107,7 @@ I.Combat.addOnHitHandler(function(attack)
     local stillFollowing = followerList[self.id] and followerList[self.id].followsPlayer
     local lethalDamage = attack.damage.health > health.current - settings.threshold
     local unluck = math.random() * 100 < settings.deathChance
-    local dontDown = lethalDamage
-        and not isCommanded()
-        and stillFollowing
-        and not unluck
+    local dontDown = lethalDamage and not isCommanded() and stillFollowing and not unluck
 
     if dontDown then
         if not down then
@@ -136,8 +132,8 @@ return {
             dead = true
             core.sendGlobalEvent("BestFriendsForever_detachScript", {
                 actor = self,
-                script = "scripts/BestFriendsForever/followerScripts/teleport.lua"
+                script = "scripts/BestFriendsForever/followerScripts/teleport.lua",
             })
         end,
-    }
+    },
 }
