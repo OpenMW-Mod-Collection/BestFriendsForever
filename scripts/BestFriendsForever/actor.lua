@@ -28,13 +28,16 @@ local function onUpdate()
         return
     end
     local target = I.AI.getActiveTarget("Combat")
-    if target and downedFollowersToLeaders[target.id] and downedFollowersToLeaders[target.id].id ~= target.id then
-        I.AI.removePackages("Combat")
-        I.AI.startPackage {
-            type = "Combat",
-            target = downedFollowersToLeaders[target.id],
-            cancelOthers = true,
-        }
+    if target then
+        local leader = downedFollowersToLeaders[target.id]
+        if leader and leader.id ~= target.id then
+            I.AI.removePackages("Combat")
+            I.AI.startPackage {
+                type = "Combat",
+                target = leader,
+                cancelOthers = true,
+            }
+        end
     end
 end
 
@@ -58,9 +61,7 @@ local function onSave()
 end
 
 local function onLoad(data)
-    if not data then
-        return
-    end
+    data = data or {}
     downedFollowersToLeaders = data.downedFollowersToLeaders or downedFollowersToLeaders
     noOneDowned = not next(downedFollowersToLeaders)
 end

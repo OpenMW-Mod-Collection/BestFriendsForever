@@ -1,6 +1,5 @@
 ---@diagnostic disable: undefined-field, param-type-mismatch
 ---@omw-context player
-local nearby = require("openmw.nearby")
 local self = require("openmw.self")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
@@ -11,26 +10,29 @@ local core = require("openmw.core")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local tp = require("scripts.BestFriendsForever.utils.teleport")
 local followerHUD = require("scripts.BestFriendsForever.ui.main")
+local combatTrackerConstructor = require("scripts.BestFriendsForever.utils.combatTracker")
 
+-- Initialization
 local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
--- local settingsCall = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_call"), async)
+local combatTracker = combatTrackerConstructor.new()
+local FDU = I.FollowerDetectionUtil
 
 local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
 deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
-        interface = I.FollowerDetectionUtil,
+        interface = FDU,
         minVersion = 7,
-        curVersion = I.FollowerDetectionUtil and I.FollowerDetectionUtil.version or -1,
+        curVersion = FDU and FDU.version or -1,
     },
 })
 
-local followers = I.FollowerDetectionUtil.getFollowerList()
-local notifListPerFollower = {}
+local followers = FDU.getFollowerList()
 local downedFollowers = {}
 local unloadedFollowers = {}
 
+-- HUD lifecycle
 if settingsWrapper.enable then
     followerHUD.new(followers)
 end
@@ -42,6 +44,7 @@ local function destroyHUD()
     end
 end
 
+-- Follower actions
 input.registerAction {
     key = "BestFriendsForever_call",
     type = input.ACTION_TYPE.Boolean,
@@ -51,56 +54,42 @@ input.registerAction {
     defaultValue = false,
 }
 
-input.registerActionHandler(
-    "BestFriendsForever_call",
-    async:callback(function(pressed)
-        if pressed or I.UI.getMode() or core.isWorldPaused() then
-            return
-        end
+local function callFollowers(pressed)
+    if pressed or I.UI.getMode() or core.isWorldPaused() then
+        return
+    end
 
-        local myFollowers = {}
-        for _, state in pairs(followers) do
-            local myFollower = state.superLeader and state.superLeader.id == self.id
-                or state.leader and state.leader.id == self.id
-            if myFollower then
-                myFollowers[#myFollowers + 1] = state.actor
-            end
-        end
+    local myFollowers = {}
+    for _, state in ipairs(FDU.getFollowersOf(self, true)) do
+        myFollowers[#myFollowers + 1] = state.actor
+    end
 
-        tp.teleportBatch(myFollowers, "BestFriendsForever_teleport")
-    end)
-)
+    tp.teleportBatch(myFollowers, "BestFriendsForever_teleport")
+end
 
+input.registerActionHandler("BestFriendsForever_call", async:callback(callFollowers))
+
+-- Updates
 local teleportCooldown = 0.1
 local teleportAccumulator = teleportCooldown
 local uiUpdateAccumulator = settingsWrapper.pollingRate
-local function onUpdate(dt)
-    -- Logic part
-    -- sparce notification sending
-    -- for enemy aggro redirection
-    for followerId, notifList in pairs(notifListPerFollower) do
-        if #notifList == 0 then
-            notifListPerFollower[followerId] = nil
-        else
-            local notif = table.remove(notifList)
-            notif.actor:sendEvent(notif.eventName, notif)
-        end
-    end
 
-    -- teleporting everyone on a cooldown to place them the nice way
+local function teleportUnloadedFollowers(dt)
     teleportAccumulator = teleportAccumulator + dt
-    if teleportCooldown >= teleportAccumulator then
-        return
+    if teleportAccumulator <= teleportCooldown then
+        return false
     end
     teleportAccumulator = 0
-    if #unloadedFollowers ~= 0 then
+    if #unloadedFollowers > 0 then
         tp.teleportBatch(unloadedFollowers, "BestFriendsForever_teleport")
         unloadedFollowers = {}
     end
+    return true
+end
 
-    -- UI part
+local function updateHUD(dt)
     uiUpdateAccumulator = uiUpdateAccumulator + dt
-    if settingsWrapper.pollingRate >= uiUpdateAccumulator then
+    if uiUpdateAccumulator <= settingsWrapper.pollingRate then
         return
     end
     uiUpdateAccumulator = 0
@@ -117,28 +106,35 @@ local function onUpdate(dt)
     end
 end
 
-local function fillNotifList(follower, eventName)
-    notifListPerFollower[follower.id] = {}
-    local notifList = notifListPerFollower[follower.id]
-    local state = followers[follower.id]
-    local leader = state.superLeader or state.leader
+local function onUpdate(dt)
+    combatTracker.onUpdate()
+    if not teleportUnloadedFollowers(dt) then
+        return
+    end
+    updateHUD(dt)
+end
 
-    for _, actor in pairs(nearby.actors) do
-        if not followers[actor.id] and actor.id ~= self.id then
-            notifList[#notifList + 1] = {
-                eventName = eventName,
+-- Follower notifications
+local function notifyCombatants(data, eventName)
+    local follower = data.follower
+    local state = followers[follower.id]
+    local leader = state and state.rootLeader or data.leader
+
+    combatTracker.prune()
+    combatTracker.forEach(function(actor)
+        if actor.id ~= self.id and not followers[actor.id] then
+            actor:sendEvent(eventName, {
+                actor = actor,
                 follower = follower,
                 leader = leader,
-                actor = actor,
-            }
+            })
         end
-    end
+    end)
 end
 
 local function followerListUpdated(data)
-    followers = data.followers
     if settingsWrapper.enable then
-        followerHUD.new(followers)
+        followerHUD.new(data)
     else
         destroyHUD()
     end
@@ -150,7 +146,7 @@ end
 
 local function followerDown(data)
     downedFollowers[data.follower.id] = data.follower
-    fillNotifList(data.follower, "BestFriendsForever_followerDown")
+    notifyCombatants(data, "BestFriendsForever_followerDown")
     local followerData = followerHUD.followerData[data.follower.id]
     if followerData then
         followerData.down = true
@@ -159,7 +155,7 @@ end
 
 local function followerUp(data)
     downedFollowers[data.follower.id] = nil
-    fillNotifList(data.follower, "BestFriendsForever_followerUp")
+    notifyCombatants(data, "BestFriendsForever_followerUp")
     local followerData = followerHUD.followerData[data.follower.id]
     if followerData then
         followerData.down = false
@@ -174,22 +170,28 @@ local function uiModeChanged(data)
     followerHUD.root:update()
 end
 
+-- Persistence and public interface
+local function onSave()
+    return {
+        downedFollowers = downedFollowers,
+    }
+end
+
+local function onLoad(data)
+    data = data or {}
+    downedFollowers = data.downedFollowers or downedFollowers
+end
+
 return {
     engineHandlers = {
         onUpdate = onUpdate,
-        onSave = function()
-            return {
-                downedFollowers = downedFollowers,
-            }
-        end,
-        onLoad = function(data)
-            data = data or {}
-            downedFollowers = data.downedFollowers or downedFollowers
-        end,
+        onSave = onSave,
+        onLoad = onLoad,
     },
     eventHandlers = {
         UiModeChanged = uiModeChanged,
-        FDU_UpdateFollowerList = followerListUpdated,
+        FDU_SyncFollowerList = followerListUpdated,
+        OMWMusicCombatTargetsChanged = combatTracker.onCombatTargetsChanged,
         BestFriendsForever_followerUnloaded = followerUnloaded,
         BestFriendsForever_followerDown = followerDown,
         BestFriendsForever_followerUp = followerUp,

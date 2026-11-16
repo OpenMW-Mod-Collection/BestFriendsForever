@@ -5,7 +5,8 @@
 - Added Ward module - module that will protect your followers from any diseases and stat damage
 - Updated settings page with new renderers
 - Updated the dependency checking module
-- Updated Follower Detection Util integration
+- Updated the Follower Detection Util integration
+- Improved Immortality's enemy retargeting system
 - Added option to display labels on bars in percents (for some reason)
 - Added more script names to the default blacklists (from Death and Taxes and TR)
 - Mod now requires Follower Detection Util 3.1 or newer
