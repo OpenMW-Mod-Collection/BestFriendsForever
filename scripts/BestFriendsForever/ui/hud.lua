@@ -9,12 +9,16 @@ local async = require("openmw.async")
 local self = require("openmw.self")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
-local followerUI = require("scripts.BestFriendsForever.ui.follower.main")
+local followerUI = require("scripts.BestFriendsForever.ui.follower.widget")
+local tooltipUI = require("scripts.BestFriendsForever.ui.tooltip")
 
 local followerHUD = {}
 
 ---@type table<string, FollowerData>
 followerHUD.followerData = {}
+---@type openmw.ui.Element|nil
+followerHUD.tooltipElement = nil
+local activeTooltipData
 
 followerHUD.hudDisplayMap = {
     ---@param uiMode string
@@ -50,8 +54,7 @@ local settingsWrapper
 local function settingsUpdated()
     if not settingsWrapper or not settingsWrapper.enable then
         if followerHUD.root then
-            followerHUD.root:destroy()
-            followerHUD.root = nil
+            followerHUD.destroy()
         end
         return
     end
@@ -128,6 +131,7 @@ local delimiterLine = {
         anchor = v2(0.5, 0.5),
     },
 }
+local tooltipCursorOffset = v2(16, 16)
 local delimiter = {
     external = {
         stretch = 1,
@@ -189,6 +193,7 @@ local wrapperEventCallbacks = {
 -- Layout construction
 
 local function createRoot()
+    local layer = settingsWrapper.lockPosition and "HUD" or "Modal"
     rootFlex = {
         name = "rootFlex",
         type = ui.TYPE.Flex,
@@ -223,7 +228,7 @@ local function createRoot()
 
     return ui.create {
         name = "root",
-        layer = settingsWrapper.lockPosition and "HUD" or "Modal",
+        layer = layer,
         template = I.MWUI.templates.boxTransparent,
         props = {
             alpha = settingsWrapper.enableBordersAndBg and 1 or 0,
@@ -239,6 +244,39 @@ local function createRoot()
             windowStartPosition = v2(settingsWrapper.posX, settingsWrapper.posY)
         },
     }
+end
+
+local function hideTooltip(fData)
+    if fData and activeTooltipData ~= fData then
+        return
+    end
+    activeTooltipData = nil
+
+    local tooltipElement = followerHUD.tooltipElement
+    if tooltipElement and tooltipElement.layout then
+        tooltipElement.layout.props.visible = false
+        tooltipElement:update()
+    end
+end
+
+local function showTooltip(fData, mousePosition)
+    local tooltipElement = followerHUD.tooltipElement
+    if not tooltipElement or not tooltipElement.layout
+        or not followerHUD.root or not followerHUD.root.layout
+        or followerHUD.followerData[fData.actor.id] ~= fData
+        or followerHUD.root.layout.props.visible == false
+    then
+        return
+    end
+
+    if activeTooltipData ~= fData then
+        activeTooltipData = fData
+        tooltipUI.update(tooltipElement, fData, settingsLocalHUD.enabledElements)
+    end
+
+    tooltipElement.layout.props.position = mousePosition + tooltipCursorOffset
+    tooltipElement.layout.props.visible = true
+    tooltipElement:update()
 end
 
 ---@return openmw.ui.Layout
@@ -260,13 +298,30 @@ followerHUD.updateRootVisibility = function(uiMode)
     local isModeAllowed = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
     followerHUD.root.layout.props.visible = #rootFlex.content ~= 0
         and isModeAllowed(uiMode)
+    if not followerHUD.root.layout.props.visible then
+        hideTooltip()
+    end
+end
+
+followerHUD.destroy = function()
+    if followerHUD.root then
+        followerHUD.root:destroy()
+        followerHUD.root = nil
+    end
+    if followerHUD.tooltipElement then
+        followerHUD.tooltipElement:destroy()
+        followerHUD.tooltipElement = nil
+    end
+    followerHUD.followerData = {}
+    activeTooltipData = nil
 end
 
 followerHUD.new = function(followers)
-    if followerHUD.root then
-        followerHUD.root:destroy()
-    end
+    followerHUD.destroy()
     followerHUD.root = createRoot()
+    followerHUD.tooltipElement = tooltipUI.create(
+        settingsWrapper.lockPosition and "HUD" or "Modal"
+    )
     followerHUD.followerData = {}
     local downedFollowers = I.BestFriendsForever
         and I.BestFriendsForever.getDownedFollowers()
@@ -292,14 +347,14 @@ followerHUD.new = function(followers)
         local down = downedFollowers[fState.actor.id]
         local actorId = fState.actor.id
         local fData
-        local function refreshRoot()
-            local root = followerHUD.root
-            if root and root.layout and followerHUD.followerData[actorId] == fData then
-                root:update()
-            end
-        end
         local layout
-        fData, layout = followerUI.create(fState.actor, down, settingsLocalHUD, refreshRoot)
+        fData, layout = followerUI.create(
+            fState.actor,
+            down,
+            settingsLocalHUD,
+            showTooltip,
+            hideTooltip
+        )
         followerHUD.followerData[actorId] = fData
         rootFlex.content:add(layout)
         widgetCount = widgetCount + 1
@@ -314,6 +369,13 @@ end
 followerHUD.updateData = function()
     for _, fData in pairs(followerHUD.followerData) do
         followerUI.update(fData, settingsLocalHUD)
+    end
+    if activeTooltipData and followerHUD.tooltipElement then
+        tooltipUI.update(
+            followerHUD.tooltipElement,
+            activeTooltipData,
+            settingsLocalHUD.enabledElements
+        )
     end
     followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()

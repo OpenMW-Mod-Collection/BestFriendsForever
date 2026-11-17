@@ -9,7 +9,7 @@ local core = require("openmw.core")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local tp = require("scripts.BestFriendsForever.utils.teleport")
-local followerHUD = require("scripts.BestFriendsForever.ui.main")
+local followerHUD = require("scripts.BestFriendsForever.ui.hud")
 local combatTrackerConstructor = require("scripts.BestFriendsForever.utils.combatTracker")
 
 -- Initialization
@@ -85,10 +85,7 @@ if settingsWrapper.enable then
 end
 
 local function destroyHUD()
-    if followerHUD.root then
-        followerHUD.root:destroy()
-        followerHUD.root = nil
-    end
+    followerHUD.destroy()
 end
 
 -- Follower actions

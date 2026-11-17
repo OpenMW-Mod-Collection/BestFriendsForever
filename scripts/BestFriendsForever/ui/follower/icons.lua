@@ -6,7 +6,6 @@ local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
 local types = require("openmw.types")
 local core = require("openmw.core")
-local tooltipUI = require("scripts.BestFriendsForever.ui.follower.tooltip")
 
 local interval = { template = I.MWUI.templates.interval }
 local iconSize = 32
@@ -121,7 +120,7 @@ iconsUI.renderCombat = function(actor)
     return renderEquipmentIcon(icon, magic)
 end
 
-local function createFollowerIcon(fData)
+local function createFollowerIcon()
     local followerIcon = {
         name = "followerIconMark",
         type = ui.TYPE.Text,
@@ -143,21 +142,16 @@ local function createFollowerIcon(fData)
         props = {
             size = v2(iconSize, iconSize),
         },
-        content = ui.content {
-            followerIcon,
-            tooltipUI.create(fData),
-        },
+        content = ui.content { followerIcon },
     }
 end
 
 ---@param fData FollowerData
----@param enabledElements table
-iconsUI.updateIcons = function(fData, enabledElements)
+iconsUI.updateIcons = function(fData)
     if not fData.icons.followerIconLayout then
-        fData.icons.followerIconLayout = createFollowerIcon(fData)
+        fData.icons.followerIconLayout = createFollowerIcon()
     end
 
-    tooltipUI.update(fData, enabledElements)
     local combatLayout = iconsUI.renderCombat(fData.actor)
     if fData.icons.combatLayout then
         fData.icons.combatLayout.content = combatLayout.content

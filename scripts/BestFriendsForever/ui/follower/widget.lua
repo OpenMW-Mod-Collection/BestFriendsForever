@@ -21,8 +21,6 @@ local sideToAlignment = {
 ---@class IconData
 ---@field container openmw.ui.Layout
 ---@field followerIconLayout openmw.ui.Layout|nil
----@field tooltipLayout openmw.ui.Layout|nil
----@field tooltipFields table<string, openmw.ui.Layout>
 ---@field combatLayout openmw.ui.Layout|nil
 
 ---@class BarData
@@ -111,14 +109,12 @@ local function newFollowerData(follower, down, settings)
                 content = ui.content {},
             },
             followerIconLayout = nil,
-            tooltipLayout = nil,
-            tooltipFields = {},
             combatLayout = nil,
         },
         stats = stats,
     }
 
-    iconsUI.updateIcons(fData, settings.enabledElements)
+    iconsUI.updateIcons(fData)
     return fData
 end
 
@@ -148,9 +144,10 @@ end
 ---@param follower openmw.GObject
 ---@param fData FollowerData
 ---@param settings table
----@param refreshRoot fun()
+---@param showTooltip fun(fData: FollowerData, position: openmw.util.Vector2)
+---@param hideTooltip fun(fData: FollowerData)
 ---@return openmw.ui.Layout
-local function createLayout(follower, fData, settings, refreshRoot)
+local function createLayout(follower, fData, settings, showTooltip, hideTooltip)
     local enabledElements = settings.enabledElements
     local barsContainer = createBarsContainer(fData, settings)
     local dataContent = settings.rightIcons
@@ -181,11 +178,6 @@ local function createLayout(follower, fData, settings, refreshRoot)
         })
     end
 
-    local function setTooltipVisible(visible)
-        fData.icons.tooltipLayout.props.visible = visible
-        refreshRoot()
-    end
-
     local followerFlex = {
         name = "followerFlex_V1",
         type = ui.TYPE.Flex,
@@ -207,17 +199,15 @@ local function createLayout(follower, fData, settings, refreshRoot)
         },
         events = {
             mouseClick = async:callback(function()
-                print("AAAAA")  -- TODO: it doesn't trigger
                 self:sendEvent("BestFriendsForever_followerWidgetClicked", follower)
                 follower:sendEvent("BestFriendsForever_followerWidgetClicked")
                 core.sendGlobalEvent("BestFriendsForever_followerWidgetClicked", follower)
             end),
-            focusGain = async:callback(function()
-                print("BBBBB")
-                setTooltipVisible(true)
+            mouseMove = async:callback(function(data)
+                showTooltip(fData, data.position)
             end),
             focusLoss = async:callback(function()
-                setTooltipVisible(false)
+                hideTooltip(fData)
             end),
         },
         content = ui.content {
@@ -231,19 +221,20 @@ end
 ---@param follower openmw.GObject
 ---@param down boolean
 ---@param settings table
----@param refreshRoot fun()
+---@param showTooltip fun(fData: FollowerData, position: openmw.util.Vector2)
+---@param hideTooltip fun(fData: FollowerData)
 ---@return FollowerData
 ---@return openmw.ui.Layout
-followerUI.create = function(follower, down, settings, refreshRoot)
+followerUI.create = function(follower, down, settings, showTooltip, hideTooltip)
     local fData = newFollowerData(follower, down, settings)
-    return fData, createLayout(follower, fData, settings, refreshRoot)
+    return fData, createLayout(follower, fData, settings, showTooltip, hideTooltip)
 end
 
 ---@param fData FollowerData
 ---@param settings table
 followerUI.update = function(fData, settings)
     barsUI.updateStats(fData, fData.down, settings)
-    iconsUI.updateIcons(fData, settings.enabledElements)
+    iconsUI.updateIcons(fData)
 end
 
 return followerUI

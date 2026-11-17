@@ -134,8 +134,7 @@ local TOOLTIP_FIELDS = {
     },
 }
 
-function tooltipUI.create(fData)
-    local fields = {}
+function tooltipUI.create(layer)
     local fieldLayouts = {}
     for _, definition in ipairs(TOOLTIP_FIELDS) do
         local field = {
@@ -146,21 +145,20 @@ function tooltipUI.create(fData)
                 textShadow = true,
             },
         }
-        fields[definition.name] = field
         fieldLayouts[#fieldLayouts + 1] = field
     end
-    fData.icons.tooltipFields = fields
 
     local layout = {
         name = "followerTooltip",
-        template = I.MWUI.templates.boxTransparent,
+        layer = layer,
+        type = ui.TYPE.Container,
         props = {
-            position = v2(36, 0),
+            position = v2(0, 0),
             visible = false,
-            ignorePointerEvents = true,
         },
         content = ui.content {
             {
+                name = "followerTooltipFields",
                 type = ui.TYPE.Flex,
                 props = {
                     horizontal = false,
@@ -170,18 +168,19 @@ function tooltipUI.create(fData)
             },
         },
     }
-    fData.icons.tooltipLayout = layout
-    return layout
+    return ui.create(layout)
 end
 
-function tooltipUI.update(fData, enabledElements)
+function tooltipUI.update(tooltipElement, fData, enabledElements)
+    local fields = tooltipElement.layout.content.followerTooltipFields.content
     for _, definition in ipairs(TOOLTIP_FIELDS) do
-        local field = fData.icons.tooltipFields[definition.name]
+        local field = fields["followerTooltip_" .. definition.name]
         local text = definition.getText(fData)
         field.props.text = text
         field.props.visible = text ~= nil
             and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
     end
+    tooltipElement:update()
 end
 
 return tooltipUI
