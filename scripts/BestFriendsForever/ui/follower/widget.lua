@@ -20,8 +20,6 @@ local sideToAlignment = {
 
 ---@class IconData
 ---@field container openmw.ui.Layout
----@field followerIconLayout openmw.ui.Layout|nil
----@field combatLayout openmw.ui.Layout|nil
 
 ---@class BarData
 ---@field enabled boolean
@@ -108,8 +106,6 @@ local function newFollowerData(follower, down, settings)
                 },
                 content = ui.content {},
             },
-            followerIconLayout = nil,
-            combatLayout = nil,
         },
         stats = stats,
     }
@@ -150,8 +146,7 @@ end
 local function createLayout(follower, fData, settings, showTooltip, hideTooltip)
     local enabledElements = settings.enabledElements
     local barsContainer = createBarsContainer(fData, settings)
-    local dataContent = settings.rightIcons
-        and { barsContainer, interval, fData.icons.container }
+    local dataContent = settings.rightIcons and { barsContainer, interval, fData.icons.container }
         or { fData.icons.container, interval, barsContainer }
 
     local dataFlex = {
@@ -198,11 +193,7 @@ local function createLayout(follower, fData, settings, showTooltip, hideTooltip)
             horizontal = true,
         },
         events = {
-            mouseClick = async:callback(function()
-                self:sendEvent("BestFriendsForever_followerWidgetClicked", follower)
-                follower:sendEvent("BestFriendsForever_followerWidgetClicked")
-                core.sendGlobalEvent("BestFriendsForever_followerWidgetClicked", follower)
-            end),
+            mouseClick = async:callback(function() end),
             mouseMove = async:callback(function(data)
                 showTooltip(fData, data.position)
             end),

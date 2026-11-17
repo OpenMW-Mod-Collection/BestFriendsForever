@@ -13,7 +13,8 @@ Note that effectively everything in this mod toggleable and configurable.
 Convenient way to see you followers' status.
 
 - Current and total health, magicka and fatigue
-- Equipped weapon, spell, disease or the lack of them
+- If in combat - equipped weapon, enchanted item or spell
+- If not in combat - custom fancy icon representing who they are
 
 ### Teleportation Module
 
@@ -88,11 +89,6 @@ Load Best Friends Forever as high as possible in the load order - before any mod
 ### Events
 
 ```lua
--- Sent when the player clicks certain follower's widget
--- Payload: Actor (follower object)
--- Scope: Player, Global
-BestFriendsForever_followerWidgetClicked
-
 -- Sent when the follower enters Downed state
 -- Payload: { follower: Actor, leader: Actor }
 -- Scope: Player, Global
@@ -110,6 +106,13 @@ BestFriendsForever_followerUp
 -- Returns: table<string, Actor>
 -- Scope: Player
 I.BestFriendsForever.getDownedFollowers()
+
+-- Assigns a unique icon to a certain follower
+-- fileName is a texture path relative to Data Files
+-- isTransparent=true layers the image over the default background
+-- false displays the image by itself
+-- Scope: Player
+I.BestFriendsForever.setFollowerIcon(recordId, fileName, isTransparent)
 ```
 
 ## Credits

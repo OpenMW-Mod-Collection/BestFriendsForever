@@ -10,6 +10,7 @@ local core = require("openmw.core")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local tp = require("scripts.BestFriendsForever.utils.teleport")
 local followerHUD = require("scripts.BestFriendsForever.ui.hud")
+local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
 local combatTrackerConstructor = require("scripts.BestFriendsForever.utils.combatTracker")
 
 -- Initialization
@@ -258,6 +259,9 @@ return {
         setPosSettings = function(x, y)
             sectionWrapper:set("posX", x)
             sectionWrapper:set("posY", y)
+        end,
+        setFollowerIcon = function(recordId, fileName, isTransparent)
+            iconsUI.setFollowerIcon(recordId, fileName, isTransparent)
         end,
     },
 }

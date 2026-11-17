@@ -8,14 +8,6 @@ local types = require("openmw.types")
 local core = require("openmw.core")
 
 local l10n = core.l10n("BestFriendsForever")
-local attributeDamageEffects = {
-    [core.magic.EFFECT_TYPE.DamageAttribute] = true,
-    [core.magic.EFFECT_TYPE.DrainAttribute] = true,
-}
-local skillDamageEffects = {
-    [core.magic.EFFECT_TYPE.DamageSkill] = true,
-    [core.magic.EFFECT_TYPE.DrainSkill] = true,
-}
 
 local tooltipUI = {}
 
@@ -43,9 +35,7 @@ end
 local function getDiseaseNames(fData)
     local diseaseNames = {}
     for _, spell in pairs(fData.spells) do
-        if spell.type == core.magic.SPELL_TYPE.Blight
-            or spell.type == core.magic.SPELL_TYPE.Disease
-        then
+        if spell.type == core.magic.SPELL_TYPE.Blight or spell.type == core.magic.SPELL_TYPE.Disease then
             diseaseNames[#diseaseNames + 1] = core.magic.spells.records[spell.id].name
         end
     end
@@ -62,31 +52,22 @@ local function addStatName(names, recordList, statId)
     names[#names + 1] = record and record.name or statId
 end
 
+local function fillAffectedStats(stats, affectedStats, activeEffects, effectId)
+    for statId, stat in pairs(stats) do
+        local drain = activeEffects:getEffect(effectId, statId)
+        if stat.damage - drain.magnitude > 0 then
+            affectedStats[statId] = true
+        end
+    end
+end
+
 local function getDamagedStatNames(fData)
     local affectedAttributes = {}
     local affectedSkills = {}
     local names = {}
 
-    for statId, stat in pairs(fData.attributes) do
-        if stat.damage > 0 then
-            affectedAttributes[statId] = true
-        end
-    end
-    for statId, stat in pairs(fData.skills) do
-        if stat.damage > 0 then
-            affectedSkills[statId] = true
-        end
-    end
-
-    for _, effect in pairs(fData.activeEffects) do
-        if effect.magnitude > 0 then
-            if attributeDamageEffects[effect.id] and effect.affectedAttribute then
-                affectedAttributes[effect.affectedAttribute] = true
-            elseif skillDamageEffects[effect.id] and effect.affectedSkill then
-                affectedSkills[effect.affectedSkill] = true
-            end
-        end
-    end
+    fillAffectedStats(fData.attributes, affectedAttributes, fData.activeEffects, core.magic.EFFECT_TYPE.DrainAttribute)
+    fillAffectedStats(fData.skills, affectedSkills, fData.activeEffects, core.magic.EFFECT_TYPE.DrainSkill)
 
     for statId in pairs(affectedAttributes) do
         addStatName(names, core.stats.Attribute.records, statId)
@@ -151,7 +132,7 @@ function tooltipUI.create(layer)
     local layout = {
         name = "followerTooltip",
         layer = layer,
-        type = ui.TYPE.Container,
+        template = I.MWUI.templates.boxSolid,
         props = {
             position = v2(0, 0),
             visible = false,
