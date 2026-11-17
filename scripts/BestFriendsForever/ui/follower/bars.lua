@@ -4,13 +4,13 @@ local util = require("openmw.util")
 local v2 = util.vector2
 local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
-local storage = require("openmw.storage")
-local async = require("openmw.async")
-
-local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
-
-local settingsLocalHUD = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_HUDFollower"), async)
 local barTexture = ui.texture { path = "textures/menu_bar_gray.dds" }
+
+---@class HUDBarSettings
+---@field barLength number
+---@field barWidth number
+---@field labelDisplayMode "Percent"|"Current"|"Current/Max"
+---@field enabledElements table<string, boolean>
 
 local barsUI = {}
 
@@ -34,14 +34,15 @@ barsUI.barImgSize = function(barSize, curr, base)
     return barSize:emul(v2(curr / base, 1))
 end
 
----@param fData FollowerData
+---@param fData StatEntry
+---@param settings HUDBarSettings
 ---@return openmw.ui.Layout
-barsUI.barElement = function(fData)
-    local barSize = v2(settingsLocalHUD.barLength, settingsLocalHUD.barWidth)
+barsUI.barElement = function(fData, settings)
+    local barSize = v2(settings.barLength, settings.barWidth)
 
     local label
-    if settingsLocalHUD.enabledElements.labels then
-        local labelConstructor = barsUI.labelConstructors[settingsLocalHUD.labelDisplayMode]
+    if settings.enabledElements.labels then
+        local labelConstructor = barsUI.labelConstructors[settings.labelDisplayMode]
         label = {
             type = ui.TYPE.Text,
             props = {
@@ -49,7 +50,7 @@ barsUI.barElement = function(fData)
                 anchor = v2(0.5, 0.5),
                 text = labelConstructor(fData.stat.current, fData.stat.base),
                 textColor = util.color.rgb(1, 1, 1),
-                textSize = settingsLocalHUD.barWidth,
+                textSize = settings.barWidth,
             },
         }
     end
@@ -83,15 +84,16 @@ end
 
 ---@param fData FollowerData
 ---@param down boolean
-barsUI.updateStats = function(fData, down)
-    local barSize = v2(settingsLocalHUD.barLength, settingsLocalHUD.barWidth)
+---@param settings HUDBarSettings
+barsUI.updateStats = function(fData, down, settings)
+    local barSize = v2(settings.barLength, settings.barWidth)
     for _, statData in ipairs(fData.stats) do
         local label = statData.bar.label
         if label then
             if down then
                 label.props.text = nil
             else
-                local labelConstructor = barsUI.labelConstructors[settingsLocalHUD.labelDisplayMode]
+                local labelConstructor = barsUI.labelConstructors[settings.labelDisplayMode]
                 label.props.text = labelConstructor(statData.stat.current, statData.stat.base)
             end
         end

@@ -1,4 +1,4 @@
----@diagnostic disable: param-type-mismatch
+---@diagnostic disable: param-type-mismatch, need-check-nil
 ---@omw-context player
 local util = require("openmw.util")
 local v2 = util.vector2
@@ -6,14 +6,17 @@ local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
 local types = require("openmw.types")
 local core = require("openmw.core")
+local tooltipUI = require("scripts.BestFriendsForever.ui.follower.tooltip")
 
 local interval = { template = I.MWUI.templates.interval }
+local iconSize = 32
 local magicIcon = ui.texture {
     path = "textures/menu_icon_magic.dds",
     offset = v2(0, 0),
     size = v2(42, 42),
 }
 local h2hIcon = ui.texture { path = "icons/k/stealth_handtohand.dds" }
+
 ---@type table<string, openmw.ui.TextureResource>
 local iconCache = {}
 
@@ -33,12 +36,11 @@ end
 
 ---@param icon openmw.ui.TextureResource
 ---@param magic boolean
----@param tint openmw.util.Color|nil
 ---@return openmw.ui.Layout
-local function renderEquipmentIcon(icon, magic, tint)
+local function renderEquipmentIcon(icon, magic)
     local box = {
         props = {
-            size = v2(32, 32),
+            size = v2(iconSize, iconSize),
         },
         content = ui.content {},
     }
@@ -58,8 +60,7 @@ local function renderEquipmentIcon(icon, magic, tint)
         type = ui.TYPE.Image,
         props = {
             resource = icon,
-            size = v2(32, 32),
-            color = tint,
+            size = v2(iconSize, iconSize),
         },
     }
 
@@ -70,26 +71,12 @@ local function renderEquipmentIcon(icon, magic, tint)
     }
 end
 
----@param spellType openmw.core.SpellType
----@return openmw.ui.Layout
-local function renderDisease(spellType)
-    local icon
-    if spellType == core.magic.SPELL_TYPE.Blight then
-        icon = getEffectIcon(core.magic.EFFECT_TYPE.CureBlightDisease)
-    else
-        icon = getEffectIcon(core.magic.EFFECT_TYPE.CureCommonDisease)
-    end
-    return renderEquipmentIcon(icon, false, util.color.rgba(1.0, 0.15, 0.15, 1.0))
-end
-
 ---@param spell openmw.core.Spell
 ---@return openmw.ui.TextureResource|nil
 local function getSpellIcon(spell)
     local effect = spell.effects[1]
     if effect then
         return getEffectIcon(effect.effect.id)
-    else
-        return nil
     end
 end
 
@@ -111,10 +98,11 @@ end
 
 local STANCE = types.Actor.STANCE
 local EQUIPMENT_SLOT = types.Actor.EQUIPMENT_SLOT
+
 ---@param actor openmw.GObject
 ---@return openmw.ui.Layout
 iconsUI.renderCombat = function(actor)
-    local icon
+    local icon = h2hIcon
     local magic = false
 
     local stance = types.Actor.getStance(actor)
@@ -123,127 +111,66 @@ iconsUI.renderCombat = function(actor)
         local enchantedItem = types.Actor.getSelectedEnchantedItem(actor)
         icon = spell and getSpellIcon(spell) or (enchantedItem and getItemIcon(enchantedItem)) or magicIcon
         magic = true
-    elseif stance == STANCE.Weapon then
+    else
         local weapon = types.Actor.getEquipment(actor, EQUIPMENT_SLOT.CarriedRight)
         if weapon then
             icon, magic = getItemIcon(weapon)
-        else
-            icon = h2hIcon
-            magic = false
         end
     end
 
     return renderEquipmentIcon(icon, magic)
 end
 
----@param actor openmw.GObject
----@param showDiseases boolean
----@param showDamagedStats boolean
----@return openmw.core.Spell|nil
----@return openmw.core.MagicEffect|nil
-iconsUI.getDebuff = function(actor, showDiseases, showDamagedStats)
-    local disease
-    if showDiseases then
-        for _, spell in pairs(types.Actor.spells(actor)) do
-            if spell.type == core.magic.SPELL_TYPE.Blight then
-                disease = spell
-                break
-            elseif spell.type == core.magic.SPELL_TYPE.Disease then
-                disease = spell
-            end
-        end
-    end
+local function createFollowerIcon(fData)
+    local followerIcon = {
+        name = "followerIconMark",
+        type = ui.TYPE.Text,
+        template = I.MWUI.templates.textHeader,
+        props = {
+            size = v2(iconSize, iconSize),
+            autoSize = false,
+            text = "?",
+            textSize = 24,
+            textAlignH = ui.ALIGNMENT.Center,
+            textAlignV = ui.ALIGNMENT.Center,
+            textShadow = true,
+        },
+    }
 
-    if disease then
-        return disease, nil
-    end
-
-    local effect
-    if showDamagedStats then
-        for _, active in pairs(types.Actor.activeEffects(actor)) do
-            if active.id == core.magic.EFFECT_TYPE.DamageAttribute then
-                effect = active
-                break
-            elseif active.id == core.magic.EFFECT_TYPE.DamageSkill then
-                effect = active
-            end
-        end
-    end
-
-    return nil, effect
-end
-
----@param disease openmw.core.Spell|nil
----@param effect openmw.core.MagicEffect|nil
----@return openmw.ui.Layout
-iconsUI.renderDebuff = function(disease, effect)
-    if disease then
-        return renderDisease(disease.type)
-    elseif effect then
-        return renderEquipmentIcon(getEffectIcon(effect.id), false)
-    else
-        return renderEquipmentIcon(nil, false)
-    end
+    return {
+        name = "followerIcon",
+        type = ui.TYPE.Widget,
+        props = {
+            size = v2(iconSize, iconSize),
+        },
+        content = ui.content {
+            followerIcon,
+            tooltipUI.create(fData),
+        },
+    }
 end
 
 ---@param fData FollowerData
----@param showCombatIcon boolean
----@param debuffed boolean
-iconsUI.placeIconsIntoContainers = function(fData, showCombatIcon, debuffed)
-    if showCombatIcon
-        and fData.icons.combatLayout
-        and types.Actor.getStance(fData.actor) ~= STANCE.Nothing
-    then
-        fData.icons.container.content:add(fData.icons.combatLayout)
-    end
-    if debuffed and fData.icons.debuffLayout then
-        if #fData.icons.container.content > 0 then
-            fData.icons.container.content:add(interval)
-        end
-        fData.icons.container.content:add(fData.icons.debuffLayout)
-    end
-end
-
----@param fData FollowerData
----@param down boolean
 ---@param enabledElements table
-iconsUI.updateIcons = function(fData, down, enabledElements)
-    fData.icons.container.props.visible = not down
-    fData.icons.container.content = ui.content {}
-    if down then
-        return
+iconsUI.updateIcons = function(fData, enabledElements)
+    if not fData.icons.followerIconLayout then
+        fData.icons.followerIconLayout = createFollowerIcon(fData)
     end
 
-    local showCombatIcon = enabledElements.icons
-    if showCombatIcon then
-        local combatLayout = iconsUI.renderCombat(fData.actor)
-        if fData.icons.combatLayout then
-            fData.icons.combatLayout.content = combatLayout.content
-        else
-            fData.icons.combatLayout = combatLayout
-        end
+    tooltipUI.update(fData, enabledElements)
+    local combatLayout = iconsUI.renderCombat(fData.actor)
+    if fData.icons.combatLayout then
+        fData.icons.combatLayout.content = combatLayout.content
     else
-        fData.icons.combatLayout = nil
+        fData.icons.combatLayout = combatLayout
     end
 
-    local disease, effect = iconsUI.getDebuff(
-        fData.actor,
-        enabledElements.diseases,
-        enabledElements.damagedStats
-    )
-    local debuffed = disease ~= nil or effect ~= nil
-    if debuffed then
-        local debuffLayout = iconsUI.renderDebuff(disease, effect)
-        if fData.icons.debuffLayout then
-            fData.icons.debuffLayout.content = debuffLayout.content
-        else
-            fData.icons.debuffLayout = debuffLayout
-        end
-    else
-        fData.icons.debuffLayout = nil
-    end
-
-    iconsUI.placeIconsIntoContainers(fData, showCombatIcon, debuffed)
+    fData.icons.container.props.visible = true
+    fData.icons.container.content = ui.content {
+        fData.icons.followerIconLayout,
+        interval,
+        fData.icons.combatLayout,
+    }
 end
 
 return iconsUI

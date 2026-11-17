@@ -95,15 +95,14 @@ horizontalLayout_name: Horizontal Layout
 
 HUDFollower_groupName: Follower Widgets
 enabledElements_name: Visible Elements
-enabledElements_desc: Select which elements appear in each follower widget.
+enabledElements_desc: Select which widget elements and tooltip details are shown.
 name: Follower Name
 health: Health
 magicka: Magicka
 fatigue: Fatigue
 labels: Bar Labels
-icons: Combat Icons
-diseases: Disease Icons
-damagedStats: Stat Damage
+diseases: Diseases in Tooltip
+damagedStats: Stat Damage in Tooltip
 nameTextSize_name: Name Text Size
 nameColor_name: Name Color
 uiAlign_name: Element Alignment
@@ -115,6 +114,12 @@ barWidth_name: Bar Width
 labelDisplayMode_name: Bar Label Format
 horizontalIcons_name: Stack Icons Horizontally
 rightIcons_name: Stack Icons to the Right of Bars
+followerTooltip_name: "Name: {name}"
+followerTooltip_class: "Class: {class_name}"
+followerTooltip_creature: "Creature: {creature_name}"
+followerTooltip_diseases: "Diseases: {diseases}"
+followerTooltip_healthy: Healthy
+followerTooltip_statDamage: "Stat damage: {stats}"
 
 Up: Up
 Center: Center

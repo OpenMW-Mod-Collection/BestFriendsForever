@@ -22,12 +22,18 @@ I.Settings.registerGroup {
             description = "pollingRate_desc",
             renderer = "number",
             default = 0.1,
+            argument = {
+                min = 0,
+            }
         },
         {
             key = "maxWidgets",
             name = "maxWidgets_name",
             renderer = "number",
             default = 5,
+            argument = {
+                min = 0,
+            }
         },
         {
             key = "lockPosition",
