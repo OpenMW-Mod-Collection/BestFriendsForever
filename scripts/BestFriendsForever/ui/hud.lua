@@ -29,22 +29,18 @@ followerHUD.hudDisplayMap = {
     ---@param uiMode string
     ---@return boolean
     ["Interface Only"] = function(uiMode)
-        return uiMode ~= nil
-            and uiMode ~= "MainMenu"
-            and I.UI.isHudVisible()
+        return uiMode ~= nil and uiMode ~= "MainMenu" and I.UI.isHudVisible()
     end,
     ---@param uiMode string
     ---@return boolean
     ["Hide on Interface"] = function(uiMode)
-        return (not uiMode or uiMode == "MainMenu")
-            and I.UI.isHudVisible()
+        return (not uiMode or uiMode == "MainMenu") and I.UI.isHudVisible()
     end,
     ---@param uiMode string
     ---@return boolean
     ["Hide on Dialogue Only"] = function(uiMode)
-        return uiMode ~= I.UI.MODE.Dialogue
-            and I.UI.isHudVisible()
-    end
+        return uiMode ~= I.UI.MODE.Dialogue and I.UI.isHudVisible()
+    end,
 }
 
 -- Settings
@@ -62,21 +58,11 @@ local function settingsUpdated()
 end
 
 local wrapperSection = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
-settingsWrapper = settingsCache.new(
-    wrapperSection,
-    async,
-    settingsUpdated
-)
-local settingsLocalHUD = settingsCache.new(
-    storage.playerSection("SettingsBestFriendsForever_HUDFollower"),
-    async,
-    settingsUpdated
-)
-local settingsBlacklists = settingsCache.new(
-    storage.globalSection("SettingsBestFriendsForever_blacklist"),
-    async,
-    settingsUpdated
-)
+settingsWrapper = settingsCache.new(wrapperSection, async, settingsUpdated)
+local settingsLocalHUD =
+    settingsCache.new(storage.playerSection("SettingsBestFriendsForever_HUDFollower"), async, settingsUpdated)
+local settingsBlacklists =
+    settingsCache.new(storage.globalSection("SettingsBestFriendsForever_blacklist"), async, settingsUpdated)
 
 -- Utilities
 
@@ -111,7 +97,7 @@ local delimiterH = 15
 local alignToAnchor = {
     Right = 0,
     Down = 0,
-    Center = .5,
+    Center = 0.5,
     Left = 1,
     Up = 1,
 }
@@ -123,9 +109,7 @@ local sideToAlignment = {
 local interval = { template = I.MWUI.templates.interval }
 local delimiterPadding = padding(delimiterW, delimiterH)
 local delimiterLine = {
-    template = settingsWrapper.horizontalLayout
-        and I.MWUI.templates.verticalLine
-        or I.MWUI.templates.horizontalLine,
+    template = settingsWrapper.horizontalLayout and I.MWUI.templates.verticalLine or I.MWUI.templates.horizontalLine,
     props = {
         relativePosition = v2(0.5, 0.5),
         anchor = v2(0.5, 0.5),
@@ -146,7 +130,9 @@ local rootFlex
 -- Dragging
 
 local function mousePress(data, elem)
-    if data.button ~= 1 or settingsWrapper.lockPosition then return end -- Left mouse button
+    if data.button ~= 1 or settingsWrapper.lockPosition then
+        return
+    end -- Left mouse button
     if not elem.userData then
         elem.userData = {}
     end
@@ -159,14 +145,14 @@ local function mousePress(data, elem)
 end
 
 local function mouseMove(data, elem)
-    if not (elem.userData and elem.userData.isDragging) then return end
+    if not (elem.userData and elem.userData.isDragging) then
+        return
+    end
     -- Calculate new position based on mouse movement
     local deltaX = data.position.x - elem.userData.dragStartPosition.x
     local deltaY = data.position.y - elem.userData.dragStartPosition.y
-    local newPosition = util.vector2(
-        elem.userData.windowStartPosition.x + deltaX,
-        elem.userData.windowStartPosition.y + deltaY
-    )
+    local newPosition =
+        util.vector2(elem.userData.windowStartPosition.x + deltaX, elem.userData.windowStartPosition.y + deltaY)
     followerHUD.root.layout.props.position = newPosition
 
     followerHUD.root:update()
@@ -201,7 +187,7 @@ local function createRoot()
             horizontal = settingsWrapper.horizontalLayout,
             arrange = ui.ALIGNMENT[sideToAlignment[settingsLocalHUD.uiAlign]],
         },
-        content = ui.content {}
+        content = ui.content {},
     }
 
     local rootFlexPadding = {
@@ -223,7 +209,7 @@ local function createRoot()
         props = {
             inheritAlpha = false,
         },
-        content = ui.content { rootFlexPadding }
+        content = ui.content { rootFlexPadding },
     }
 
     return ui.create {
@@ -236,12 +222,12 @@ local function createRoot()
             anchor = v2(
                 alignToAnchor[settingsWrapper.expansionDirectionH],
                 alignToAnchor[settingsWrapper.expansionDirectionV]
-            )
+            ),
         },
         events = wrapperEventCallbacks,
         content = ui.content { rootOuterPadding },
         userData = {
-            windowStartPosition = v2(settingsWrapper.posX, settingsWrapper.posY)
+            windowStartPosition = v2(settingsWrapper.posX, settingsWrapper.posY),
         },
     }
 end
@@ -261,8 +247,11 @@ end
 
 local function showTooltip(fData, mousePosition)
     local tooltipElement = followerHUD.tooltipElement
-    if not tooltipElement or not tooltipElement.layout
-        or not followerHUD.root or not followerHUD.root.layout
+    if
+        not tooltipElement
+        or not tooltipElement.layout
+        or not followerHUD.root
+        or not followerHUD.root.layout
         or followerHUD.followerData[fData.actor.id] ~= fData
         or followerHUD.root.layout.props.visible == false
     then
@@ -282,8 +271,7 @@ end
 ---@return openmw.ui.Layout
 local function makeDelimiter()
     if settingsWrapper.enableBordersAndBg then
-        delimiterLine.template = settingsWrapper.horizontalLayout
-            and I.MWUI.templates.verticalLine
+        delimiterLine.template = settingsWrapper.horizontalLayout and I.MWUI.templates.verticalLine
             or I.MWUI.templates.horizontalLine
         return delimiter
     else
@@ -293,11 +281,12 @@ end
 
 followerHUD.updateRootVisibility = function(uiMode)
     -- why is this even being triggered?
-    if not followerHUD.root or not followerHUD.root.layout then return end
+    if not followerHUD.root or not followerHUD.root.layout then
+        return
+    end
 
     local isModeAllowed = followerHUD.hudDisplayMap[settingsWrapper.hudDisplay]
-    followerHUD.root.layout.props.visible = #rootFlex.content ~= 0
-        and isModeAllowed(uiMode)
+    followerHUD.root.layout.props.visible = #rootFlex.content ~= 0 and isModeAllowed(uiMode)
     if not followerHUD.root.layout.props.visible then
         hideTooltip()
     end
@@ -319,13 +308,9 @@ end
 followerHUD.new = function(followers)
     followerHUD.destroy()
     followerHUD.root = createRoot()
-    followerHUD.tooltipElement = tooltipUI.create(
-        settingsWrapper.lockPosition and "HUD" or "Modal"
-    )
+    followerHUD.tooltipElement = tooltipUI.create(settingsWrapper.lockPosition and "HUD" or "Modal")
     followerHUD.followerData = {}
-    local downedFollowers = I.BestFriendsForever
-        and I.BestFriendsForever.getDownedFollowers()
-        or {}
+    local downedFollowers = I.BestFriendsForever and I.BestFriendsForever.getDownedFollowers() or {}
 
     local widgetCount = 0
     for _, fState in pairs(followers) do
@@ -336,30 +321,20 @@ followerHUD.new = function(followers)
         local myFollower = fState.superLeader and fState.superLeader.id == self.id
             or fState.leader and fState.leader.id == self.id
         local banned = blacklisted(fState.actor, settingsBlacklists.globalScriptBlacklist)
-        if not myFollower or banned then
-            goto continue
+        if myFollower and not banned then
+            if #rootFlex.content ~= 0 then
+                rootFlex.content:add(makeDelimiter())
+            end
+
+            local down = downedFollowers[fState.actor.id]
+            local actorId = fState.actor.id
+            local fData
+            local layout
+            fData, layout = followerUI.create(fState, down, settingsLocalHUD, showTooltip, hideTooltip)
+            followerHUD.followerData[actorId] = fData
+            rootFlex.content:add(layout)
+            widgetCount = widgetCount + 1
         end
-
-        if #rootFlex.content ~= 0 then
-            rootFlex.content:add(makeDelimiter())
-        end
-
-        local down = downedFollowers[fState.actor.id]
-        local actorId = fState.actor.id
-        local fData
-        local layout
-        fData, layout = followerUI.create(
-            fState.actor,
-            down,
-            settingsLocalHUD,
-            showTooltip,
-            hideTooltip
-        )
-        followerHUD.followerData[actorId] = fData
-        rootFlex.content:add(layout)
-        widgetCount = widgetCount + 1
-
-        ::continue::
     end
 
     followerHUD.updateRootVisibility(I.UI.getMode())
@@ -371,11 +346,7 @@ followerHUD.updateData = function()
         followerUI.update(fData, settingsLocalHUD)
     end
     if activeTooltipData and followerHUD.tooltipElement then
-        tooltipUI.update(
-            followerHUD.tooltipElement,
-            activeTooltipData,
-            settingsLocalHUD.enabledElements
-        )
+        tooltipUI.update(followerHUD.tooltipElement, activeTooltipData, settingsLocalHUD.enabledElements)
     end
     followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()

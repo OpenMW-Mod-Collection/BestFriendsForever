@@ -1,5 +1,19 @@
 # Best Friends Forever (OpenMW)
 
+## 3.0
+
+- Massive UI rewrite
+- Added Follower Icons (thx butts)
+- Added unique Follower Icons to Biz'kuitz, Julan and Tetra the Pack Guar
+- Added Tooltips to follower widgets
+- Tooltips now show general info about the follower, their diseases and damaged stats
+- Added follower Interaction Menu
+- Added Companion Share, Wait Here, Follower Info and Repair Gear features to Interaction Menu
+- Added interfaces to add new unique Follower Icons, edit or expand Tooltips and add new Interactions
+- Complete overhaul of the mod's settings
+- Added settigns presets
+- Removed all GOTOs
+
 ## 2.0
 
 - Added Ward module - module that will protect your followers from any diseases and stat damage

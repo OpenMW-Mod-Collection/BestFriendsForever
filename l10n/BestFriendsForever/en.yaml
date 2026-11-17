@@ -1,4 +1,6 @@
 msg_followerDown: "{npc_name} is down!"
+msg_followerWaiting: "{npc_name} will wait here. Interact with them to make them a follower again."
+msg_followerFollowingAgain: "{npc_name} is following you again."
 
 page_name: Best Friends Forever
 page_description: Several utilities for you and your followers.

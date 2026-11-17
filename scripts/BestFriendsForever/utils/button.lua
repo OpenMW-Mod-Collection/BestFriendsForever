@@ -222,7 +222,9 @@ Templates.buttonBoxBgr = function(bgrAlpha)
     return template
 end
 
-Templates.button = function(text, textSize, onClick, name, bgrAlpha)
+Templates.button = function(text, textSize, onClick, name, bgrAlpha, disabled)
+    -- TODO: disabled state doesn't show correctly
+    disabled = disabled == true
     local element = ui.create {
         name = name,
         template = Templates.buttonBoxBgr(bgrAlpha),
@@ -242,7 +244,7 @@ Templates.button = function(text, textSize, onClick, name, bgrAlpha)
                         props = {
                             text = text,
                             textSize = textSize,
-                            textColor = C.Colors.DEFAULT,
+                            textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT,
                         },
                         userData = { colorable = true },
                     },
@@ -257,24 +259,30 @@ Templates.button = function(text, textSize, onClick, name, bgrAlpha)
     }
     local btnText = element.layout.content[1].content[2]
     element.layout.events.focusLoss = async:callback(function()
-        btnText.props.textColor = C.Colors.DEFAULT
+        btnText.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT
         element:update()
     end)
     element.layout.events.focusGain = async:callback(function()
-        btnText.props.textColor = C.Colors.DEFAULT_LIGHT
+        btnText.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT_LIGHT
         element:update()
     end)
     element.layout.events.mousePress = async:callback(function()
+        if disabled then
+            return
+        end
         ambient.playSound("menu click")
         btnText.props.textColor = C.Colors.DEFAULT_PRESSED
         element:update()
     end)
     element.layout.events.mouseRelease = async:callback(function()
-        if onClick then
-            onClick()
+        if disabled then
+            return
         end
         btnText.props.textColor = C.Colors.DEFAULT_LIGHT
         element:update()
+        if onClick then
+            onClick()
+        end
     end)
     return element
 end

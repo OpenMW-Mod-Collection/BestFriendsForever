@@ -4,11 +4,10 @@ local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
 local async = require("openmw.async")
 local types = require("openmw.types")
-local self = require("openmw.self")
-local core = require("openmw.core")
 
 local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
 local barsUI = require("scripts.BestFriendsForever.ui.follower.bars")
+local followerMenu = require("scripts.BestFriendsForever.ui.menu")
 
 local followerUI = {}
 local interval = { template = I.MWUI.templates.interval }
@@ -137,13 +136,14 @@ local function createBarsContainer(fData, settings)
     }
 end
 
----@param follower openmw.GObject
+---@param followerState table
 ---@param fData FollowerData
 ---@param settings table
 ---@param showTooltip fun(fData: FollowerData, position: openmw.util.Vector2)
 ---@param hideTooltip fun(fData: FollowerData)
 ---@return openmw.ui.Layout
-local function createLayout(follower, fData, settings, showTooltip, hideTooltip)
+local function createLayout(followerState, fData, settings, showTooltip, hideTooltip)
+    local follower = followerState.actor
     local enabledElements = settings.enabledElements
     local barsContainer = createBarsContainer(fData, settings)
     local dataContent = settings.rightIcons and { barsContainer, interval, fData.icons.container }
@@ -193,7 +193,9 @@ local function createLayout(follower, fData, settings, showTooltip, hideTooltip)
             horizontal = true,
         },
         events = {
-            mouseClick = async:callback(function() end),
+            mouseClick = async:callback(function()
+                followerMenu.open(followerState)
+            end),
             mouseMove = async:callback(function(data)
                 showTooltip(fData, data.position)
             end),
@@ -209,16 +211,17 @@ local function createLayout(follower, fData, settings, showTooltip, hideTooltip)
     }
 end
 
----@param follower openmw.GObject
+---@param followerState table
 ---@param down boolean
 ---@param settings table
 ---@param showTooltip fun(fData: FollowerData, position: openmw.util.Vector2)
 ---@param hideTooltip fun(fData: FollowerData)
 ---@return FollowerData
 ---@return openmw.ui.Layout
-followerUI.create = function(follower, down, settings, showTooltip, hideTooltip)
+followerUI.create = function(followerState, down, settings, showTooltip, hideTooltip)
+    local follower = followerState.actor
     local fData = newFollowerData(follower, down, settings)
-    return fData, createLayout(follower, fData, settings, showTooltip, hideTooltip)
+    return fData, createLayout(followerState, fData, settings, showTooltip, hideTooltip)
 end
 
 ---@param fData FollowerData

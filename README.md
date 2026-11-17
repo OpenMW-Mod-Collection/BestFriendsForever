@@ -65,12 +65,20 @@ Should be compatible with anything. Though Immortality and Teleport modules migh
 
 It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but they should not be used together.
 
-Supported edge case mods:
+### Builtin Support
+
+Script blacklist:
 
 - [Loafy's Necromancy - Reanimate Dead](https://www.nexusmods.com/morrowind/mods/58901) by TheLoafyOne
 - [Water Life](https://www.nexusmods.com/morrowind/mods/42417) by abot
 - [Inquisitive Guards](https://www.nexusmods.com/morrowind/mods/46538) by RubberMan
 - [Morrowind Comes Alive](https://www.nexusmods.com/morrowind/mods/6006) by Neoptolemus and Morrowind community
+
+Unique follower icons:
+
+- [Biz'Kuitz Blissful Mind - Alfiq Scholar Companion](https://www.nexusmods.com/morrowind/mods/59156) by 6moonless
+- Julan, Ashlander Companion by Kateri
+- [Tetra the Pack Guar](https://www.nexusmods.com/morrowind/mods/47928) by Tizzo
 
 ## Requirements
 
@@ -115,12 +123,65 @@ I.BestFriendsForever.getDownedFollowers()
 I.BestFriendsForever.setFollowerIcon(recordId, fileName, isTransparent)
 ```
 
+### Follower Menu
+
+Player scripts can register buttons in the follower menu through the
+`I.BestFriendsForever` interface. Buttons are sorted alphabetically and the menu
+shows up to 10 action buttons per page.
+
+The built-in Wait action dismisses an eligible follower; interact with them to
+have them follow you again. It is unavailable for summons and actors under a
+Command effect.
+
+Run a function with the current Follower Detection Util state:
+
+```lua
+I.BestFriendsForever.registerFollowerMenuButton {
+    name = "My Action",
+    action = function(followerState)
+        I.UI.setMode("Companion", { target = followerState.actor })
+    end,
+    condition = function(followerState)
+        return not followerState.isSummon
+    end,
+}
+```
+
+The optional `condition` function receives the follower state and must return a
+boolean. When it returns `false`, the button appears disabled and cannot be
+activated. Companion Share uses this to exclude summons.
+
+Or send that state as the event payload to the player, follower, or global
+script:
+
+```lua
+I.BestFriendsForever.registerFollowerMenuButton {
+    name = "My Event",
+    event = "MyMod_followerAction",
+    target = "follower", -- "player", "follower", or "global"
+}
+```
+
+Buttons may set `closeAfterActivation = true` to close the menu without leaving
+the current UI mode. The built-in Companion Share button uses this to open the
+follower in Companion mode for trading. <!-- TODO: what? -->
+
+Player scripts can also reopen the follower menu by sending the
+`BestFriendsForever_openFollowerMenu` event to the player. Its payload is the
+follower's Follower Detection Util state:
+
+```lua
+self:sendEvent("BestFriendsForever_openFollowerMenu", followerState)
+```
+
 ## Credits
 
 **Sosnoviy Bor** - Author  
+**butts** - Follower icons and the initial idea for them  
 **urm** - Main inspiration and many UI elements ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))  
-**ownlyme** - Slider renderer and ideas  
+**ownlyme** - Custom settings renderers and ideas  
 **Hyacinth** - Ideas  
-**atka** - Inspiration for the Call feature
+**atka** - Inspiration for the Call feature  
+**Pirate443** - Inspiration for the UI design ([HUD Companion Health Bar](https://www.nexusmods.com/morrowind/mods/60242))
 
 Powered by [Super Settings Renderers](https://www.nexusmods.com/morrowind/mods/59673) and [Drop-in Utils](https://www.nexusmods.com/morrowind/mods/60374)

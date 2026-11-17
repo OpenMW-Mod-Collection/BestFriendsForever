@@ -10,6 +10,7 @@ local core = require("openmw.core")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local tp = require("scripts.BestFriendsForever.utils.teleport")
 local followerHUD = require("scripts.BestFriendsForever.ui.hud")
+local followerMenu = require("scripts.BestFriendsForever.ui.menu")
 local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
 local combatTrackerConstructor = require("scripts.BestFriendsForever.utils.combatTracker")
 
@@ -179,11 +180,16 @@ end
 
 local function followerListUpdated(data)
     followers = data
+    followerMenu.onFollowerListUpdated(data)
     if settingsWrapper.enable then
         followerHUD.new(data)
     else
         destroyHUD()
     end
+end
+
+local function openFollowerMenu(followerState)
+    followerMenu.open(followerState)
 end
 
 local function followerUnloaded(follower)
@@ -212,6 +218,7 @@ local function followerUp(data)
 end
 
 local function uiModeChanged(data)
+    followerMenu.onUiModeChanged(data)
     if not followerHUD.root then
         return
     end
@@ -249,6 +256,7 @@ return {
         BestFriendsForever_followerUnloaded = followerUnloaded,
         BestFriendsForever_followerDown = followerDown,
         BestFriendsForever_followerUp = followerUp,
+        BestFriendsForever_openFollowerMenu = openFollowerMenu,
     },
     interfaceName = "BestFriendsForever",
     interface = {
@@ -263,5 +271,6 @@ return {
         setFollowerIcon = function(recordId, fileName, isTransparent)
             iconsUI.setFollowerIcon(recordId, fileName, isTransparent)
         end,
+        registerFollowerMenuButton = followerMenu.registerButton,
     },
 }
