@@ -42,6 +42,63 @@ Does not apply to:
 - Summons
 - Actors under any Command effect
 
+<details>
+<summary><b>Follower Injuries</b></summary>
+
+When a follower would have died, they roll for an injury: **80%** minor (10 minutes), **15%** major (7 days), **5%** permanent death.
+
+**Skill groups**
+
+- **Hand skills:** Long Blade, Short Blade, Axe, Blunt Weapon, Spear, Hand-to-hand, Block, Marksman, Security, Alchemy, Armorer
+- **Fine-hand skills:** Marksman, Security, Alchemy, Armorer
+- **Leg skills:** Athletics, Acrobatics, Sneak
+- **Armor skills:** Light Armor, Medium Armor, Heavy Armor, Unarmored (draining them increases physical damage taken)
+- **Weapon-arm skills:** Axe, Blunt Weapon, Long Blade, Spear, Marksman
+
+Max Health/Fatigue deductions are applied directly by the mod, not by the spell.
+
+<details>
+<summary><b>Minor injuries</b> (10 minutes)</summary>
+
+| Injury              | Spell effects                                          | Max deduction    |
+| ------------------- | ------------------------------------------------------ | ---------------- |
+| **Bruised Ribs**    | Drain Endurance 10, Athletics 15                       | none             |
+| **Twisted Ankle**   | Drain Speed 20, Leg skills 20                          | none             |
+| **Jarred Wrist**    | Drain Strength 10, Hand skills 15                      | none             |
+| **Pulled Shoulder** | Drain Strength 25, Weapon-arm skills 20, Athletics 10  | none             |
+| **Sprained Thumb**  | Drain Agility 10, Fine-hand skills 25, Hand-to-hand 20 | none             |
+| **Scraped Knees**   | Drain Speed 10, Acrobatics 25, Sneak 25                | none             |
+| **Dazed**           | Drain Intelligence 20, Willpower 20                    | none             |
+| **Shaken Nerves**   | Drain Willpower 25, Luck 15                            | none             |
+| **Black Eye**       | Blind 20, Drain Marksman 20, Security 20               | none             |
+| **Bleeding Gash**   | Drain Agility 10, Armor skills 15                      | Max Health −10%  |
+| **Winded**          | Drain Athletics 15                                     | Max Fatigue −30% |
+| **Muscle Cramp**    | Drain Strength 10, Speed 10, Leg skills 15             | none             |
+
+</details>
+
+<details>
+<summary><b>Major injuries</b> (7 days)</summary>
+
+| Injury                  | Spell effects                                                               | Max deduction   |
+| ----------------------- | --------------------------------------------------------------------------- | --------------- |
+| **Broken Leg**          | Drain Speed 40, Agility 25, Leg skills 50                                   | none            |
+| **Broken Arm**          | Drain Strength 35, Agility 15, Hand skills 40                               | none            |
+| **Dislocated Shoulder** | Drain Strength 40, Weapon-arm skills 40, Block 40, Armorer 30, Athletics 20 | none            |
+| **Maimed Hand**         | Drain Agility 35, Hand skills 50 (Fine-hand skills 60)                      | none            |
+| **Concussion**          | Drain Intelligence 35, Willpower 35, Blind 20                               | none            |
+| **Lost Eye**            | Blind 50, Drain Marksman 40, Security 40, Agility 15, Luck 10               | none            |
+| **Punctured Lung**      | Drain Endurance 40, Athletics 40                                            | Max Health −20% |
+| **Crushed Ribs**        | Drain Strength 25, Endurance 30, Armor skills 30                            | Max Health −20% |
+| **Internal Bleeding**   | Drain Endurance 30, Armor skills 20                                         | Max Health −35% |
+| **Festering Wound**     | Weakness to Common Disease 100, Drain Endurance 25, Personality 30          | Max Health −25% |
+| **Severe Burns**        | Drain Endurance 15, Personality 40, Armor skills 30                         | Max Health −15% |
+| **Spinal Trauma**       | Drain Agility 40, Speed 25, Strength 20, Leg skills 30                      | none            |
+
+</details>
+
+</details>
+
 > Note: this module might break scripted events when your followers have to engage in combat with you. The solution is the same as with TP module.
 
 ### Ward Module

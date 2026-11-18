@@ -48,3 +48,4 @@ self-explanatory
 
 
 Remove all redundant type checks and shit
+Add injuries system
