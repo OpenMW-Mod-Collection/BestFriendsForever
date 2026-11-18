@@ -248,5 +248,6 @@ self:sendEvent("BestFriendsForever_openFollowerMenu", followerState)
 **Hyacinth** - Ideas  
 **atka** - Inspiration for the Call feature  
 **Pirate443** - Inspiration for the UI design ([HUD Companion Health Bar](https://www.nexusmods.com/morrowind/mods/60242))
+**jayserpa** - Inspiration for the Injury system ([Follower Death and Injury Chance - Followers Can Die](https://www.nexusmods.com/skyrimspecialedition/mods/38043))
 
 Powered by [Super Settings Renderers](https://www.nexusmods.com/morrowind/mods/59673) and [Drop-in Utils](https://www.nexusmods.com/morrowind/mods/60374)

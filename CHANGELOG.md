@@ -10,6 +10,7 @@
 - Added follower Interaction Menu
 - Added Companion Share, Wait Here, Follower Info and Repair Gear features to Interaction Menu
 - Added interfaces to add new unique Follower Icons, edit or expand Tooltips and add new Interactions
+- Added Injury system to Immortality to balance things out
 - Complete overhaul of the mod's settings
 - Added settigns presets
 - Removed all GOTOs
