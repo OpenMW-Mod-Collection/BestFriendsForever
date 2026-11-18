@@ -42,64 +42,72 @@ Does not apply to:
 - Summons
 - Actors under any Command effect
 
+> Note: this module might break scripted events when your followers have to engage in combat with you. The solution is the same as with TP module.
+
+### Injuries
+
+Though, to balance things out, you and your followers will still get punished. Now when they will be downed, they will roll a dice and get one of these:
+
+- **80%** minor injury (10 minutes)
+- **15%** major injury (7 days)
+- **5%** death for real this time
+
+The injuries could be checked in the follower's tooltip. Major injuries will also add a special VFX to the follower, so you won't miss it.
+
+Don't let the death spiral consume your followers!
+
+<!-- TODO: balance this shit out -->
+
 <details>
-<summary><b>Follower Injuries</b></summary>
+<summary>Minor injuries</summary>
 
-When a follower would have died, they roll for an injury: **80%** minor (10 minutes), **15%** major (7 days), **5%** permanent death.
+| Injury              | Effects                                             |
+| ------------------- | --------------------------------------------------- |
+| **Bruised Ribs**    | -10 Endurance, -15 Athletics                        |
+| **Twisted Ankle**   | -20 Speed, -20 Leg skills                           |
+| **Jarred Wrist**    | -10 Strength, -15 Hand skills                       |
+| **Pulled Shoulder** | -25 Strength, -20 Weapon-arm skills, -10 Athletics  |
+| **Sprained Thumb**  | -10 Agility, -25 Fine-hand skills, -20 Hand-to-hand |
+| **Scraped Knees**   | -10 Speed, -25 Acrobatics, -25 Sneak                |
+| **Dazed**           | -20 Intelligence, -20 Willpower                     |
+| **Shaken Nerves**   | -25 Willpower, -15 Luck                             |
+| **Black Eye**       | Blind 20, -20 Marksman, -20 Security                |
+| **Bleeding Gash**   | -10 Agility, -15 Armor skills, -10% Max Health      |
+| **Winded**          | -15 Athletics, -30% Max Fatigue                     |
+| **Muscle Cramp**    | -10 Strength, -10 Speed, -15 Leg skills             |
 
-**Skill groups**
+</details>
+
+<details>
+<summary>Major injuries</summary>
+
+| Injury                  | Effects                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| **Broken Leg**          | -40 Speed, -25 Agility, -50 Leg skills                                          |
+| **Broken Arm**          | -35 Strength, -15 Agility, -40 Hand skills                                      |
+| **Dislocated Shoulder** | -40 Strength, -40 Weapon-arm skills, -40 Block, -30 Armorer, -20 Athletics      |
+| **Maimed Hand**         | -35 Agility, -50 Hand skills (except Fine-hand), -60 Fine-hand skills           |
+| **Concussion**          | -35 Intelligence, -35 Willpower, Blind 20                                       |
+| **Lost Eye**            | Blind 50, -40 Marksman, -40 Security, -15 Agility, -10 Luck                     |
+| **Punctured Lung**      | -40 Endurance, -40 Athletics, -20% Max Health                                   |
+| **Crushed Ribs**        | -25 Strength, -30 Endurance, -30 Armor skills, -20% Max Health                  |
+| **Internal Bleeding**   | -30 Endurance, -20 Armor skills, -35% Max Health                                |
+| **Festering Wound**     | Weakness to Common Disease 100, -25 Endurance, -30 Personality, -25% Max Health |
+| **Severe Burns**        | -15 Endurance, -40 Personality, -30 Armor skills, -15% Max Health               |
+| **Spinal Trauma**       | -40 Agility, -25 Speed, -20 Strength, -30 Leg skills                            |
+
+</details>
+
+<details>
+<summary>Injury skill groups</summary>
 
 - **Hand skills:** Long Blade, Short Blade, Axe, Blunt Weapon, Spear, Hand-to-hand, Block, Marksman, Security, Alchemy, Armorer
 - **Fine-hand skills:** Marksman, Security, Alchemy, Armorer
 - **Leg skills:** Athletics, Acrobatics, Sneak
-- **Armor skills:** Light Armor, Medium Armor, Heavy Armor, Unarmored (draining them increases physical damage taken)
+- **Armor skills:** Light Armor, Medium Armor, Heavy Armor, Unarmored
 - **Weapon-arm skills:** Axe, Blunt Weapon, Long Blade, Spear, Marksman
 
-Max Health/Fatigue deductions are applied directly by the mod, not by the spell.
-
 <details>
-<summary><b>Minor injuries</b> (10 minutes)</summary>
-
-| Injury              | Spell effects                                          | Max deduction    |
-| ------------------- | ------------------------------------------------------ | ---------------- |
-| **Bruised Ribs**    | Drain Endurance 10, Athletics 15                       | none             |
-| **Twisted Ankle**   | Drain Speed 20, Leg skills 20                          | none             |
-| **Jarred Wrist**    | Drain Strength 10, Hand skills 15                      | none             |
-| **Pulled Shoulder** | Drain Strength 25, Weapon-arm skills 20, Athletics 10  | none             |
-| **Sprained Thumb**  | Drain Agility 10, Fine-hand skills 25, Hand-to-hand 20 | none             |
-| **Scraped Knees**   | Drain Speed 10, Acrobatics 25, Sneak 25                | none             |
-| **Dazed**           | Drain Intelligence 20, Willpower 20                    | none             |
-| **Shaken Nerves**   | Drain Willpower 25, Luck 15                            | none             |
-| **Black Eye**       | Blind 20, Drain Marksman 20, Security 20               | none             |
-| **Bleeding Gash**   | Drain Agility 10, Armor skills 15                      | Max Health −10%  |
-| **Winded**          | Drain Athletics 15                                     | Max Fatigue −30% |
-| **Muscle Cramp**    | Drain Strength 10, Speed 10, Leg skills 15             | none             |
-
-</details>
-
-<details>
-<summary><b>Major injuries</b> (7 days)</summary>
-
-| Injury                  | Spell effects                                                               | Max deduction   |
-| ----------------------- | --------------------------------------------------------------------------- | --------------- |
-| **Broken Leg**          | Drain Speed 40, Agility 25, Leg skills 50                                   | none            |
-| **Broken Arm**          | Drain Strength 35, Agility 15, Hand skills 40                               | none            |
-| **Dislocated Shoulder** | Drain Strength 40, Weapon-arm skills 40, Block 40, Armorer 30, Athletics 20 | none            |
-| **Maimed Hand**         | Drain Agility 35, Hand skills 50 (Fine-hand skills 60)                      | none            |
-| **Concussion**          | Drain Intelligence 35, Willpower 35, Blind 20                               | none            |
-| **Lost Eye**            | Blind 50, Drain Marksman 40, Security 40, Agility 15, Luck 10               | none            |
-| **Punctured Lung**      | Drain Endurance 40, Athletics 40                                            | Max Health −20% |
-| **Crushed Ribs**        | Drain Strength 25, Endurance 30, Armor skills 30                            | Max Health −20% |
-| **Internal Bleeding**   | Drain Endurance 30, Armor skills 20                                         | Max Health −35% |
-| **Festering Wound**     | Weakness to Common Disease 100, Drain Endurance 25, Personality 30          | Max Health −25% |
-| **Severe Burns**        | Drain Endurance 15, Personality 40, Armor skills 30                         | Max Health −15% |
-| **Spinal Trauma**       | Drain Agility 40, Speed 25, Strength 20, Leg skills 30                      | none            |
-
-</details>
-
-</details>
-
-> Note: this module might break scripted events when your followers have to engage in combat with you. The solution is the same as with TP module.
 
 ### Ward Module
 
