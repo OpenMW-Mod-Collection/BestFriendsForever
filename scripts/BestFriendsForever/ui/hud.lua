@@ -252,7 +252,7 @@ local function showTooltip(fData, mousePosition)
         or not tooltipElement.layout
         or not followerHUD.root
         or not followerHUD.root.layout
-        or followerHUD.followerData[fData.actor.id] ~= fData
+        or followerHUD.followerData[fData.followerState.actor.id] ~= fData
         or followerHUD.root.layout.props.visible == false
     then
         return
@@ -302,6 +302,17 @@ followerHUD.destroy = function()
         followerHUD.tooltipElement = nil
     end
     followerHUD.followerData = {}
+    activeTooltipData = nil
+end
+
+followerHUD.rebuildTooltip = function()
+    if not followerHUD.root then
+        return
+    end
+    if followerHUD.tooltipElement then
+        followerHUD.tooltipElement:destroy()
+    end
+    followerHUD.tooltipElement = tooltipUI.create(settingsWrapper.lockPosition and "HUD" or "Modal")
     activeTooltipData = nil
 end
 

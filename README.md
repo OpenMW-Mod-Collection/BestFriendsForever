@@ -99,7 +99,7 @@ Load Best Friends Forever as high as possible in the load order - before any mod
 ```lua
 -- Sent when the follower enters Downed state
 -- Payload: { follower: Actor, leader: Actor }
--- Scope: Player, Global
+-- Scope: Player, Global, and the follower's local script
 BestFriendsForever_followerDown
 
 -- Sent when the follower is released from the Downed state
@@ -109,9 +109,11 @@ BestFriendsForever_followerUp
 
 ### Interfaces
 
+`I.BestFriendsForever.version` is currently `2`.
+
 ```lua
 -- Returns downed followers of the player
--- Returns: table<string, Actor>
+-- Returns: table<string, Actor>  (live table, treat it as read-only)
 -- Scope: Player
 I.BestFriendsForever.getDownedFollowers()
 
@@ -121,7 +123,44 @@ I.BestFriendsForever.getDownedFollowers()
 -- false displays the image by itself
 -- Scope: Player
 I.BestFriendsForever.setFollowerIcon(recordId, fileName, isTransparent)
+
+-- Adds a field to the follower tooltip
+-- name must be unique; order is a numeric weight and defaults to 100
+-- built-in fields use 1-4; decimals such as 1.5 are allowed
+-- getText receives the Follower Detection Util state and returns text or nil
+-- nil hides the field. Safe to register at any time; BFF rebuilds the tooltip.
+-- Scope: Player
+I.BestFriendsForever.registerFollowerTooltipField {
+    name = "MyMod_status",
+    order = 100,
+    getText = function(followerState)
+        return followerState.isSummon and "Summon" or nil
+    end,
+}
 ```
+
+### Follower Down Outcome
+
+Local scripts attached to the same follower can provide a synchronous outcome
+through `I.BestFriendsForeverDown`. BFF calls the provider when the follower
+would otherwise be downed. Returning `"death"` commits real death; returning
+`"down"` or `nil` uses the normal down behavior.
+
+```lua
+-- Scope: local scripts on a BFF-immortal follower
+-- Interface version: 1
+I.BestFriendsForeverDown.setOutcomeProvider("MyMod", function()
+    return "down" -- "down" | "death" | nil
+end)
+
+I.BestFriendsForeverDown.clearOutcomeProvider("MyMod")
+```
+
+Only one provider is active; registering a new id replaces the previous one.
+Providers are not persisted, so re-register them in `onInit`, `onLoad`, or
+`onActive`. Keep the callback fast and side-effect-free. Errors and unexpected
+return values fall back to a normal down. BFF's own `deathChance` setting is
+separate and is checked before the provider is called.
 
 ### Follower Menu
 

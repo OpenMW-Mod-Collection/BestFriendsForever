@@ -34,7 +34,7 @@ local sideToAlignment = {
 ---@class FollowerData
 ---@field stats StatEntry[]
 ---@field icons IconData
----@field actor openmw.GObject
+---@field followerState table
 ---@field down boolean
 ---@field spells table
 ---@field activeEffects table
@@ -59,11 +59,12 @@ local STAT_DEFINITIONS = {
     },
 }
 
----@param follower openmw.GObject
+---@param followerState table
 ---@param down boolean
 ---@param settings table
 ---@return FollowerData
-local function newFollowerData(follower, down, settings)
+local function newFollowerData(followerState, down, settings)
+    local follower = followerState.actor
     local stats = {}
     local attributes = {}
     local skills = {}
@@ -91,7 +92,7 @@ local function newFollowerData(follower, down, settings)
     end
 
     local fData = {
-        actor = follower,
+        followerState = followerState,
         down = down,
         spells = types.Actor.spells(follower),
         activeEffects = types.Actor.activeEffects(follower),
@@ -219,8 +220,7 @@ end
 ---@return FollowerData
 ---@return openmw.ui.Layout
 followerUI.create = function(followerState, down, settings, showTooltip, hideTooltip)
-    local follower = followerState.actor
-    local fData = newFollowerData(follower, down, settings)
+    local fData = newFollowerData(followerState, down, settings)
     return fData, createLayout(followerState, fData, settings, showTooltip, hideTooltip)
 end
 

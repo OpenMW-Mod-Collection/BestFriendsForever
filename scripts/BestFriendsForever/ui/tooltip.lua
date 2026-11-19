@@ -10,14 +10,16 @@ local core = require("openmw.core")
 local l10n = core.l10n("BestFriendsForever")
 
 local tooltipUI = {}
+local registeredFields = {}
+local fieldsCache
 
 local function getActorName(fData)
-    local actor = fData.actor
+    local actor = fData.followerState.actor
     return actor.type.records[actor.recordId].name
 end
 
 local function getActorRole(fData)
-    local actor = fData.actor
+    local actor = fData.followerState.actor
     if types.NPC.objectIsInstance(actor) then
         local npcRecord = types.NPC.record(actor)
         local classRecord = types.NPC.classes.record(npcRecord.class)
@@ -93,16 +95,19 @@ end
 local TOOLTIP_FIELDS = {
     {
         name = "name",
+        order = 1,
         getText = function(fData)
             return l10n("followerTooltip_name", { name = getActorName(fData) })
         end,
     },
     {
         name = "role",
+        order = 2,
         getText = getActorRole,
     },
     {
         name = "diseases",
+        order = 3,
         enabledSetting = "diseases",
         getText = function(fData)
             return l10n("followerTooltip_diseases", { diseases = getDiseaseNames(fData) })
@@ -110,14 +115,86 @@ local TOOLTIP_FIELDS = {
     },
     {
         name = "statDamage",
+        order = 4,
         enabledSetting = "damagedStats",
         getText = getStatDamage,
     },
 }
 
+local function nameTaken(name)
+    for _, definition in ipairs(TOOLTIP_FIELDS) do
+        if definition.name == name then
+            return true
+        end
+    end
+    for _, definition in ipairs(registeredFields) do
+        if definition.name == name then
+            return true
+        end
+    end
+    return false
+end
+
+---@class TooltipFieldDef
+---@field name string Unique field name.
+---@field order number? sort weight, defaults to 100.
+---@field getText fun(followerState: table): string|nil
+
+---@param definition TooltipFieldDef
+function tooltipUI.registerField(definition)
+    if type(definition) ~= "table" then
+        error("registerFollowerTooltipField: definition must be a table", 2)
+    end
+    if type(definition.name) ~= "string" or definition.name == "" then
+        error("registerFollowerTooltipField: name must be a non-empty string", 2)
+    end
+    if nameTaken(definition.name) then
+        error(("registerFollowerTooltipField: '%s' is already registered"):format(definition.name), 2)
+    end
+    if type(definition.getText) ~= "function" then
+        error("registerFollowerTooltipField: getText must be a function", 2)
+    end
+
+    local order = tonumber(definition.order) or 100
+    if order ~= order or order == math.huge or order == -math.huge then
+        error("registerFollowerTooltipField: order must be a finite number", 2)
+    end
+
+    registeredFields[#registeredFields + 1] = {
+        name = definition.name,
+        order = order,
+        getText = definition.getText,
+        usesFollowerState = true,
+    }
+    fieldsCache = nil
+end
+
+local function allFields()
+    if fieldsCache then
+        return fieldsCache
+    end
+
+    local fields = {}
+    for _, definition in ipairs(TOOLTIP_FIELDS) do
+        fields[#fields + 1] = definition
+    end
+    for _, definition in ipairs(registeredFields) do
+        fields[#fields + 1] = definition
+    end
+
+    table.sort(fields, function(a, b)
+        if a.order ~= b.order then
+            return a.order < b.order
+        end
+        return a.name < b.name
+    end)
+    fieldsCache = fields
+    return fields
+end
+
 function tooltipUI.create(layer)
     local fieldLayouts = {}
-    for _, definition in ipairs(TOOLTIP_FIELDS) do
+    for _, definition in ipairs(allFields()) do
         local field = {
             name = "followerTooltip_" .. definition.name,
             template = I.MWUI.templates.textNormal,
@@ -153,13 +230,16 @@ function tooltipUI.create(layer)
 end
 
 function tooltipUI.update(tooltipElement, fData, enabledElements)
-    local fields = tooltipElement.layout.content.followerTooltipFields.content
-    for _, definition in ipairs(TOOLTIP_FIELDS) do
-        local field = fields["followerTooltip_" .. definition.name]
-        local text = definition.getText(fData)
-        field.props.text = text
-        field.props.visible = text ~= nil
-            and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
+    local layouts = tooltipElement.layout.content.followerTooltipFields.content
+    for _, definition in ipairs(allFields()) do
+        local field = layouts["followerTooltip_" .. definition.name]
+        if field then
+            local argument = definition.usesFollowerState and fData.followerState or fData
+            local text = definition.getText(argument)
+            field.props.text = text
+            field.props.visible = text ~= nil
+                and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
+        end
     end
     tooltipElement:update()
 end

@@ -286,11 +286,12 @@ end
 
 ---@param fData FollowerData
 iconsUI.updateIcons = function(fData)
+    local actor = fData.followerState.actor
     local iconLayout
-    if types.Actor.getStance(fData.actor) == STANCE.Nothing then
-        iconLayout = renderFollowerIcon(getFollowerIcon(fData.actor, fData.skills))
+    if types.Actor.getStance(actor) == STANCE.Nothing then
+        iconLayout = renderFollowerIcon(getFollowerIcon(actor, fData.skills))
     else
-        iconLayout = iconsUI.renderCombat(fData.actor)
+        iconLayout = iconsUI.renderCombat(actor)
     end
 
     fData.icons.container.props.visible = true

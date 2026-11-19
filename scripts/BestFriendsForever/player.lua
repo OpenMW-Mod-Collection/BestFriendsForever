@@ -1,21 +1,23 @@
 ---@diagnostic disable: undefined-field, param-type-mismatch
 ---@omw-context player
+local I = require("openmw.interfaces")
+local async = require("openmw.async")
+local core = require("openmw.core")
+local input = require("openmw.input")
 local self = require("openmw.self")
 local storage = require("openmw.storage")
-local async = require("openmw.async")
-local I = require("openmw.interfaces")
-local input = require("openmw.input")
-local core = require("openmw.core")
 
-local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
-local tp = require("scripts.BestFriendsForever.utils.teleport")
+local CombatTracker = require("scripts.BestFriendsForever.utils.combatTracker")
 local followerHUD = require("scripts.BestFriendsForever.ui.hud")
 local followerMenu = require("scripts.BestFriendsForever.ui.menu")
+local followerTooltip = require("scripts.BestFriendsForever.ui.tooltip")
 local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
-local combatTrackerConstructor = require("scripts.BestFriendsForever.utils.combatTracker")
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local tp = require("scripts.BestFriendsForever.utils.teleport")
 
 -- Initialization
-local sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
+local sectionWrapper =
+    storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 local settingsWrapper = settingsCache.new(sectionWrapper, async)
 local combatTracker
 local FDU = I.FollowerDetectionUtil
@@ -76,7 +78,7 @@ local function onCombatEnter()
     end
 end
 
-combatTracker = combatTrackerConstructor.new {
+combatTracker = CombatTracker.new {
     onEnter = onCombatEnter,
     onLeave = onCombatLeave,
 }
@@ -113,7 +115,10 @@ local function callFollowers(pressed)
     tp.teleportBatch(myFollowers, "BestFriendsForever_teleport")
 end
 
-input.registerActionHandler("BestFriendsForever_call", async:callback(callFollowers))
+input.registerActionHandler(
+    "BestFriendsForever_call",
+    async:callback(callFollowers)
+)
 
 -- Updates
 local teleportCooldown = 0.1
@@ -199,7 +204,10 @@ end
 local function followerDown(data, updateCombatStatus)
     downedFollowers[data.follower.id] = data.follower
     if updateCombatStatus ~= false then
-        data.follower:sendEvent("BestFriendsForever_setCombatStatus", isPlayerGroupInCombat())
+        data.follower:sendEvent(
+            "BestFriendsForever_setCombatStatus",
+            isPlayerGroupInCombat()
+        )
     end
     notifyCombatants(data, "BestFriendsForever_followerDown")
     local followerData = followerHUD.followerData[data.follower.id]
@@ -243,6 +251,11 @@ local function onLoad(data)
     onCombatEnter()
 end
 
+local function registerFollowerTooltipField(definition)
+    followerTooltip.registerField(definition)
+    followerHUD.rebuildTooltip()
+end
+
 return {
     engineHandlers = {
         onUpdate = onUpdate,
@@ -260,7 +273,7 @@ return {
     },
     interfaceName = "BestFriendsForever",
     interface = {
-        version = 1,
+        version = 2,
         getDownedFollowers = function()
             return downedFollowers
         end,
@@ -272,5 +285,6 @@ return {
             iconsUI.setFollowerIcon(recordId, fileName, isTransparent)
         end,
         registerFollowerMenuButton = followerMenu.registerButton,
+        registerFollowerTooltipField = registerFollowerTooltipField,
     },
 }

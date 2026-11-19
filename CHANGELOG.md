@@ -1,5 +1,12 @@
 # Best Friends Forever (OpenMW)
 
+## Unreleased
+
+- Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
+- Added `I.BestFriendsForever.registerFollowerTooltipField` for player scripts.
+- `I.BestFriendsForever` interface version is now 2.
+- `BestFriendsForever_followerDown` is now also sent to the follower's local scripts.
+
 ## 3.0
 
 - Massive UI rewrite
