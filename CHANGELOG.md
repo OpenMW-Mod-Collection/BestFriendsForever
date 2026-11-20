@@ -4,7 +4,8 @@
 
 - Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
 - Added `I.BestFriendsForever.registerFollowerTooltipField` for player scripts.
-- `I.BestFriendsForever` interface version is now 2.
+- `registerFollowerTooltipField` now accepts `getLayout` callbacks returning complete UI layouts.
+- `I.BestFriendsForever` interface version is now 3.
 - `BestFriendsForever_followerDown` is now also sent to the follower's local scripts.
 
 ## 3.0

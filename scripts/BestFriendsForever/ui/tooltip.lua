@@ -138,7 +138,8 @@ end
 ---@class TooltipFieldDef
 ---@field name string Unique field name.
 ---@field order number? sort weight, defaults to 100.
----@field getText fun(followerState: table): string|nil
+---@field getText? fun(followerState: table): string|nil
+---@field getLayout? fun(followerState: table, followerData: FollowerData): openmw.ui.Layout|nil
 
 ---@param definition TooltipFieldDef
 function tooltipUI.registerField(definition)
@@ -151,8 +152,11 @@ function tooltipUI.registerField(definition)
     if nameTaken(definition.name) then
         error(("registerFollowerTooltipField: '%s' is already registered"):format(definition.name), 2)
     end
-    if type(definition.getText) ~= "function" then
-        error("registerFollowerTooltipField: getText must be a function", 2)
+
+    local hasText = type(definition.getText) == "function"
+    local hasLayout = type(definition.getLayout) == "function"
+    if hasText == hasLayout then
+        error("registerFollowerTooltipField: provide exactly one of getText or getLayout", 2)
     end
 
     local order = tonumber(definition.order) or 100
@@ -164,6 +168,7 @@ function tooltipUI.registerField(definition)
         name = definition.name,
         order = order,
         getText = definition.getText,
+        getLayout = definition.getLayout,
         usesFollowerState = true,
     }
     fieldsCache = nil
@@ -192,18 +197,31 @@ local function allFields()
     return fields
 end
 
+local function newFieldLayout(definition)
+    local name = "followerTooltip_" .. definition.name
+    if definition.getLayout then
+        return {
+            name = name,
+            type = ui.TYPE.Container,
+            props = { visible = false },
+            content = ui.content {},
+        }
+    end
+    return {
+        name = name,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            textSize = 16,
+            textShadow = true,
+            visible = false,
+        },
+    }
+end
+
 function tooltipUI.create(layer)
     local fieldLayouts = {}
     for _, definition in ipairs(allFields()) do
-        local field = {
-            name = "followerTooltip_" .. definition.name,
-            template = I.MWUI.templates.textNormal,
-            props = {
-                textSize = 16,
-                textShadow = true,
-            },
-        }
-        fieldLayouts[#fieldLayouts + 1] = field
+        fieldLayouts[#fieldLayouts + 1] = newFieldLayout(definition)
     end
 
     local layout = {
@@ -235,10 +253,18 @@ function tooltipUI.update(tooltipElement, fData, enabledElements)
         local field = layouts["followerTooltip_" .. definition.name]
         if field then
             local argument = definition.usesFollowerState and fData.followerState or fData
-            local text = definition.getText(argument)
-            field.props.text = text
-            field.props.visible = text ~= nil
-                and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
+            if definition.getLayout then
+                local layout = definition.getLayout(argument, fData)
+                if field.content[1] ~= layout then
+                    field.content = layout and ui.content { layout } or ui.content {}
+                end
+                field.props.visible = layout ~= nil
+            else
+                local text = definition.getText(argument)
+                field.props.text = text
+                field.props.visible = text ~= nil
+                    and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
+            end
         end
     end
     tooltipElement:update()

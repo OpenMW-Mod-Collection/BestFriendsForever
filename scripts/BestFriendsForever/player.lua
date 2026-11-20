@@ -273,7 +273,7 @@ return {
     },
     interfaceName = "BestFriendsForever",
     interface = {
-        version = 2,
+        version = 3,
         getDownedFollowers = function()
             return downedFollowers
         end,

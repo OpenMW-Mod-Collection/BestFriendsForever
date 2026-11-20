@@ -109,7 +109,7 @@ BestFriendsForever_followerUp
 
 ### Interfaces
 
-`I.BestFriendsForever.version` is currently `2`.
+`I.BestFriendsForever.version` is currently `3`.
 
 ```lua
 -- Returns downed followers of the player
@@ -135,6 +135,30 @@ I.BestFriendsForever.registerFollowerTooltipField {
     order = 100,
     getText = function(followerState)
         return followerState.isSummon and "Summon" or nil
+    end,
+}
+
+-- Instead of text, a field can provide a complete UI layout.
+-- getLayout receives the FDU state and BFF's read-only follower data
+-- (down, spells, activeEffects, attributes, skills).
+-- Return an openmw.ui.Layout table to show the field, or nil to hide it.
+-- Provide either getText or getLayout, never both.
+-- ui = require("openmw.ui")
+I.BestFriendsForever.registerFollowerTooltipField {
+    name = "MyMod_custom",
+    order = 5,
+    getLayout = function(followerState, followerData)
+        return {
+            type = ui.TYPE.Flex,
+            props = { horizontal = true, gap = 4 },
+            content = ui.content {
+                { template = I.MWUI.templates.textNormal, props = { text = "Custom" } },
+                {
+                    template = I.MWUI.templates.textNormal,
+                    props = { text = followerState.isSummon and "Summon" or "Follower" },
+                },
+            },
+        }
     end,
 }
 ```
