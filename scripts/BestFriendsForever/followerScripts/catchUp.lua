@@ -9,12 +9,12 @@ local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
+-- Variables
 ---@type openmw.GObject|nil
 local leader
 local leaderSpeed
 local selfSpeed = types.Actor.stats.attributes.speed(self)
-
-local settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_catchUp"), async)
+local settings
 
 local function getTargetBoost()
     if not leader or not leader:isValid() then
@@ -63,6 +63,9 @@ local function onLoad(data)
     leader = data.leader or leader
     leaderSpeed = types.Actor.stats.attributes.speed(leader)
 end
+
+-- Initialization
+settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_catchUp"), async)
 
 return {
     engineHandlers = {

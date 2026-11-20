@@ -25,19 +25,6 @@ local followerIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
 ---@type table<string, openmw.ui.TextureResource>
 local iconCache = {}
 local iconsUI = {}
-
----@class FollowerIcon
----@field path string
----@field transparent boolean
----@field rule? fun(actor: openmw.GObject): boolean|nil
-
----@class FollowerIconSpec
----@field recordIds? string|string[]
----@field recordId? string
----@field rule? fun(actor: openmw.GObject): boolean|nil
----@field fileName string
----@field isTransparent boolean
-
 ---@type table<string, FollowerIcon>
 local iconById = {}
 ---@type FollowerIcon[]
@@ -92,6 +79,18 @@ local specializationSkills = {
         "speechcraft",
     },
 }
+
+---@class FollowerIcon
+---@field path string
+---@field transparent boolean
+---@field rule? fun(actor: openmw.GObject): boolean|nil
+
+---@class FollowerIconSpec
+---@field recordIds? string|string[]
+---@field recordId? string
+---@field rule? fun(actor: openmw.GObject): boolean|nil
+---@field fileName string
+---@field isTransparent boolean
 
 ---@param path string
 ---@return openmw.ui.TextureResource

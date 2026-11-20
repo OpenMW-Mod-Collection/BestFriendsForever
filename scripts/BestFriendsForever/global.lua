@@ -7,14 +7,18 @@ local I = require("openmw.interfaces")
 local core = require("openmw.core")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+
+-- Constants
 local FDU = I.FollowerDetectionUtil
 local l10n = core.l10n("BestFriendsForever")
-
 local sectionToggles = storage.globalSection("SettingsBestFriendsForever_toggles")
 local sectionBlacklists = storage.globalSection("SettingsBestFriendsForever_blacklist")
-local settingToggles = settingsCache.new(sectionToggles, async, ResyncAll)
-local settingsBlacklists = settingsCache.new(sectionBlacklists, async, ResyncAll)
 local immortalitySpell = "BFF_Immortality"
+
+-- Variables
+local settingToggles
+local settingsBlacklists
+local scripts
 local waitingActors = {}
 
 local function blacklisted(actor, noMwscripts, blacklist)
@@ -45,45 +49,6 @@ local function makeScript(name, path, cond, onAdd, onRemove)
         onRemove = onRemove,
     }
 end
-
-local scripts = {
-    makeScript("Immortality", "scripts/BestFriendsForever/followerScripts/immortality.lua", function(fState)
-        local record = fState.actor.type.records[fState.actor.recordId]
-        local isSummon = FDU.isSummon(fState.actor)
-        local banned = blacklisted(
-            fState.actor,
-            settingsBlacklists.immortalityBlacklistMWScript,
-            settingsBlacklists.immortalityScriptBlacklist
-        )
-        -- for Loafy's Necromancy https://www.nexusmods.com/morrowind/mods/58901
-        local isZombie = record.name:lower():find("'s zombie")
-        return not isSummon
-            and fState.followsPlayer
-            and settingToggles.enableImmortality
-            and not banned
-            and not isZombie
-    end, function(fState)
-        local follower = fState.actor
-        types.Actor.spells(follower):add(immortalitySpell)
-    end, function(fState)
-        local follower = fState.actor
-        types.Actor.spells(follower):remove(immortalitySpell)
-    end),
-    makeScript("Teleport", "scripts/BestFriendsForever/followerScripts/teleport.lua", function(fState)
-        local banned = blacklisted(
-            fState.actor,
-            settingsBlacklists.teleportBlacklistMWScript,
-            settingsBlacklists.teleportScriptBlacklist
-        )
-        return settingToggles.enableTeleport and not banned
-    end),
-    makeScript("Catch Up", "scripts/BestFriendsForever/followerScripts/catchUp.lua", function()
-        return settingToggles.enableCatchUp
-    end),
-    makeScript("Ward", "scripts/BestFriendsForever/followerScripts/ward.lua", function()
-        return settingToggles.enableWard
-    end),
-}
 
 local function syncScripts(fState, addingScript)
     local banned = blacklisted(fState.actor, false, settingsBlacklists.globalScriptBlacklist)
@@ -116,10 +81,6 @@ local function followerListUpdated(followers)
     for _, fState in pairs(followers) do
         syncScripts(fState, fState.followsPlayer)
     end
-end
-
-ResyncAll = function()
-    followerListUpdated(FDU and FDU.getFollowerList() or {})
 end
 
 local function detachScript(data)
@@ -161,6 +122,7 @@ local function onActorActivated(object, activator)
     if not waitingActor or not activator or not types.Player.objectIsInstance(activator) then
         return
     end
+
     if FDU.isSummon(waitingActor) or hasCommandEffect(waitingActor) then
         return
     end
@@ -186,6 +148,55 @@ end
 
 local function onLoad(data)
     waitingActors = data and data.waitingActors or {}
+end
+
+-- Initialization
+settingToggles = settingsCache.new(sectionToggles, async, ResyncAll)
+settingsBlacklists = settingsCache.new(sectionBlacklists, async, ResyncAll)
+
+-- TODO: get rid of makeScript() function
+scripts = {
+    makeScript("Immortality", "scripts/BestFriendsForever/followerScripts/immortality.lua", function(fState)
+        local record = fState.actor.type.records[fState.actor.recordId]
+        local isSummon = FDU.isSummon(fState.actor)
+        local banned = blacklisted(
+            fState.actor,
+            settingsBlacklists.immortalityBlacklistMWScript,
+            settingsBlacklists.immortalityScriptBlacklist
+        )
+        -- for Loafy's Necromancy https://www.nexusmods.com/morrowind/mods/58901
+        local isZombie = record.name:lower():find("'s zombie")
+        return not isSummon
+            and fState.followsPlayer
+            and settingToggles.enableImmortality
+            and not banned
+            and not isZombie
+    end, function(fState)
+        local follower = fState.actor
+        types.Actor.spells(follower):add(immortalitySpell)
+    end, function(fState)
+        local follower = fState.actor
+        types.Actor.spells(follower):remove(immortalitySpell)
+    end),
+    makeScript("Teleport", "scripts/BestFriendsForever/followerScripts/teleport.lua", function(fState)
+        local banned = blacklisted(
+            fState.actor,
+            settingsBlacklists.teleportBlacklistMWScript,
+            settingsBlacklists.teleportScriptBlacklist
+        )
+        return settingToggles.enableTeleport and not banned
+    end),
+    makeScript("Catch Up", "scripts/BestFriendsForever/followerScripts/catchUp.lua", function()
+        return settingToggles.enableCatchUp
+    end),
+    makeScript("Ward", "scripts/BestFriendsForever/followerScripts/ward.lua", function()
+        return settingToggles.enableWard
+    end),
+}
+
+-- Assigned after cache creation to preserve the existing resync behavior.
+ResyncAll = function()
+    followerListUpdated(FDU and FDU.getFollowerList() or {})
 end
 
 I.Activation.addHandlerForType(types.NPC, onActorActivated)

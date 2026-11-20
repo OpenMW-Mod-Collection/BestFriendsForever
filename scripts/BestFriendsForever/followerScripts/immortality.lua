@@ -9,10 +9,14 @@ local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
+-- Constants
 local immortalitySection = storage.globalSection("SettingsBestFriendsForever_immortality")
-local settings = settingsCache.new(immortalitySection, async)
 local l10n = core.l10n("BestFriendsForever")
 local selfName = self.type.records[self.recordId].name
+local SCRIPT_PATH = "scripts/BestFriendsForever/followerScripts/immortality.lua"
+
+-- Variables
+local settings
 local selfEffects = types.Actor.activeEffects(self)
 local health = self.type.stats.dynamic.health(self)
 local fatigue = self.type.stats.dynamic.fatigue(self)
@@ -20,9 +24,6 @@ local eventData = {
     follower = self,
     leader = nil,
 }
-
-local SCRIPT_PATH = "scripts/BestFriendsForever/followerScripts/immortality.lua"
-
 local dead = types.Actor.isDead(self)
 local down = false
 local dying = false
@@ -205,6 +206,9 @@ local function onLoad(data)
     end
 end
 
+-- Initialization
+settings = settingsCache.new(immortalitySection, async)
+
 I.Combat.addOnHitHandler(function(attack)
     if down or dying then
         return false
@@ -231,7 +235,6 @@ I.Combat.addOnHitHandler(function(attack)
         return false
     end
 end)
-
 
 return {
     engineHandlers = {

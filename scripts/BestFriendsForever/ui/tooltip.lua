@@ -7,25 +7,27 @@ local I = require("openmw.interfaces")
 local types = require("openmw.types")
 local core = require("openmw.core")
 
+-- Constants
 local l10n = core.l10n("BestFriendsForever")
 
+-- Variables
 local tooltipUI = {}
 local registeredFields = {}
 local fieldsCache
 
-local function getActorName(fData)
-    local actor = fData.followerState.actor
+local function getActorName(followerState)
+    local actor = followerState.actor
     return actor.type.records[actor.recordId].name
 end
 
-local function getActorRole(fData)
-    local actor = fData.followerState.actor
+local function getActorRole(followerState)
+    local actor = followerState.actor
     if types.NPC.objectIsInstance(actor) then
-        local npcRecord = types.NPC.record(actor)
+        local npcRecord = types.NPC.records[actor.recordId]
         local classRecord = types.NPC.classes.record(npcRecord.class)
         return l10n("followerTooltip_class", { class_name = classRecord.name })
     elseif types.Creature.objectIsInstance(actor) then
-        local creatureRecord = types.Creature.record(actor)
+        local creatureRecord = types.Creature.records[actor.recordId]
         local baseCreature = creatureRecord.baseCreature
             and creatureRecord.baseCreature ~= ""
             and types.Creature.record(creatureRecord.baseCreature)
@@ -50,8 +52,7 @@ local function getDiseaseNames(fData)
 end
 
 local function addStatName(names, recordList, statId)
-    local record = recordList[statId]
-    names[#names + 1] = record and record.name or statId
+    names[#names + 1] = recordList[statId].name
 end
 
 local function fillAffectedStats(stats, affectedStats, activeEffects, effectId)
@@ -92,41 +93,7 @@ local function getStatDamage(fData)
     })
 end
 
-local TOOLTIP_FIELDS = {
-    {
-        name = "name",
-        order = 1,
-        getText = function(fData)
-            return l10n("followerTooltip_name", { name = getActorName(fData) })
-        end,
-    },
-    {
-        name = "role",
-        order = 2,
-        getText = getActorRole,
-    },
-    {
-        name = "diseases",
-        order = 3,
-        enabledSetting = "diseases",
-        getText = function(fData)
-            return l10n("followerTooltip_diseases", { diseases = getDiseaseNames(fData) })
-        end,
-    },
-    {
-        name = "statDamage",
-        order = 4,
-        enabledSetting = "damagedStats",
-        getText = getStatDamage,
-    },
-}
-
 local function nameTaken(name)
-    for _, definition in ipairs(TOOLTIP_FIELDS) do
-        if definition.name == name then
-            return true
-        end
-    end
     for _, definition in ipairs(registeredFields) do
         if definition.name == name then
             return true
@@ -138,7 +105,8 @@ end
 ---@class TooltipFieldDef
 ---@field name string Unique field name.
 ---@field order number? sort weight, defaults to 100.
----@field getText? fun(followerState: table): string|nil
+---@field enabledSetting string? HUD element setting that can hide the field.
+---@field getText? fun(followerState: table, followerData: FollowerData): string|nil
 ---@field getLayout? fun(followerState: table, followerData: FollowerData): openmw.ui.Layout|nil
 
 ---@param definition TooltipFieldDef
@@ -167,9 +135,9 @@ function tooltipUI.registerField(definition)
     registeredFields[#registeredFields + 1] = {
         name = definition.name,
         order = order,
+        enabledSetting = definition.enabledSetting,
         getText = definition.getText,
         getLayout = definition.getLayout,
-        usesFollowerState = true,
     }
     fieldsCache = nil
 end
@@ -180,9 +148,6 @@ local function allFields()
     end
 
     local fields = {}
-    for _, definition in ipairs(TOOLTIP_FIELDS) do
-        fields[#fields + 1] = definition
-    end
     for _, definition in ipairs(registeredFields) do
         fields[#fields + 1] = definition
     end
@@ -252,22 +217,57 @@ function tooltipUI.update(tooltipElement, fData, enabledElements)
     for _, definition in ipairs(allFields()) do
         local field = layouts["followerTooltip_" .. definition.name]
         if field then
-            local argument = definition.usesFollowerState and fData.followerState or fData
+            local followerState = fData.followerState
+            local visible
             if definition.getLayout then
-                local layout = definition.getLayout(argument, fData)
+                local layout = definition.getLayout(followerState, fData)
                 if field.content[1] ~= layout then
                     field.content = layout and ui.content { layout } or ui.content {}
                 end
-                field.props.visible = layout ~= nil
+                visible = layout ~= nil
             else
-                local text = definition.getText(argument)
+                local text = definition.getText(followerState, fData)
                 field.props.text = text
-                field.props.visible = text ~= nil
-                    and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
+                visible = text ~= nil
             end
+            field.props.visible = visible
+                and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
         end
     end
     tooltipElement:update()
 end
+
+-- Initialization
+tooltipUI.registerField {
+    name = "name",
+    order = 1,
+    getText = function(followerState)
+        return l10n("followerTooltip_name", { name = getActorName(followerState) })
+    end,
+}
+
+tooltipUI.registerField {
+    name = "role",
+    order = 2,
+    getText = getActorRole,
+}
+
+tooltipUI.registerField {
+    name = "diseases",
+    order = 3,
+    enabledSetting = "diseases",
+    getText = function(_, followerData)
+        return l10n("followerTooltip_diseases", { diseases = getDiseaseNames(followerData) })
+    end,
+}
+
+tooltipUI.registerField {
+    name = "statDamage",
+    order = 4,
+    enabledSetting = "damagedStats",
+    getText = function(_, followerData)
+        return getStatDamage(followerData)
+    end,
+}
 
 return tooltipUI

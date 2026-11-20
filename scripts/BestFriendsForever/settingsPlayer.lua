@@ -1,6 +1,14 @@
 ---@omw-context menu
 local I = require("openmw.interfaces")
 
+-- Constants
+local groups = {
+    "call",
+    "HUDFollower",
+    "HUDWrapper",
+}
+
+-- Initialization
 I.Settings.registerPage {
     key = "BestFriendsForever",
     l10n = "BestFriendsForever",
@@ -13,12 +21,6 @@ I.Settings.registerPage {
     l10n = "BestFriendsForever",
     name = "page_HUD_name",
     description = "page_HUD_description",
-}
-
-local groups = {
-    "call",
-    "HUDFollower",
-    "HUDWrapper",
 }
 
 for _, group in ipairs(groups) do

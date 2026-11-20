@@ -145,8 +145,9 @@ I.BestFriendsForever.setFollowerIcon {
 -- Adds a field to the follower tooltip
 -- name must be unique; order is a numeric weight and defaults to 100
 -- built-in fields use 1-4; decimals such as 1.5 are allowed
--- getText receives the Follower Detection Util state and returns text or nil
--- nil hides the field. Safe to register at any time; BFF rebuilds the tooltip.
+-- getText receives the Follower Detection Util state and BFF's read-only
+-- follower data, and returns text or nil (nil hides the field).
+-- Safe to register at any time; BFF rebuilds the tooltip.
 -- Scope: Player
 I.BestFriendsForever.registerFollowerTooltipField {
     name = "MyMod_status",

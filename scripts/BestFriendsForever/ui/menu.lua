@@ -10,7 +10,7 @@ local buttonTemplates = require("scripts.BestFriendsForever.utils.button")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
 
-local followerMenu = {}
+-- Constants
 local PAGE_SIZE = 10
 local MENU_MODE = "Interface"
 local BUTTON_TARGETS = {
@@ -19,6 +19,8 @@ local BUTTON_TARGETS = {
     global = true,
 }
 
+-- Variables
+local followerMenu = {}
 local buttonsByName = {}
 local currentFollowerState
 local currentPage = 1

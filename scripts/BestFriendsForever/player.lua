@@ -14,15 +14,23 @@ local followerTooltip = require("scripts.BestFriendsForever.ui.tooltip")
 local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local tp = require("scripts.BestFriendsForever.utils.teleport")
+local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
 
--- Initialization
-local sectionWrapper =
-    storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
-local settingsWrapper = settingsCache.new(sectionWrapper, async)
+-- Constants
+local teleportCooldown = 0.1
+
+-- Variables
+local sectionWrapper
+local settingsWrapper
 local combatTracker
 local FDU = I.FollowerDetectionUtil
+local followers
+local downedFollowers = {}
+local unloadedFollowers = {}
+local teleportAccumulator = teleportCooldown
+local uiUpdateAccumulator
 
-local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
+-- Fail fast before touching the FDU list.
 deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
     {
         plugin = "FollowerDetectionUtil.omwscripts",
@@ -31,10 +39,7 @@ deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
         curVersion = FDU and FDU.version or -1,
     },
 })
-
-local followers = FDU.getFollowerList()
-local downedFollowers = {}
-local unloadedFollowers = {}
+followers = FDU.getFollowerList()
 
 local function isPlayerGroupInCombat()
     local inCombat = false
@@ -78,29 +83,13 @@ local function onCombatEnter()
     end
 end
 
-combatTracker = CombatTracker.new {
-    onEnter = onCombatEnter,
-    onLeave = onCombatLeave,
-}
-
 -- HUD lifecycle
-if settingsWrapper.enable then
-    followerHUD.new(followers)
-end
 
 local function destroyHUD()
     followerHUD.destroy()
 end
 
 -- Follower actions
-input.registerAction {
-    key = "BestFriendsForever_call",
-    type = input.ACTION_TYPE.Boolean,
-    l10n = "BestFriendsForever",
-    name = "callAction_name",
-    description = "",
-    defaultValue = false,
-}
 
 local function callFollowers(pressed)
     if pressed or I.UI.getMode() or core.isWorldPaused() then
@@ -115,15 +104,7 @@ local function callFollowers(pressed)
     tp.teleportBatch(myFollowers, "BestFriendsForever_teleport")
 end
 
-input.registerActionHandler(
-    "BestFriendsForever_call",
-    async:callback(callFollowers)
-)
-
 -- Updates
-local teleportCooldown = 0.1
-local teleportAccumulator = teleportCooldown
-local uiUpdateAccumulator = settingsWrapper.pollingRate
 
 local function teleportUnloadedFollowers(dt)
     teleportAccumulator = teleportAccumulator + dt
@@ -255,6 +236,33 @@ local function registerFollowerTooltipField(definition)
     followerTooltip.registerField(definition)
     followerHUD.rebuildTooltip()
 end
+
+-- Initialization
+sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
+settingsWrapper = settingsCache.new(sectionWrapper, async)
+uiUpdateAccumulator = settingsWrapper.pollingRate
+
+combatTracker = CombatTracker.new {
+    onEnter = onCombatEnter,
+    onLeave = onCombatLeave,
+}
+
+if settingsWrapper.enable then
+    followerHUD.new(followers)
+end
+
+input.registerAction {
+    key = "BestFriendsForever_call",
+    type = input.ACTION_TYPE.Boolean,
+    l10n = "BestFriendsForever",
+    name = "callAction_name",
+    description = "",
+    defaultValue = false,
+}
+input.registerActionHandler(
+    "BestFriendsForever_call",
+    async:callback(callFollowers)
+)
 
 return {
     engineHandlers = {

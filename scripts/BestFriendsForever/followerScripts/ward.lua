@@ -10,24 +10,16 @@ local I = require("openmw.interfaces")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local spellcastRecordDecoder = require("scripts.BestFriendsForever.utils.spellcastRecordDecoder")
 
-local applyWard
+-- Constants
 local wardSection = storage.globalSection("SettingsBestFriendsForever_ward")
-local wardSettings = settingsCache.new(wardSection, async, applyWard)
+
+-- Variables
+local wardSettings
 local selfActiveSpells = types.Actor.activeEffects(self)
 local selfSpells = types.Actor.spells(self)
 local nextStatDamageCheck = 0
 local attributes = {}
 local skills = {}
-
-for attrId, attrGetter in pairs(types.Actor.stats.attributes) do
-    attributes[attrId] = attrGetter(self)
-end
-
-if types.NPC.objectIsInstance(self) then
-    for skillId, skillGetter in pairs(types.NPC.stats.skills) do
-        skills[skillId] = skillGetter(self)
-    end
-end
 
 local function removeDiseases()
     if not wardSettings.disableDiseases then
@@ -75,8 +67,6 @@ local function rejectDiseaseSpell(options)
     end
 end
 
-I.SpellCasting.addApplyMagicEffectsHandler(rejectDiseaseSpell)
-
 local function onUpdate(dt)
     nextStatDamageCheck = nextStatDamageCheck - dt
     if nextStatDamageCheck > 0 then
@@ -87,6 +77,20 @@ local function onUpdate(dt)
     removeDiseases()
     nextStatDamageCheck = wardSettings.statDamageCheckFrequency
 end
+
+-- Initialization
+wardSettings = settingsCache.new(wardSection, async)
+
+for attrId, attrGetter in pairs(types.Actor.stats.attributes) do
+    attributes[attrId] = attrGetter(self)
+end
+if types.NPC.objectIsInstance(self) then
+    for skillId, skillGetter in pairs(types.NPC.stats.skills) do
+        skills[skillId] = skillGetter(self)
+    end
+end
+
+I.SpellCasting.addApplyMagicEffectsHandler(rejectDiseaseSpell)
 
 removeDiseases()
 restoreAllStats()

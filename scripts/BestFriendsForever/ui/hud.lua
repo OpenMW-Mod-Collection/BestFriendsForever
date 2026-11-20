@@ -12,6 +12,41 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local followerUI = require("scripts.BestFriendsForever.ui.follower.widget")
 local tooltipUI = require("scripts.BestFriendsForever.ui.tooltip")
 
+-- Constants
+local delimiterW = 10
+local delimiterH = 15
+local alignToAnchor = {
+    Right = 0,
+    Down = 0,
+    Center = 0.5,
+    Left = 1,
+    Up = 1,
+}
+local sideToAlignment = {
+    Left = "Start",
+    Center = "Center",
+    Right = "End",
+}
+local interval = { template = I.MWUI.templates.interval }
+local delimiterPadding = { props = { size = v2(delimiterW, delimiterH) } }
+local delimiterLine = {
+    props = {
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+    },
+}
+local tooltipCursorOffset = v2(16, 16)
+local delimiter = {
+    external = {
+        stretch = 1,
+    },
+    props = {
+        size = v2(delimiterW, delimiterH),
+    },
+    content = ui.content { delimiterLine },
+}
+
+-- Variables
 local followerHUD = {}
 
 ---@type table<string, FollowerData>
@@ -19,6 +54,11 @@ followerHUD.followerData = {}
 ---@type openmw.ui.Element|nil
 followerHUD.tooltipElement = nil
 local activeTooltipData
+local settingsWrapper
+local settingsLocalHUD
+local settingsBlacklists
+local rootFlex
+local wrapperEventCallbacks
 
 followerHUD.hudDisplayMap = {
     ---@param uiMode string
@@ -43,10 +83,6 @@ followerHUD.hudDisplayMap = {
     end,
 }
 
--- Settings
-
-local settingsWrapper
-
 local function settingsUpdated()
     if not settingsWrapper or not settingsWrapper.enable then
         if followerHUD.root then
@@ -57,18 +93,7 @@ local function settingsUpdated()
     followerHUD.new(I.FollowerDetectionUtil.getFollowerList())
 end
 
-local wrapperSection = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
-settingsWrapper = settingsCache.new(wrapperSection, async, settingsUpdated)
-local settingsLocalHUD =
-    settingsCache.new(storage.playerSection("SettingsBestFriendsForever_HUDFollower"), async, settingsUpdated)
-local settingsBlacklists =
-    settingsCache.new(storage.globalSection("SettingsBestFriendsForever_blacklist"), async, settingsUpdated)
-
 -- Utilities
-
-local function padding(x, y)
-    return { props = { size = v2(x, y) } }
-end
 
 local function blacklisted(actor, blacklist)
     local mwscript = actor.type.records[actor.recordId].mwscript
@@ -89,43 +114,6 @@ local function blacklisted(actor, blacklist)
     end
     return false
 end
-
--- Layout constants
-
-local delimiterW = 10
-local delimiterH = 15
-local alignToAnchor = {
-    Right = 0,
-    Down = 0,
-    Center = 0.5,
-    Left = 1,
-    Up = 1,
-}
-local sideToAlignment = {
-    Left = "Start",
-    Center = "Center",
-    Right = "End",
-}
-local interval = { template = I.MWUI.templates.interval }
-local delimiterPadding = padding(delimiterW, delimiterH)
-local delimiterLine = {
-    template = settingsWrapper.horizontalLayout and I.MWUI.templates.verticalLine or I.MWUI.templates.horizontalLine,
-    props = {
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-    },
-}
-local tooltipCursorOffset = v2(16, 16)
-local delimiter = {
-    external = {
-        stretch = 1,
-    },
-    props = {
-        size = v2(delimiterW, delimiterH),
-    },
-    content = ui.content { delimiterLine },
-}
-local rootFlex
 
 -- Dragging
 
@@ -169,12 +157,6 @@ local function mouseRelease(data, elem)
     )
     followerHUD.root:update()
 end
-
-local wrapperEventCallbacks = {
-    mousePress = async:callback(mousePress),
-    mouseMove = async:callback(mouseMove),
-    mouseRelease = async:callback(mouseRelease),
-}
 
 -- Layout construction
 
@@ -362,5 +344,19 @@ followerHUD.updateData = function()
     followerHUD.updateRootVisibility(I.UI.getMode())
     followerHUD.root:update()
 end
+
+-- Initialization
+local wrapperSection = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
+settingsWrapper = settingsCache.new(wrapperSection, async, settingsUpdated)
+settingsLocalHUD =
+    settingsCache.new(storage.playerSection("SettingsBestFriendsForever_HUDFollower"), async, settingsUpdated)
+settingsBlacklists =
+    settingsCache.new(storage.globalSection("SettingsBestFriendsForever_blacklist"), async, settingsUpdated)
+
+wrapperEventCallbacks = {
+    mousePress = async:callback(mousePress),
+    mouseMove = async:callback(mouseMove),
+    mouseRelease = async:callback(mouseRelease),
+}
 
 return followerHUD

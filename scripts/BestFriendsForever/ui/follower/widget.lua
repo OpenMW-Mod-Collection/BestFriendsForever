@@ -9,13 +9,33 @@ local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
 local barsUI = require("scripts.BestFriendsForever.ui.follower.bars")
 local followerMenu = require("scripts.BestFriendsForever.ui.menu")
 
-local followerUI = {}
+-- Constants
 local interval = { template = I.MWUI.templates.interval }
 local sideToAlignment = {
     Left = "Start",
     Center = "Center",
     Right = "End",
 }
+local STAT_DEFINITIONS = {
+    {
+        name = "health",
+        getStat = types.Actor.stats.dynamic.health,
+        colorSetting = "healthBarColor",
+    },
+    {
+        name = "magicka",
+        getStat = types.Actor.stats.dynamic.magicka,
+        colorSetting = "magickaBarColor",
+    },
+    {
+        name = "fatigue",
+        getStat = types.Actor.stats.dynamic.fatigue,
+        colorSetting = "fatigueBarColor",
+    },
+}
+
+-- Variables
+local followerUI = {}
 
 ---@class IconData
 ---@field container openmw.ui.Layout
@@ -40,24 +60,6 @@ local sideToAlignment = {
 ---@field activeEffects table
 ---@field attributes table<string, table>
 ---@field skills table<string, table>
-
-local STAT_DEFINITIONS = {
-    {
-        name = "health",
-        getStat = types.Actor.stats.dynamic.health,
-        colorSetting = "healthBarColor",
-    },
-    {
-        name = "magicka",
-        getStat = types.Actor.stats.dynamic.magicka,
-        colorSetting = "magickaBarColor",
-    },
-    {
-        name = "fatigue",
-        getStat = types.Actor.stats.dynamic.fatigue,
-        colorSetting = "fatigueBarColor",
-    },
-}
 
 ---@param followerState table
 ---@param down boolean

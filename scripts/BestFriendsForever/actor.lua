@@ -5,21 +5,13 @@ local async = require("openmw.async")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
--- [==========================================================]
 -- currently here's only logic for switching enemy aggro
 -- from downed followers to their leader
--- [==========================================================]
 
+-- Variables
 local noOneDowned = true
 local downedFollowersToLeaders = {}
-
-local settings = {}
-settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async, function(key)
-    if key == "changeAggro" and not settings[key] then
-        downedFollowersToLeaders = {}
-        noOneDowned = true
-    end
-end)
+local settings
 
 -- I have to continuosly check it
 -- so they don't change back to attacking the downed follower
@@ -65,6 +57,14 @@ local function onLoad(data)
     downedFollowersToLeaders = data.downedFollowersToLeaders or downedFollowersToLeaders
     noOneDowned = not next(downedFollowersToLeaders)
 end
+
+-- Initialization
+settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async, function(key)
+    if key == "changeAggro" and not settings[key] then
+        downedFollowersToLeaders = {}
+        noOneDowned = true
+    end
+end)
 
 return {
     engineHandlers = {
