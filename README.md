@@ -109,7 +109,7 @@ BestFriendsForever_followerUp
 
 ### Interfaces
 
-`I.BestFriendsForever.version` is currently `3`.
+`I.BestFriendsForever.version` is currently `4`.
 
 ```lua
 -- Returns downed followers of the player
@@ -117,12 +117,30 @@ BestFriendsForever_followerUp
 -- Scope: Player
 I.BestFriendsForever.getDownedFollowers()
 
--- Assigns a unique icon to a certain follower
+-- Assigns an icon to followers. Provide exactly one of recordIds or rule.
+-- recordIds is a record ID string or a list of IDs (useful when a follower
+-- is replaced by a twin with a different ID); recordId = "..." is shorthand
+-- for one ID. IDs are looked up first.
+-- rule(actor) is checked after ID lookup, in registration order; the first
+-- matching rule wins. Anything unmatched falls back to BFF's built-in
+-- class/creature-type icons.
 -- fileName is a texture path relative to Data Files
 -- isTransparent=true layers the image over the default background
 -- false displays the image by itself
 -- Scope: Player
-I.BestFriendsForever.setFollowerIcon(recordId, fileName, isTransparent)
+I.BestFriendsForever.setFollowerIcon {
+    recordIds = { "julan", "julan_twin" },
+    fileName = "textures/bffs/Julan 1.png",
+    isTransparent = true,
+}
+
+I.BestFriendsForever.setFollowerIcon {
+    rule = function(actor)
+        return actor.recordId == "some_creature"
+    end,
+    fileName = "textures/bffs/Animunculi.png",
+    isTransparent = true,
+}
 
 -- Adds a field to the follower tooltip
 -- name must be unique; order is a numeric weight and defaults to 100

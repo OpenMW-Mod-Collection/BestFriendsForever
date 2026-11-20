@@ -273,7 +273,7 @@ return {
     },
     interfaceName = "BestFriendsForever",
     interface = {
-        version = 3,
+        version = 4,
         getDownedFollowers = function()
             return downedFollowers
         end,
@@ -281,8 +281,8 @@ return {
             sectionWrapper:set("posX", x)
             sectionWrapper:set("posY", y)
         end,
-        setFollowerIcon = function(recordId, fileName, isTransparent)
-            iconsUI.setFollowerIcon(recordId, fileName, isTransparent)
+        setFollowerIcon = function(spec)
+            iconsUI.setFollowerIcon(spec)
         end,
         registerFollowerMenuButton = followerMenu.registerButton,
         registerFollowerTooltipField = registerFollowerTooltipField,

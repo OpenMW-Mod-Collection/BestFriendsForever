@@ -5,7 +5,9 @@
 - Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
 - Added `I.BestFriendsForever.registerFollowerTooltipField` for player scripts.
 - `registerFollowerTooltipField` now accepts `getLayout` callbacks returning complete UI layouts.
-- `I.BestFriendsForever` interface version is now 3.
+- `I.BestFriendsForever.setFollowerIcon` now takes a spec table with `recordIds` (string or list; `recordId` for one) or a `rule(actor)` function. Icon lookup is now ID map → rules → built-in class/creature-type fallback.
+- Animunculi uses a rule; the four creature types are handled by the built-in fallback (textures still TODO).
+- `I.BestFriendsForever` interface version is now 4.
 - `BestFriendsForever_followerDown` is now also sent to the follower's local scripts.
 
 ## 3.0

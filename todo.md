@@ -12,6 +12,12 @@
   - Follower/combat
   - Combat/follower
 - [ ] Icon interval
+- [ ] Add textures for the rule-based follower icons (currently referenced but missing)
+  - Animunculi
+  - Creatures
+  - Daedra
+  - Humanoid
+  - Undead
 - [ ] Tooltip fields reordering (separator at the bottom, where items under it won't render)
 - [ ] Tooltip disease verbosity
 - [ ] Tooltip stat damage verbosity
