@@ -12,15 +12,6 @@
   - Follower/combat
   - Combat/follower
 - [ ] Icon interval
-- [ ] Add textures for the rule-based follower icons (currently referenced but missing)
-  - Animunculi
-  - Creatures
-  - Daedra
-  - Humanoid
-  - Undead
-- [ ] Tooltip fields reordering (separator at the bottom, where items under it won't render)
-- [ ] Tooltip disease verbosity
-- [ ] Tooltip stat damage verbosity
 - [ ] Follower widget sorting
   - Summons at the bottom (separate toggle)
   - A-Z
@@ -33,9 +24,16 @@
   - A-Z
   - Z-A
 - [ ] Selector for a modifier key to hold to move the follower HUD (none, ctrl, alt, shift)
-- [ ] Buttons per window in Interactions Menu
+
+## Icons
 
 Add support for slave icons too, just under Unique in priority
+- [ ] Add textures for the rule-based follower icons (currently referenced but missing)
+  - Animunculi
+  - Creatures
+  - Daedra
+  - Humanoid
+  - Undead
 
 ## Menu interactions
 

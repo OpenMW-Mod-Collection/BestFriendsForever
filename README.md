@@ -208,8 +208,8 @@ separate and is checked before the provider is called.
 ### Follower Menu
 
 Player scripts can register buttons in the follower menu through the
-`I.BestFriendsForever` interface. Buttons are sorted alphabetically and the menu
-shows up to 10 action buttons per page.
+`I.BestFriendsForever` interface. Buttons are sorted alphabetically; the number
+of action buttons shown per page is configurable (10 by default).
 
 The built-in Wait action dismisses an eligible follower; interact with them to
 have them follow you again. It is unavailable for summons and actors under a
@@ -229,9 +229,9 @@ I.BestFriendsForever.registerFollowerMenuButton {
 }
 ```
 
-The optional `condition` function receives the follower state and must return a
-boolean. When it returns `false`, the button appears disabled and cannot be
-activated. Companion Share uses this to exclude summons.
+The optional `condition` function receives the follower state. Any truthy result
+enables the button; `false` or `nil` disables it and prevents activation.
+Companion Share uses this to exclude summons.
 
 Or send that state as the event payload to the player, follower, or global
 script:

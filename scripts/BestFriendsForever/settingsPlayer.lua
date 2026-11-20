@@ -6,6 +6,8 @@ local groups = {
     "call",
     "HUDFollower",
     "HUDWrapper",
+    "tooltip",
+    "menu",
 }
 
 -- Initialization

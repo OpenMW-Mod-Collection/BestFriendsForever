@@ -23,8 +23,6 @@ I.Settings.registerGroup {
                 magicka = true,
                 fatigue = true,
                 labels = true,
-                diseases = true,
-                damagedStats = true,
             },
             argument = {
                 l10n = "BestFriendsForever",
@@ -34,8 +32,6 @@ I.Settings.registerGroup {
                     "magicka",
                     "fatigue",
                     "labels",
-                    "diseases",
-                    "damagedStats",
                 },
             },
         },

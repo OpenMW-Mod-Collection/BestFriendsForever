@@ -5,13 +5,15 @@ local util = require("openmw.util")
 local I = require("openmw.interfaces")
 local core = require("openmw.core")
 local self = require("openmw.self")
+local async = require("openmw.async")
+local storage = require("openmw.storage")
 
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local buttonTemplates = require("scripts.BestFriendsForever.utils.button")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
 
 -- Constants
-local PAGE_SIZE = 10
 local MENU_MODE = "Interface"
 local BUTTON_TARGETS = {
     player = true,
@@ -26,16 +28,13 @@ local currentFollowerState
 local currentPage = 1
 local root
 local buttonElements = {}
+local settings
 
 local function conditionMet(button, state)
     if not button.condition then
         return true
     end
-    local result = button.condition(state)
-    if type(result) ~= "boolean" then
-        error("Condition for follower menu button '" .. button.name .. "' must return a boolean")
-    end
-    return result
+    return button.condition(state)
 end
 
 local function destroyMenu()
@@ -90,10 +89,11 @@ local function buildMenu()
 
     destroyMenu()
     local buttons = sortedButtons()
-    local pageCount = math.max(1, math.ceil(#buttons / PAGE_SIZE))
+    local pageSize = math.max(1, math.floor(tonumber(settings.maxButtonsPerPage) or 10))
+    local pageCount = math.max(1, math.ceil(#buttons / pageSize))
     currentPage = math.max(1, math.min(currentPage, pageCount))
-    local firstIndex = (currentPage - 1) * PAGE_SIZE + 1
-    local lastIndex = math.min(firstIndex + PAGE_SIZE - 1, #buttons)
+    local firstIndex = (currentPage - 1) * pageSize + 1
+    local lastIndex = math.min(firstIndex + pageSize - 1, #buttons)
     local content = ui.content {
         {
             name = "followerMenuHeader",
@@ -279,6 +279,8 @@ function followerMenu.onFollowerListUpdated(followers)
     end
     currentFollowerState = updatedState
 end
+
+settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_menu"), async)
 
 followerMenu.registerButton(companionShare)
 followerMenu.registerButton(wait)

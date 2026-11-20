@@ -6,14 +6,26 @@ local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
 local types = require("openmw.types")
 local core = require("openmw.core")
+local async = require("openmw.async")
+local storage = require("openmw.storage")
+
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 -- Constants
 local l10n = core.l10n("BestFriendsForever")
+local damagedColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
+local creatureTypeLabels = {
+    [types.Creature.TYPE.Creatures] = "creatureType_creatures",
+    [types.Creature.TYPE.Daedra] = "creatureType_daedra",
+    [types.Creature.TYPE.Humanoid] = "creatureType_humanoid",
+    [types.Creature.TYPE.Undead] = "creatureType_undead",
+}
 
 -- Variables
 local tooltipUI = {}
 local registeredFields = {}
 local fieldsCache
+local settings
 
 local function getActorName(followerState)
     local actor = followerState.actor
@@ -24,31 +36,57 @@ local function getActorRole(followerState)
     local actor = followerState.actor
     if types.NPC.objectIsInstance(actor) then
         local npcRecord = types.NPC.records[actor.recordId]
-        local classRecord = types.NPC.classes.record(npcRecord.class)
+        local classRecord = types.NPC.classes.records[npcRecord.class]
         return l10n("followerTooltip_class", { class_name = classRecord.name })
     elseif types.Creature.objectIsInstance(actor) then
         local creatureRecord = types.Creature.records[actor.recordId]
-        local baseCreature = creatureRecord.baseCreature
-            and creatureRecord.baseCreature ~= ""
-            and types.Creature.record(creatureRecord.baseCreature)
-        local creatureName = baseCreature and baseCreature.name or creatureRecord.name
+        local creatureName
+        if settings.creatureDisplayMode == "Creature Type" then
+            local typeLabel = creatureTypeLabels[creatureRecord.type]
+            creatureName = typeLabel and l10n(typeLabel) or creatureRecord.type or creatureRecord.name
+        else
+            local baseCreatureId = creatureRecord.baseCreature
+            local baseCreature = baseCreatureId and types.Creature.records[baseCreatureId]
+            creatureName = baseCreature and baseCreature.name or creatureRecord.name
+        end
         return l10n("followerTooltip_creature", { creature_name = creatureName })
     end
 end
 
-local function getDiseaseNames(fData)
-    local diseaseNames = {}
+local function getDiseases(fData)
+    local names = {}
+    local types = {}
+    local seenTypes = {}
     for _, spell in pairs(fData.spells) do
         if spell.type == core.magic.SPELL_TYPE.Blight or spell.type == core.magic.SPELL_TYPE.Disease then
-            diseaseNames[#diseaseNames + 1] = core.magic.spells.records[spell.id].name
+            names[#names + 1] = core.magic.spells.records[spell.id].name
+            local typeName = spell.type == core.magic.SPELL_TYPE.Blight and "Blight" or "Disease"
+            if not seenTypes[typeName] then
+                seenTypes[typeName] = true
+                types[#types + 1] = typeName
+            end
         end
     end
 
-    table.sort(diseaseNames)
-    if #diseaseNames == 0 then
-        return l10n("followerTooltip_healthy")
+    table.sort(names)
+    table.sort(types)
+    return names, types
+end
+
+local function getDiseaseText(fData, verbosity)
+    local names, types = getDiseases(fData)
+    if #names == 0 then
+        return nil
     end
-    return table.concat(diseaseNames, ", ")
+    if verbosity == "By Type" then
+        for i, typeName in ipairs(types) do
+            types[i] = l10n(typeName)
+        end
+        return l10n("followerTooltip_diseases", { diseases = table.concat(types, ", ") })
+    elseif verbosity == "Unclear" then
+        return l10n("followerTooltip_diseased")
+    end
+    return l10n("followerTooltip_diseases", { diseases = table.concat(names, ", ") })
 end
 
 local function addStatName(names, recordList, statId)
@@ -106,6 +144,8 @@ end
 ---@field name string Unique field name.
 ---@field order number? sort weight, defaults to 100.
 ---@field enabledSetting string? HUD element setting that can hide the field.
+---@field toggleKey string? Tooltip field setting that can hide the field.
+---@field textColor? openmw.util.Color Text color override for text fields.
 ---@field getText? fun(followerState: table, followerData: FollowerData): string|nil
 ---@field getLayout? fun(followerState: table, followerData: FollowerData): openmw.ui.Layout|nil
 
@@ -136,6 +176,8 @@ function tooltipUI.registerField(definition)
         name = definition.name,
         order = order,
         enabledSetting = definition.enabledSetting,
+        toggleKey = definition.toggleKey,
+        textColor = definition.textColor,
         getText = definition.getText,
         getLayout = definition.getLayout,
     }
@@ -172,14 +214,18 @@ local function newFieldLayout(definition)
             content = ui.content {},
         }
     end
+    local props = {
+        textSize = 16,
+        textShadow = true,
+        visible = false,
+    }
+    if definition.textColor then
+        props.textColor = definition.textColor
+    end
     return {
         name = name,
         template = I.MWUI.templates.textNormal,
-        props = {
-            textSize = 16,
-            textShadow = true,
-            visible = false,
-        },
+        props = props,
     }
 end
 
@@ -214,6 +260,7 @@ end
 
 function tooltipUI.update(tooltipElement, fData, enabledElements)
     local layouts = tooltipElement.layout.content.followerTooltipFields.content
+    local toggles = settings.enabledFields
     for _, definition in ipairs(allFields()) do
         local field = layouts["followerTooltip_" .. definition.name]
         if field then
@@ -232,12 +279,15 @@ function tooltipUI.update(tooltipElement, fData, enabledElements)
             end
             field.props.visible = visible
                 and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
+                and (not definition.toggleKey or not toggles or toggles[definition.toggleKey] ~= false)
         end
     end
     tooltipElement:update()
 end
 
 -- Initialization
+settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_tooltip"), async)
+
 tooltipUI.registerField {
     name = "name",
     order = 1,
@@ -249,22 +299,25 @@ tooltipUI.registerField {
 tooltipUI.registerField {
     name = "role",
     order = 2,
+    toggleKey = "class",
     getText = getActorRole,
 }
 
 tooltipUI.registerField {
     name = "diseases",
     order = 3,
-    enabledSetting = "diseases",
+    toggleKey = "diseases",
+    textColor = damagedColor,
     getText = function(_, followerData)
-        return l10n("followerTooltip_diseases", { diseases = getDiseaseNames(followerData) })
+        return getDiseaseText(followerData, settings.diseaseVerbosity)
     end,
 }
 
 tooltipUI.registerField {
     name = "statDamage",
     order = 4,
-    enabledSetting = "damagedStats",
+    toggleKey = "statDamage",
+    textColor = damagedColor,
     getText = function(_, followerData)
         return getStatDamage(followerData)
     end,
