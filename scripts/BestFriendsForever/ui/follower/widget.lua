@@ -1,5 +1,7 @@
 ---@diagnostic disable: undefined-field, missing-fields, param-type-mismatch
 ---@omw-context player
+local util = require("openmw.util")
+local v2 = util.vector2
 local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
 local async = require("openmw.async")
@@ -104,7 +106,7 @@ local function newFollowerData(followerState, down, settings)
             container = {
                 type = ui.TYPE.Flex,
                 props = {
-                    horizontal = settings.horizontalIcons,
+                    horizontal = settings.iconOrientation ~= "Vertical",
                 },
                 content = ui.content {},
             },
@@ -112,7 +114,7 @@ local function newFollowerData(followerState, down, settings)
         stats = stats,
     }
 
-    iconsUI.updateIcons(fData)
+    iconsUI.updateIcons(fData, settings)
     return fData
 end
 
@@ -121,11 +123,13 @@ end
 ---@return openmw.ui.Layout
 local function createBarsContainer(fData, settings)
     local bars = {}
+    local barGap = math.max(0, tonumber(settings.barInterval) or 4)
     for _, statData in ipairs(fData.stats) do
-        local bar = barsUI.barElement(statData, settings)
         if statData.bar.enabled then
-            bars[#bars + 1] = interval
-            bars[#bars + 1] = bar
+            if #bars > 0 then
+                bars[#bars + 1] = { props = { size = v2(0, barGap) } }
+            end
+            bars[#bars + 1] = barsUI.barElement(statData, settings)
         end
     end
 
@@ -134,6 +138,7 @@ local function createBarsContainer(fData, settings)
         type = ui.TYPE.Flex,
         props = {
             horizontal = false,
+            arrange = ui.ALIGNMENT[sideToAlignment[settings.barAlignment] or "Center"],
         },
         content = ui.content(bars),
     }
@@ -149,8 +154,10 @@ local function createLayout(followerState, fData, settings, showTooltip, hideToo
     local follower = followerState.actor
     local enabledElements = settings.enabledElements
     local barsContainer = createBarsContainer(fData, settings)
-    local dataContent = settings.rightIcons and { barsContainer, interval, fData.icons.container }
-        or { fData.icons.container, interval, barsContainer }
+    local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
+    local iconSpacer = { props = { size = v2(iconGap, 0) } }
+    local dataContent = settings.iconSide ~= "Left" and { barsContainer, iconSpacer, fData.icons.container }
+        or { fData.icons.container, iconSpacer, barsContainer }
 
     local dataFlex = {
         name = "followex_V1_H1",
@@ -230,7 +237,7 @@ end
 ---@param settings table
 followerUI.update = function(fData, settings)
     barsUI.updateStats(fData, fData.down, settings)
-    iconsUI.updateIcons(fData)
+    iconsUI.updateIcons(fData, settings)
 end
 
 return followerUI

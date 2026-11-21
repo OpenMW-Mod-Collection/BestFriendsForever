@@ -21,8 +21,13 @@ local nextStatDamageCheck = 0
 local attributes = {}
 local skills = {}
 
+local function isProtected(effect)
+    local protections = wardSettings.protections or {}
+    return protections[effect] ~= false
+end
+
 local function removeDiseases()
-    if not wardSettings.disableDiseases then
+    if not isProtected("diseases") then
         return
     end
 
@@ -47,7 +52,7 @@ local function restoreStat(stats, drainEffect)
 end
 
 local function restoreAllStats()
-    if not wardSettings.disableStatDamage then
+    if not isProtected("statDamage") then
         return
     end
     
@@ -56,7 +61,7 @@ local function restoreAllStats()
 end
 
 local function rejectDiseaseSpell(options)
-    if not wardSettings.disableDiseases then
+    if not isProtected("diseases") then
         return
     end
 

@@ -36,11 +36,21 @@ I.Settings.registerGroup {
             }
         },
         {
-            key = "lockPosition",
-            name = "lockPosition_name",
-            description = "lockPosition_desc",
-            renderer = "checkbox",
-            default = true,
+            key = "dragModifier",
+            name = "dragModifier_name",
+            description = "dragModifier_desc",
+            renderer = "SuperSelect3",
+            default = "Shift",
+            argument = {
+                l10n = "BestFriendsForever",
+                items = {
+                    "Disabled",
+                    "None",
+                    "Ctrl",
+                    "Alt",
+                    "Shift",
+                },
+            },
         },
         {
             key = "posX",
@@ -99,10 +109,18 @@ I.Settings.registerGroup {
             default = "Right",
         },
         {
-            key = "horizontalLayout",
-            name = "horizontalLayout_name",
-            renderer = "checkbox",
-            default = false,
+            key = "hudOrientation",
+            name = "hudOrientation_name",
+            description = "hudOrientation_desc",
+            renderer = "SuperSelect3",
+            default = "Vertical",
+            argument = {
+                l10n = "BestFriendsForever",
+                items = {
+                    "Horizontal",
+                    "Vertical",
+                },
+            },
         },
         {
             key = "enableBordersAndBg",

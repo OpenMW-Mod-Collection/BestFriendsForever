@@ -11,16 +11,21 @@ I.Settings.registerGroup {
     order = 10,
     settings = {
         {
-            key = "disableDiseases",
-            name = "disableDiseases_name",
-            renderer = "checkbox",
-            default = true,
-        },
-        {
-            key = "disableStatDamage",
-            name = "disableStatDamage_name",
-            renderer = "checkbox",
-            default = true,
+            key = "protections",
+            name = "protections_name",
+            description = "protections_desc",
+            renderer = "multiCheckbox_V1",
+            default = {
+                diseases = true,
+                statDamage = true,
+            },
+            argument = {
+                l10n = "BestFriendsForever",
+                keys = {
+                    "diseases",
+                    "statDamage",
+                },
+            },
         },
         {
             key = "statDamageCheckFrequency",

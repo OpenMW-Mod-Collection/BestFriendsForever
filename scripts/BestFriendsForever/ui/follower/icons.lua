@@ -6,9 +6,13 @@ local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
 local types = require("openmw.types")
 local core = require("openmw.core")
+local async = require("openmw.async")
+local storage = require("openmw.storage")
+
+local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 -- Constants
-local iconSize = 32
+local defaultIconSize = 32
 local skillThreshold = 30
 local STANCE = types.Actor.STANCE
 local EQUIPMENT_SLOT = types.Actor.EQUIPMENT_SLOT
@@ -19,7 +23,8 @@ local magicIcon = ui.texture {
 }
 local h2hIcon = ui.texture { path = "icons/k/stealth_handtohand.dds" }
 local followerIconBackground = ui.texture { path = "textures/bffs/bg.png" }
-local followerIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
+local defaultIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
+local unhealthyIconBackgroundColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 
 -- Variables
 ---@type table<string, openmw.ui.TextureResource>
@@ -29,6 +34,13 @@ local iconsUI = {}
 local iconById = {}
 ---@type FollowerIcon[]
 local iconRules = {}
+local tooltipSettings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_tooltip"), async)
+
+---@param settings table
+---@return number
+local function iconSizeFrom(settings)
+    return math.max(1, tonumber(settings.iconSize) or defaultIconSize)
+end
 
 local defaultIcons = {
     creature = { path = "textures/bffs/Creature.png", transparent = true },
@@ -112,22 +124,25 @@ end
 
 ---@param icon openmw.ui.TextureResource
 ---@param magic boolean
+---@param size number
 ---@return openmw.ui.Layout
-local function renderEquipmentIcon(icon, magic)
+local function renderEquipmentIcon(icon, magic, size)
     local box = {
         props = {
-            size = v2(iconSize, iconSize),
+            size = v2(size, size),
         },
         content = ui.content {},
     }
 
     if magic then
+        local magicSize = size + 8
+        local magicOffset = -(magicSize - size) / 2
         box.content:add {
             type = ui.TYPE.Image,
             props = {
                 resource = magicIcon,
-                position = v2(-5, -5),
-                size = v2(1, 1) * 40,
+                position = v2(magicOffset, magicOffset),
+                size = v2(1, 1) * magicSize,
             },
         }
     end
@@ -136,7 +151,7 @@ local function renderEquipmentIcon(icon, magic)
         type = ui.TYPE.Image,
         props = {
             resource = icon,
-            size = v2(iconSize, iconSize),
+            size = v2(size, size),
         },
     }
 
@@ -208,17 +223,51 @@ local function getFollowerIcon(actor, skills)
     return getFallbackIcon(actor, skills)
 end
 
+local function hasDisease(fData)
+    for _, spell in pairs(fData.spells) do
+        if spell.type == core.magic.SPELL_TYPE.Blight or spell.type == core.magic.SPELL_TYPE.Disease then
+            return true
+        end
+    end
+    return false
+end
+
+local function hasDamagedStats(fData)
+    for statId, stat in pairs(fData.attributes) do
+        local drain = fData.activeEffects:getEffect(core.magic.EFFECT_TYPE.DrainAttribute, statId)
+        if stat.damage - drain.magnitude > 0 then
+            return true
+        end
+    end
+    for statId, stat in pairs(fData.skills) do
+        local drain = fData.activeEffects:getEffect(core.magic.EFFECT_TYPE.DrainSkill, statId)
+        if stat.damage - drain.magnitude > 0 then
+            return true
+        end
+    end
+    return false
+end
+
+local function shouldHighlight(fData)
+    local toggles = tooltipSettings.enabledFields or {}
+    local showDiseases = toggles.diseases ~= false
+    local showStatDamage = toggles.statDamage ~= false
+    return (showDiseases and hasDisease(fData)) or (showStatDamage and hasDamagedStats(fData))
+end
+
 ---@param icon { path: string, transparent: boolean }
+---@param backgroundColor openmw.util.Color|nil
+---@param size number
 ---@return openmw.ui.Layout
-local function renderFollowerIcon(icon)
+local function renderFollowerIcon(icon, backgroundColor, size)
     local content = ui.content {}
     if icon.transparent then
         content:add {
             type = ui.TYPE.Image,
             props = {
                 resource = followerIconBackground,
-                color = followerIconBackgroundColor,
-                size = v2(iconSize, iconSize),
+                color = backgroundColor or defaultIconBackgroundColor,
+                size = v2(size, size),
             },
         }
     end
@@ -226,7 +275,7 @@ local function renderFollowerIcon(icon)
         type = ui.TYPE.Image,
         props = {
             resource = getTexture(icon.path),
-            size = v2(iconSize, iconSize),
+            size = v2(size, size),
         },
     }
 
@@ -234,15 +283,16 @@ local function renderFollowerIcon(icon)
         name = "followerIcon",
         type = ui.TYPE.Widget,
         props = {
-            size = v2(iconSize, iconSize),
+            size = v2(size, size),
         },
         content = content,
     }
 end
 
 ---@param actor openmw.GObject
+---@param size number
 ---@return openmw.ui.Layout
-iconsUI.renderCombat = function(actor)
+iconsUI.renderCombat = function(actor, size)
     local icon = h2hIcon
     local magic = false
 
@@ -259,7 +309,7 @@ iconsUI.renderCombat = function(actor)
         end
     end
 
-    return renderEquipmentIcon(icon, magic)
+    return renderEquipmentIcon(icon, magic, size)
 end
 
 ---@param ids string|string[]
@@ -322,17 +372,52 @@ iconsUI.setFollowerIcon = function(spec)
 end
 
 ---@param fData FollowerData
-iconsUI.updateIcons = function(fData)
+---@param settings table
+---@return openmw.ui.Layout
+local function followerIconLayout(fData, settings)
+    local backgroundColor = settings.iconBackgroundColor or defaultIconBackgroundColor
+    if shouldHighlight(fData) then
+        backgroundColor = unhealthyIconBackgroundColor
+    end
     local actor = fData.followerState.actor
-    local iconLayout
-    if types.Actor.getStance(actor) == STANCE.Nothing then
-        iconLayout = renderFollowerIcon(getFollowerIcon(actor, fData.skills))
+    return renderFollowerIcon(getFollowerIcon(actor, fData.skills), backgroundColor, iconSizeFrom(settings))
+end
+
+---@param fData FollowerData
+---@param settings table
+iconsUI.updateIcons = function(fData, settings)
+    local actor = fData.followerState.actor
+    local mode = settings.iconDisplayMode or "Merged"
+    local iconSize = iconSizeFrom(settings)
+    local layouts
+
+    if mode == "Follower/combat" then
+        layouts = { followerIconLayout(fData, settings), iconsUI.renderCombat(actor, iconSize) }
+    elseif mode == "Combat/follower" then
+        layouts = { iconsUI.renderCombat(actor, iconSize), followerIconLayout(fData, settings) }
+    elseif mode == "Follower only" then
+        layouts = { followerIconLayout(fData, settings) }
+    elseif mode == "Combat only" then
+        layouts = { iconsUI.renderCombat(actor, iconSize) }
+    elseif types.Actor.getStance(actor) == STANCE.Nothing then
+        layouts = { followerIconLayout(fData, settings) }
     else
-        iconLayout = iconsUI.renderCombat(actor)
+        layouts = { iconsUI.renderCombat(actor, iconSize) }
     end
 
+    local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
+    local spacerSize = settings.iconOrientation == "Vertical" and v2(0, iconGap) or v2(iconGap, 0)
+    local content = ui.content {}
+    for index, layout in ipairs(layouts) do
+        if index > 1 then
+            content:add { props = { size = spacerSize } }
+        end
+        content:add(layout)
+    end
+
+    fData.icons.container.props.horizontal = settings.iconOrientation ~= "Vertical"
     fData.icons.container.props.visible = true
-    fData.icons.container.content = ui.content { iconLayout }
+    fData.icons.container.content = content
 end
 
 -- Initialization

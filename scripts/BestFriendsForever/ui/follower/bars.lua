@@ -7,12 +7,22 @@ local I = require("openmw.interfaces")
 local barTexture = ui.texture { path = "textures/menu_bar_gray.dds" }
 
 ---@class HUDBarSettings
----@field barLength number
----@field barWidth number
+---@field barDimensions table<string, number>
+---@field barLabels table<string, boolean>
+---@field barLabelColor openmw.util.Color
 ---@field labelDisplayMode "Percent"|"Current"|"Current/Max"
----@field enabledElements table<string, boolean>
 
 local barsUI = {}
+
+---@param statName string
+---@param settings HUDBarSettings
+---@return openmw.util.Vector2
+local function barSizeFor(statName, settings)
+    local dimensions = settings.barDimensions or {}
+    local width = tonumber(dimensions[statName .. "Width"]) or 100
+    local height = tonumber(dimensions[statName .. "Height"]) or 16
+    return v2(width, height)
+end
 
 barsUI.labelConstructors = {
     ["Percent"] = function(curr, base)
@@ -38,10 +48,11 @@ end
 ---@param settings HUDBarSettings
 ---@return openmw.ui.Layout
 barsUI.barElement = function(fData, settings)
-    local barSize = v2(settings.barLength, settings.barWidth)
+    local barSize = barSizeFor(fData.name, settings)
 
     local label
-    if settings.enabledElements.labels then
+    local labels = settings.barLabels or {}
+    if labels[fData.name] ~= false then
         local labelConstructor = barsUI.labelConstructors[settings.labelDisplayMode]
         label = {
             type = ui.TYPE.Text,
@@ -49,8 +60,8 @@ barsUI.barElement = function(fData, settings)
                 relativePosition = v2(0.5, 0.5),
                 anchor = v2(0.5, 0.5),
                 text = labelConstructor(fData.stat.current, fData.stat.base),
-                textColor = util.color.rgb(1, 1, 1),
-                textSize = settings.barWidth,
+                textColor = settings.barLabelColor or util.color.rgb(1, 1, 1),
+                textSize = barSize.y,
             },
         }
     end
@@ -86,8 +97,8 @@ end
 ---@param down boolean
 ---@param settings HUDBarSettings
 barsUI.updateStats = function(fData, down, settings)
-    local barSize = v2(settings.barLength, settings.barWidth)
     for _, statData in ipairs(fData.stats) do
+        local barSize = barSizeFor(statData.name, settings)
         local label = statData.bar.label
         if label then
             if down then

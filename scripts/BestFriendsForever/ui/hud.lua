@@ -4,9 +4,11 @@ local util = require("openmw.util")
 local v2 = util.vector2
 local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
+local types = require("openmw.types")
 local storage = require("openmw.storage")
 local async = require("openmw.async")
 local self = require("openmw.self")
+local input = require("openmw.input")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local followerUI = require("scripts.BestFriendsForever.ui.follower.widget")
@@ -115,10 +117,84 @@ local function blacklisted(actor, blacklist)
     return false
 end
 
+local function primaryWeight(primary, state)
+    local actor = state.actor
+    if primary == "NPCs first" then
+        return types.NPC.objectIsInstance(actor) and 0 or 1
+    elseif primary == "Creatures first" then
+        return types.Creature.objectIsInstance(actor) and 0 or 1
+    elseif primary == "By level" then
+        return -(types.Actor.stats.level(actor).current or 0)
+    elseif primary == "By max health" then
+        return -(types.Actor.stats.dynamic.health(actor).max or 0)
+    end
+end
+
+local function nameOf(state)
+    return state.actor.type.records[state.actor.recordId].name or ""
+end
+
+local function sortedFollowers(followers)
+    local list = {}
+    for _, state in pairs(followers) do
+        list[#list + 1] = state
+    end
+
+    local primary = settingsLocalHUD.primarySort
+    local keepSummonsAtBottom = settingsLocalHUD.keepSummonsAtBottom == true
+
+    table.sort(list, function(left, right)
+        if keepSummonsAtBottom then
+            local leftSummon = left.isSummon == true
+            local rightSummon = right.isSummon == true
+            if leftSummon ~= rightSummon then
+                return not leftSummon
+            end
+        end
+
+        local leftWeight = primaryWeight(primary, left)
+        local rightWeight = primaryWeight(primary, right)
+        if leftWeight and rightWeight and leftWeight ~= rightWeight then
+            return leftWeight < rightWeight
+        end
+
+        local leftName = nameOf(left):lower()
+        local rightName = nameOf(right):lower()
+        return leftName < rightName
+    end)
+
+    return list
+end
+
+local modifierChecks = {
+    Ctrl = function()
+        return input.isCtrlPressed()
+    end,
+    Alt = function()
+        return input.isAltPressed()
+    end,
+    Shift = function()
+        return input.isShiftPressed()
+    end,
+}
+
+local function canDrag()
+    local mode = settingsWrapper.dragModifier
+    if mode == "Disabled" then
+        return false
+    end
+    local check = modifierChecks[mode]
+    return not check or check()
+end
+
+local function hudLayer()
+    return settingsWrapper.dragModifier == "Disabled" and "HUD" or "Modal"
+end
+
 -- Dragging
 
 local function mousePress(data, elem)
-    if data.button ~= 1 or settingsWrapper.lockPosition then
+    if data.button ~= 1 or not canDrag() then
         return
     end -- Left mouse button
     if not elem.userData then
@@ -161,12 +237,12 @@ end
 -- Layout construction
 
 local function createRoot()
-    local layer = settingsWrapper.lockPosition and "HUD" or "Modal"
+    local layer = hudLayer()
     rootFlex = {
         name = "rootFlex",
         type = ui.TYPE.Flex,
         props = {
-            horizontal = settingsWrapper.horizontalLayout,
+            horizontal = settingsWrapper.hudOrientation == "Horizontal",
             arrange = ui.ALIGNMENT[sideToAlignment[settingsLocalHUD.uiAlign]],
         },
         content = ui.content {},
@@ -253,7 +329,7 @@ end
 ---@return openmw.ui.Layout
 local function makeDelimiter()
     if settingsWrapper.enableBordersAndBg then
-        delimiterLine.template = settingsWrapper.horizontalLayout and I.MWUI.templates.verticalLine
+        delimiterLine.template = settingsWrapper.hudOrientation == "Horizontal" and I.MWUI.templates.verticalLine
             or I.MWUI.templates.horizontalLine
         return delimiter
     else
@@ -294,19 +370,19 @@ followerHUD.rebuildTooltip = function()
     if followerHUD.tooltipElement then
         followerHUD.tooltipElement:destroy()
     end
-    followerHUD.tooltipElement = tooltipUI.create(settingsWrapper.lockPosition and "HUD" or "Modal")
+    followerHUD.tooltipElement = tooltipUI.create(hudLayer())
     activeTooltipData = nil
 end
 
 followerHUD.new = function(followers)
     followerHUD.destroy()
     followerHUD.root = createRoot()
-    followerHUD.tooltipElement = tooltipUI.create(settingsWrapper.lockPosition and "HUD" or "Modal")
+    followerHUD.tooltipElement = tooltipUI.create(hudLayer())
     followerHUD.followerData = {}
     local downedFollowers = I.BestFriendsForever and I.BestFriendsForever.getDownedFollowers() or {}
 
     local widgetCount = 0
-    for _, fState in pairs(followers) do
+    for _, fState in pairs(sortedFollowers(followers)) do
         if widgetCount >= settingsWrapper.maxWidgets then
             break
         end

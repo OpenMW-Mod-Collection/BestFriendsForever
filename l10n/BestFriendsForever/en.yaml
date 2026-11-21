@@ -54,8 +54,8 @@ deathChance_name: Death Chance
 
 ward_groupName: Ward
 ward_groupDesc: Protecting followers from diseases and stat damage.
-disableDiseases_name: Protect Followers from Diseases
-disableStatDamage_name: Protect Followers from Stat Damage
+protections_name: Protection
+protections_desc: Select which effects the ward prevents or removes.
 statDamageCheckFrequency_name: Attribute Damage Check Frequency
 statDamageCheckFrequency_desc: How often, in seconds, to check follower's stats for damage.
 
@@ -84,36 +84,91 @@ enable_name: Enable Follower HUD
 hudDisplay_name: "When to Show Follower HUD   "
 pollingRate_name: HUD Update Polling Rate (sec)
 pollingRate_desc: Set it to zero to update HUD every frame.
-lockPosition_name: Lock Position
-lockPosition_desc: >
-  If disabled, you can drag the HUD around by holding it with LMB.
+dragModifier_name: Drag Modifier
+dragModifier_desc: |
+  Hold the selected modifier while dragging the HUD with LMB.
+  
+  "Disabled" locks the HUD in place.
+  "None" needs no modifier and is the default.
+
+  Note: disabling dragging disables Tooltips and Follower Menu.
+Disabled: Disabled
+None: None
+Ctrl: Ctrl
+Alt: Alt
+Shift: Shift
 maxWidgets_name: Max Follower Widgets
 posX_name: X Position
 posY_name: Y Position
 expansionDirectionV_name: Expand HUD Vertically
 expansionDirectionH_name: Expand HUD Horizontally
 enableBordersAndBg_name: Enable Borders and Background
-horizontalLayout_name: Horizontal Layout
+hudOrientation_name: HUD Orientation
+hudOrientation_desc: Choose whether the follower HUD expands horizontally or vertically.
 
 HUDFollower_groupName: Follower Widgets
 enabledElements_name: Visible Elements
 enabledElements_desc: Select which HUD widget elements are shown.
+primarySort_name: Primary Sort
+primarySort_desc: >-
+  How follower widgets are ordered. Widgets with the same primary rank are
+  ordered A-Z by default.
+keepSummonsAtBottom_name: Keep Summons at the Bottom
+keepSummonsAtBottom_desc: Always show summoned followers after other followers.
+"NPCs first": NPCs first
+"Creatures first": Creatures first
+"By level": By level
+"By max health": By max health
 name: Follower Name
 health: Health
 magicka: Magicka
 fatigue: Fatigue
-labels: Bar Labels
 nameTextSize_name: Name Text Size
 nameColor_name: Name Color
 uiAlign_name: Element Alignment
 healthBarColor_name: Health Bar Color
 magickaBarColor_name: Magicka Bar Color
 fatigueBarColor_name: Fatigue Bar Color
-barLength_name: Bar Length
-barWidth_name: Bar Width
+barDimensions_name: Bar Dimensions
+barDimensions_desc: >-
+  Set each bar's width and height in pixels.
+healthWidth: Health Width
+healthHeight: Health Height
+magickaWidth: Magicka Width
+magickaHeight: Magicka Height
+fatigueWidth: Fatigue Width
+fatigueHeight: Fatigue Height
+barLabels_name: Bar Labels
+barLabels_desc: Select which statistic bars show a value label.
+barLabelColor_name: Bar Label Color
+barAlignment_name: Bar Alignment
+barAlignment_desc: Choose how bars are aligned within the follower widget.
+barInterval_name: Bar Interval
+barInterval_desc: Vertical space between bars.
 labelDisplayMode_name: Bar Label Format
-horizontalIcons_name: Stack Icons Horizontally
-rightIcons_name: Stack Icons to the Right of Bars
+iconSize_name: Icon Size
+iconSize_desc: Size of follower and combat icons in pixels.
+iconInterval_name: Icon Interval
+iconInterval_desc: Space from the bars and between displayed icons.
+iconOrientation_name: Icon Stack Direction
+iconOrientation_desc: Choose whether follower and combat icons stack horizontally or vertically.
+iconSide_name: Icon Side
+iconSide_desc: Choose which side of the bars the icons appear on.
+Horizontal: Horizontal
+Vertical: Vertical
+iconDisplayMode_name: Icon Display
+iconDisplayMode_desc: >-
+  Choose whether follower and combat icons share one slot or are shown
+  side by side.
+Merged: Merged
+"Follower/combat": Follower / Combat
+"Combat/follower": Combat / Follower
+"Follower only": Follower Only
+"Combat only": Combat Only
+iconBackgroundColor_name: Icon Background Color
+iconBackgroundColor_desc: >-
+  Default color for transparent follower icon backgrounds. Enabled disease and
+  stat damage tooltip fields override it when those conditions are present.
 followerTooltip_name: "Name: {name}"
 followerTooltip_class: "Class: {class_name}"
 followerTooltip_creature: "Creature: {creature_name}"
@@ -123,7 +178,10 @@ followerTooltip_statDamage: "Stat damage: {stats}"
 tooltip_groupName: Tooltip
 tooltip_groupDesc: Details shown in the follower tooltip.
 enabledFields_name: Visible Fields
-enabledFields_desc: Select which details appear in the follower tooltip.
+enabledFields_desc: >-
+  Select which details appear in the follower tooltip. Each enabled field
+  independently tints the follower icon background when that condition is
+  present.
 class: Class / Creature Type
 diseases: Diseases
 statDamage: Stat Damage
