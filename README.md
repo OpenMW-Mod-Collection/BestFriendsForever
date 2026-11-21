@@ -58,8 +58,7 @@ Unbound by default.
 
 ## Compatibility
 
-Safe to install or update mid-playthrough.  
-When removing the mod, make sure no follower is currently downed and they don't have a speed boost.
+Safe to install or update mid-playthrough. When removing the mod, make sure no follower is currently downed and they don't have a speed boost.
 
 Should be compatible with anything. Though Immortality and Teleport modules might break certain scripts - please report such cases so I could expand the default blacklist.
 
@@ -94,177 +93,19 @@ Load Best Friends Forever as high as possible in the load order - before any mod
 
 ## API
 
-### Events
+Best Friends Forever is built to be extended. Other mods can react when followers fall or recover, add custom icons and tooltip fields, and register follower-specific actions in the follower menu.
 
-```lua
--- Sent when the follower enters Downed state
--- Payload: { follower: Actor, leader: Actor }
--- Scope: Player, Global, and the follower's local script
-BestFriendsForever_followerDown
-
--- Sent when the follower is released from the Downed state
--- Payload: { follower: Actor, leader: Actor }
-BestFriendsForever_followerUp
-```
-
-### Interfaces
-
-`I.BestFriendsForever.version` is currently `4`.
-
-```lua
--- Returns downed followers of the player
--- Returns: table<string, Actor>  (live table, treat it as read-only)
--- Scope: Player
-I.BestFriendsForever.getDownedFollowers()
-
--- Assigns an icon to followers. Provide exactly one of recordIds or rule.
--- recordIds is a record ID string or a list of IDs (useful when a follower
--- is replaced by a twin with a different ID); recordId = "..." is shorthand
--- for one ID. IDs are looked up first.
--- rule(actor) is checked after ID lookup, in registration order; the first
--- matching rule wins. Anything unmatched falls back to BFF's built-in
--- class/creature-type icons.
--- fileName is a texture path relative to Data Files
--- isTransparent=true layers the image over the default background
--- false displays the image by itself
--- Scope: Player
-I.BestFriendsForever.setFollowerIcon {
-    recordIds = { "julan", "julan_twin" },
-    fileName = "textures/bffs/Julan 1.png",
-    isTransparent = true,
-}
-
-I.BestFriendsForever.setFollowerIcon {
-    rule = function(actor)
-        return actor.recordId == "some_creature"
-    end,
-    fileName = "textures/bffs/Animunculi.png",
-    isTransparent = true,
-}
-
--- Adds a field to the follower tooltip
--- name must be unique; order is a numeric weight and defaults to 100
--- built-in fields use 1-4; decimals such as 1.5 are allowed
--- getText receives the Follower Detection Util state and BFF's read-only
--- follower data, and returns text or nil (nil hides the field).
--- Safe to register at any time; BFF rebuilds the tooltip.
--- Scope: Player
-I.BestFriendsForever.registerFollowerTooltipField {
-    name = "MyMod_status",
-    order = 100,
-    getText = function(followerState)
-        return followerState.isSummon and "Summon" or nil
-    end,
-}
-
--- Instead of text, a field can provide a complete UI layout.
--- getLayout receives the FDU state and BFF's read-only follower data
--- (down, spells, activeEffects, attributes, skills).
--- Return an openmw.ui.Layout table to show the field, or nil to hide it.
--- Provide either getText or getLayout, never both.
--- ui = require("openmw.ui")
-I.BestFriendsForever.registerFollowerTooltipField {
-    name = "MyMod_custom",
-    order = 5,
-    getLayout = function(followerState, followerData)
-        return {
-            type = ui.TYPE.Flex,
-            props = { horizontal = true, gap = 4 },
-            content = ui.content {
-                { template = I.MWUI.templates.textNormal, props = { text = "Custom" } },
-                {
-                    template = I.MWUI.templates.textNormal,
-                    props = { text = followerState.isSummon and "Summon" or "Follower" },
-                },
-            },
-        }
-    end,
-}
-```
-
-### Follower Down Outcome
-
-Local scripts attached to the same follower can provide a synchronous outcome
-through `I.BestFriendsForeverDown`. BFF calls the provider when the follower
-would otherwise be downed. Returning `"death"` commits real death; returning
-`"down"` or `nil` uses the normal down behavior.
-
-```lua
--- Scope: local scripts on a BFF-immortal follower
--- Interface version: 1
-I.BestFriendsForeverDown.setOutcomeProvider("MyMod", function()
-    return "down" -- "down" | "death" | nil
-end)
-
-I.BestFriendsForeverDown.clearOutcomeProvider("MyMod")
-```
-
-Only one provider is active; registering a new id replaces the previous one.
-Providers are not persisted, so re-register them in `onInit`, `onLoad`, or
-`onActive`. Keep the callback fast and side-effect-free. Errors and unexpected
-return values fall back to a normal down. BFF's own `deathChance` setting is
-separate and is checked before the provider is called.
-
-### Follower Menu
-
-Player scripts can register buttons in the follower menu through the
-`I.BestFriendsForever` interface. Buttons are sorted alphabetically; the number
-of action buttons shown per page is configurable (10 by default).
-
-The built-in Wait action dismisses an eligible follower; interact with them to
-have them follow you again. It is unavailable for summons and actors under a
-Command effect.
-
-Run a function with the current Follower Detection Util state:
-
-```lua
-I.BestFriendsForever.registerFollowerMenuButton {
-    name = "My Action",
-    action = function(followerState)
-        I.UI.setMode("Companion", { target = followerState.actor })
-    end,
-    condition = function(followerState)
-        return not followerState.isSummon
-    end,
-}
-```
-
-The optional `condition` function receives the follower state. Any truthy result
-enables the button; `false` or `nil` disables it and prevents activation.
-Companion Share uses this to exclude summons.
-
-Or send that state as the event payload to the player, follower, or global
-script:
-
-```lua
-I.BestFriendsForever.registerFollowerMenuButton {
-    name = "My Event",
-    event = "MyMod_followerAction",
-    target = "follower", -- "player", "follower", or "global"
-}
-```
-
-Buttons may set `closeAfterActivation = true` to close the menu without leaving
-the current UI mode. The built-in Companion Share button uses this to open the
-follower in Companion mode for trading. <!-- TODO: what? -->
-
-Player scripts can also reopen the follower menu by sending the
-`BestFriendsForever_openFollowerMenu` event to the player. Its payload is the
-follower's Follower Detection Util state:
-
-```lua
-self:sendEvent("BestFriendsForever_openFollowerMenu", followerState)
-```
+See [docs/API.md](docs/API.md) for details.
 
 ## Credits
 
-**Sosnoviy Bor** - Author  
-**butts** - Follower icons and the initial idea for them  
-**urm** - Main inspiration and many UI elements ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))  
-**ownlyme** - Custom settings renderers and ideas  
-**Hyacinth** - Ideas  
-**atka** - Inspiration for the Call feature  
-**Pirate443** - Inspiration for the UI design ([HUD Companion Health Bar](https://www.nexusmods.com/morrowind/mods/60242))
-**jayserpa** - Inspiration for the Injury system ([Follower Death and Injury Chance - Followers Can Die](https://www.nexusmods.com/skyrimspecialedition/mods/38043))
+- **Sosnoviy Bor** - Author
+- **butts** - Follower icons and the initial idea for them
+- **urm** - Main inspiration and many UI elements ([Attend Me](https://www.nexusmods.com/morrowind/mods/51232))
+- **ownlyme** - Custom settings renderers and ideas
+- **Hyacinth** - Ideas
+- **atka** - Inspiration for the Call feature
+- **Pirate443** - Inspiration for the UI design ([HUD Companion Health Bar](https://www.nexusmods.com/morrowind/mods/60242))
+- **jayserpa** - Inspiration for the Injury system ([Follower Death and Injury Chance - Followers Can Die](https://www.nexusmods.com/skyrimspecialedition/mods/38043))
 
 Powered by [Super Settings Renderers](https://www.nexusmods.com/morrowind/mods/59673) and [Drop-in Utils](https://www.nexusmods.com/morrowind/mods/60374)

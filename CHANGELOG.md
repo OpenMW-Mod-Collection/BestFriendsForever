@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Moved the public API contract out of the README into an expanded `docs/API.md` with built-in defaults and reserved values.
 - Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
 - Added `I.BestFriendsForever.registerFollowerTooltipField` for player scripts.
 - `registerFollowerTooltipField` now accepts `getLayout` callbacks returning complete UI layouts.
@@ -12,15 +13,14 @@
 
 ## 3.0
 
-- Massive UI rewrite
+- Complete rewrite, especially prominent on the UI side
 - Added Follower Icons (thx butts)
 - Added unique Follower Icons to Biz'kuitz, Julan and Tetra the Pack Guar
 - Added Tooltips to follower widgets
 - Tooltips now show general info about the follower, their diseases and damaged stats
 - Added follower Interaction Menu
 - Added Companion Share, Wait Here, Follower Info and Repair Gear features to Interaction Menu
-- Added interfaces to add new unique Follower Icons, edit or expand Tooltips and add new Interactions
-- Added Injury system to Immortality to balance things out
+- Added interfaces to add new Follower Icons (unique or conditional), edit or expand Tooltips, add new Interactions and edit the Follower HUD
 - Complete overhaul of the mod's settings
 - Added settigns presets
 - Removed all GOTOs
