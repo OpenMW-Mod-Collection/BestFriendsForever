@@ -14,7 +14,6 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local followerUI = require("scripts.BestFriendsForever.ui.follower.widget")
 local tooltipUI = require("scripts.BestFriendsForever.ui.tooltip")
 
--- Constants
 local delimiterW = 10
 local delimiterH = 15
 local alignToAnchor = {
@@ -49,7 +48,6 @@ local delimiter = {
     content = ui.content { delimiterLine },
 }
 
--- Variables
 local followerHUD = {}
 
 ---@type table<string, FollowerData>
@@ -446,7 +444,6 @@ followerHUD.updateData = function()
     followerHUD.root:update()
 end
 
--- Initialization
 local wrapperSection = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 settingsWrapper = settingsCache.new(wrapperSection, async, settingsUpdated)
 settingsLocalHUD =

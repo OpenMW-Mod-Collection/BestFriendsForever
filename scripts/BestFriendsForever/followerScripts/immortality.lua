@@ -9,13 +9,11 @@ local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
--- Constants
 local immortalitySection = storage.globalSection("SettingsBestFriendsForever_immortality")
 local l10n = core.l10n("BestFriendsForever")
 local selfName = self.type.records[self.recordId].name
 local SCRIPT_PATH = "scripts/BestFriendsForever/followerScripts/immortality.lua"
 
--- Variables
 local settings
 local selfEffects = types.Actor.activeEffects(self)
 local health = self.type.stats.dynamic.health(self)

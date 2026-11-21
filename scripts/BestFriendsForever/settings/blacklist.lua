@@ -2,14 +2,12 @@
 local I = require("openmw.interfaces")
 local storage = require("openmw.storage")
 
--- Constants
 local legacyBlacklistKeys = {
     globalScriptBlacklist = "globalBlacklistByScript",
     teleportScriptBlacklist = "teleportBlacklistByScript",
     immortalityScriptBlacklist = "immortalityBlacklistByScript",
 }
 
--- Variables
 local blacklistSettings = storage.globalSection("SettingsBestFriendsForever_blacklist")
 
 local function migrateBlacklistSettings()

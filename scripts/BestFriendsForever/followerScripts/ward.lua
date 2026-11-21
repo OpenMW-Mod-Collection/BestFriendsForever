@@ -10,10 +10,8 @@ local I = require("openmw.interfaces")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local spellcastRecordDecoder = require("scripts.BestFriendsForever.utils.spellcastRecordDecoder")
 
--- Constants
 local wardSection = storage.globalSection("SettingsBestFriendsForever_ward")
 
--- Variables
 local wardSettings
 local selfActiveSpells = types.Actor.activeEffects(self)
 local selfSpells = types.Actor.spells(self)
@@ -55,7 +53,7 @@ local function restoreAllStats()
     if not isProtected("statDamage") then
         return
     end
-    
+
     restoreStat(attributes, core.magic.EFFECT_TYPE.DrainAttribute)
     restoreStat(skills, core.magic.EFFECT_TYPE.DrainSkill)
 end
@@ -83,7 +81,6 @@ local function onUpdate(dt)
     nextStatDamageCheck = wardSettings.statDamageCheckFrequency
 end
 
--- Initialization
 wardSettings = settingsCache.new(wardSection, async)
 
 for attrId, attrGetter in pairs(types.Actor.stats.attributes) do

@@ -1,15 +1,14 @@
 ---@diagnostic disable: undefined-field, assign-type-mismatch, different-requires, param-type-mismatch, need-check-nil
 ---@omw-context local
-local self = require("openmw.self")
-local core = require("openmw.core")
-local storage = require("openmw.storage")
 local I = require("openmw.interfaces")
 local async = require("openmw.async")
+local core = require("openmw.core")
+local self = require("openmw.self")
+local storage = require("openmw.storage")
 local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
--- Variables
 ---@type openmw.GObject|nil
 local leader
 local leaderSpeed
@@ -28,7 +27,8 @@ local function getTargetBoost()
     elseif distance >= settings.maxDist then
         return leaderSpeed.modified * 1.5
     else
-        local t = (distance - settings.startDist) / (settings.maxDist - settings.startDist)
+        local t = (distance - settings.startDist)
+            / (settings.maxDist - settings.startDist)
         return t * leaderSpeed.modified * 1.5
     end
 end
@@ -64,8 +64,10 @@ local function onLoad(data)
     leaderSpeed = types.Actor.stats.attributes.speed(leader)
 end
 
--- Initialization
-settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_catchUp"), async)
+settings = settingsCache.new(
+    storage.globalSection("SettingsBestFriendsForever_catchUp"),
+    async
+)
 
 return {
     engineHandlers = {

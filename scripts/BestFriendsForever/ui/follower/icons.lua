@@ -11,7 +11,6 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
--- Constants
 local defaultIconSize = 32
 local skillThreshold = 30
 local STANCE = types.Actor.STANCE
@@ -27,7 +26,6 @@ local defaultIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
 local unhealthyIconBackgroundColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 local downedIconBackgroundColor = util.color.rgb(0.5, 0.5, 0.5)
 
--- Variables
 ---@type table<string, openmw.ui.TextureResource>
 local iconCache = {}
 local iconsUI = {}
@@ -431,7 +429,6 @@ iconsUI.updateIcons = function(fData, settings)
     fData.icons.container.content = content
 end
 
--- Initialization
 -- Priority: unique. Order-independent: record IDs are looked up directly.
 -- TODO: replace these placeholder record IDs when the actor IDs are known.
 iconsUI.setFollowerIcon {

@@ -16,10 +16,8 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local tp = require("scripts.BestFriendsForever.utils.teleport")
 local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
 
--- Constants
 local teleportCooldown = 0.1
 
--- Variables
 local sectionWrapper
 local settingsWrapper
 local combatTracker
@@ -237,7 +235,6 @@ local function registerFollowerTooltipField(definition)
     followerHUD.rebuildTooltip()
 end
 
--- Initialization
 sectionWrapper = storage.playerSection("SettingsBestFriendsForever_HUDWrapper")
 settingsWrapper = settingsCache.new(sectionWrapper, async)
 uiUpdateAccumulator = settingsWrapper.pollingRate

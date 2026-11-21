@@ -8,14 +8,12 @@ local core = require("openmw.core")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
--- Constants
 local FDU = I.FollowerDetectionUtil
 local l10n = core.l10n("BestFriendsForever")
 local sectionToggles = storage.globalSection("SettingsBestFriendsForever_toggles")
 local sectionBlacklists = storage.globalSection("SettingsBestFriendsForever_blacklist")
 local immortalitySpell = "BFF_Immortality"
 
--- Variables
 local settingToggles
 local settingsBlacklists
 local scripts
@@ -150,7 +148,6 @@ local function onLoad(data)
     waitingActors = data and data.waitingActors or {}
 end
 
--- Initialization
 settingToggles = settingsCache.new(sectionToggles, async, ResyncAll)
 settingsBlacklists = settingsCache.new(sectionBlacklists, async, ResyncAll)
 

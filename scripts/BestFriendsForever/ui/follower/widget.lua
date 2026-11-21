@@ -11,7 +11,6 @@ local iconsUI = require("scripts.BestFriendsForever.ui.follower.icons")
 local barsUI = require("scripts.BestFriendsForever.ui.follower.bars")
 local followerMenu = require("scripts.BestFriendsForever.ui.menu")
 
--- Constants
 local interval = { template = I.MWUI.templates.interval }
 local sideToAlignment = {
     Left = "Start",
@@ -36,7 +35,6 @@ local STAT_DEFINITIONS = {
     },
 }
 
--- Variables
 local followerUI = {}
 
 ---@class IconData

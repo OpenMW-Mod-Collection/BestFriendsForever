@@ -1,7 +1,6 @@
 ---@omw-context menu
 local I = require("openmw.interfaces")
 
--- Constants
 local groups = {
     "call",
     "HUDFollower",
@@ -10,7 +9,6 @@ local groups = {
     "menu",
 }
 
--- Initialization
 I.Settings.registerPage {
     key = "BestFriendsForever",
     l10n = "BestFriendsForever",

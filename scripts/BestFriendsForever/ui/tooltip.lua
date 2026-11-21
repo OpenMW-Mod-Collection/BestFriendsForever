@@ -11,7 +11,6 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
--- Constants
 local l10n = core.l10n("BestFriendsForever")
 local damagedColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 local creatureTypeLabels = {
@@ -21,7 +20,6 @@ local creatureTypeLabels = {
     [types.Creature.TYPE.Undead] = "creatureType_undead",
 }
 
--- Variables
 local tooltipUI = {}
 local registeredFields = {}
 local fieldsCache
@@ -285,7 +283,6 @@ function tooltipUI.update(tooltipElement, fData, enabledElements)
     tooltipElement:update()
 end
 
--- Initialization
 settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_tooltip"), async)
 
 tooltipUI.registerField {

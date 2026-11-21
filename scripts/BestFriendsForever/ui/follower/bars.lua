@@ -2,8 +2,8 @@
 ---@omw-context player
 local util = require("openmw.util")
 local v2 = util.vector2
-local ui = require("openmw.ui")
 local I = require("openmw.interfaces")
+local ui = require("openmw.ui")
 local barTexture = ui.texture { path = "textures/menu_bar_gray.dds" }
 
 ---@class HUDBarSettings
@@ -53,7 +53,8 @@ barsUI.barElement = function(fData, settings)
     local label
     local labels = settings.barLabels or {}
     if labels[fData.name] ~= false then
-        local labelConstructor = barsUI.labelConstructors[settings.labelDisplayMode]
+        local labelConstructor =
+            barsUI.labelConstructors[settings.labelDisplayMode]
         label = {
             type = ui.TYPE.Text,
             props = {
@@ -70,7 +71,11 @@ barsUI.barElement = function(fData, settings)
         name = "image",
         type = ui.TYPE.Image,
         props = {
-            size = barsUI.barImgSize(barSize, fData.stat.current, fData.stat.base),
+            size = barsUI.barImgSize(
+                barSize,
+                fData.stat.current,
+                fData.stat.base
+            ),
             resource = barTexture,
             color = fData.bar.color,
         },
@@ -104,18 +109,28 @@ barsUI.updateStats = function(fData, down, settings)
             if down then
                 label.props.text = nil
             else
-                local labelConstructor = barsUI.labelConstructors[settings.labelDisplayMode]
-                label.props.text = labelConstructor(statData.stat.current, statData.stat.base)
+                local labelConstructor =
+                    barsUI.labelConstructors[settings.labelDisplayMode]
+                label.props.text =
+                    labelConstructor(statData.stat.current, statData.stat.base)
             end
         end
         local imgLayout = statData.bar.imgLayout
         if imgLayout then
             if down then
                 imgLayout.props.color = util.color.rgb(0.5, 0.5, 0.5)
-                imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.base, statData.stat.base)
+                imgLayout.props.size = barsUI.barImgSize(
+                    barSize,
+                    statData.stat.base,
+                    statData.stat.base
+                )
             else
                 imgLayout.props.color = statData.bar.color
-                imgLayout.props.size = barsUI.barImgSize(barSize, statData.stat.current, statData.stat.base)
+                imgLayout.props.size = barsUI.barImgSize(
+                    barSize,
+                    statData.stat.current,
+                    statData.stat.base
+                )
             end
         end
     end

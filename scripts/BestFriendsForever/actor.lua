@@ -8,7 +8,6 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 -- currently here's only logic for switching enemy aggro
 -- from downed followers to their leader
 
--- Variables
 local noOneDowned = true
 local downedFollowersToLeaders = {}
 local settings
@@ -58,7 +57,6 @@ local function onLoad(data)
     noOneDowned = not next(downedFollowersToLeaders)
 end
 
--- Initialization
 settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async, function(key)
     if key == "changeAggro" and not settings[key] then
         downedFollowersToLeaders = {}
