@@ -1,4 +1,4 @@
----@diagnostic disable: param-type-mismatch, need-check-nil
+---@diagnostic disable: param-type-mismatch, need-check-nil, undefined-field
 ---@omw-context player
 local util = require("openmw.util")
 local v2 = util.vector2
@@ -25,6 +25,7 @@ local h2hIcon = ui.texture { path = "icons/k/stealth_handtohand.dds" }
 local followerIconBackground = ui.texture { path = "textures/bffs/bg.png" }
 local defaultIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
 local unhealthyIconBackgroundColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
+local downedIconBackgroundColor = util.color.rgb(0.5, 0.5, 0.5)
 
 -- Variables
 ---@type table<string, openmw.ui.TextureResource>
@@ -43,7 +44,6 @@ local function iconSizeFrom(settings)
 end
 
 local defaultIcons = {
-    creature = { path = "textures/bffs/Creature.png", transparent = true },
     combat = { path = "textures/bffs/Generic Warrior.png", transparent = true },
     magic = { path = "textures/bffs/Generic Mage.png", transparent = true },
     stealth = { path = "textures/bffs/Generic Thief.png", transparent = true },
@@ -51,6 +51,13 @@ local defaultIcons = {
 }
 
 local creatureTypeIcons = {
+    [types.Creature.TYPE.Creatures] = { path = "textures/bffs/Creatures.png", transparent = true },
+    [types.Creature.TYPE.Daedra] = { path = "textures/bffs/Daedra.png", transparent = true },
+    [types.Creature.TYPE.Humanoid] = { path = "textures/bffs/Humanoid.png", transparent = true },
+    [types.Creature.TYPE.Undead] = { path = "textures/bffs/Undead.png", transparent = true },
+}
+
+local summonTypeIcons = {
     [types.Creature.TYPE.Creatures] = { path = "textures/bffs/Creatures.png", transparent = true },
     [types.Creature.TYPE.Daedra] = { path = "textures/bffs/Daedra.png", transparent = true },
     [types.Creature.TYPE.Humanoid] = { path = "textures/bffs/Humanoid.png", transparent = true },
@@ -189,8 +196,10 @@ end
 ---@return FollowerIcon
 local function getFallbackIcon(actor, skills)
     if types.Creature.objectIsInstance(actor) then
-        local record = types.Creature.records[actor.recordId]
-        return creatureTypeIcons[record.type] or defaultIcons.creature
+        local creatureType = types.Creature.records[actor.recordId].type
+        return I.FollowerDetectionUtil.isSummon(actor)
+            and summonTypeIcons[creatureType]
+            or creatureTypeIcons[creatureType]
     end
 
     if types.NPC.objectIsInstance(actor) then
@@ -376,7 +385,9 @@ end
 ---@return openmw.ui.Layout
 local function followerIconLayout(fData, settings)
     local backgroundColor = settings.iconBackgroundColor or defaultIconBackgroundColor
-    if shouldHighlight(fData) then
+    if fData.down then
+        backgroundColor = downedIconBackgroundColor
+    elseif shouldHighlight(fData) then
         backgroundColor = unhealthyIconBackgroundColor
     end
     local actor = fData.followerState.actor
@@ -448,16 +459,6 @@ iconsUI.setFollowerIcon {
     fileName = "textures/bffs/Pack Guar.png",
     isTransparent = true,
 }
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_slave",
-    fileName = "textures/bffs/Slave.png",
-    isTransparent = true,
-}
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_slave_flat",
-    fileName = "textures/bffs/Slave Flat.png",
-    isTransparent = true,
-}
 
 -- Priority: slightly special. Order-dependent: first matching rule wins.
 -- TODO: add the corresponding texture files under textures/bffs.
@@ -468,6 +469,20 @@ iconsUI.setFollowerIcon {
         return record.bloodType == 2 and record.soulValue == 0
     end,
     fileName = "textures/bffs/Animunculi.png",
+    isTransparent = true,
+}
+iconsUI.setFollowerIcon {
+    rule = function(actor)
+        if not types.NPC.objectIsInstance(actor) then
+            return false
+        end
+        local eq = types.NPC.getEquipment(actor)
+        local leftGauntlet = eq[types.NPC.EQUIPMENT_SLOT.LeftGauntlet]
+        local rightGauntlet = eq[types.NPC.EQUIPMENT_SLOT.RightGauntlet]
+        return leftGauntlet == "slave_bracer_left"
+            or rightGauntlet == "slave_bracer_right"
+    end,
+    fileName = "textures/bffs/Slave.png",
     isTransparent = true,
 }
 

@@ -38,6 +38,7 @@ local delimiterLine = {
     },
 }
 local tooltipCursorOffset = v2(16, 16)
+local tooltipLayer = "Notification"
 local delimiter = {
     external = {
         stretch = 1,
@@ -56,6 +57,7 @@ followerHUD.followerData = {}
 ---@type openmw.ui.Element|nil
 followerHUD.tooltipElement = nil
 local activeTooltipData
+local dragClickSuppressed = false
 local settingsWrapper
 local settingsLocalHUD
 local settingsBlacklists
@@ -85,7 +87,14 @@ followerHUD.hudDisplayMap = {
     end,
 }
 
-local function settingsUpdated()
+local function settingsUpdated(key)
+    if key == "posX" or key == "posY" then
+        if settingsWrapper and followerHUD.root and followerHUD.root.layout then
+            followerHUD.root.layout.props.position = v2(settingsWrapper.posX, settingsWrapper.posY)
+            followerHUD.root:update()
+        end
+        return
+    end
     if not settingsWrapper or not settingsWrapper.enable then
         if followerHUD.root then
             followerHUD.destroy()
@@ -191,15 +200,26 @@ local function hudLayer()
     return settingsWrapper.dragModifier == "Disabled" and "HUD" or "Modal"
 end
 
+local function consumeDragClick()
+    local suppressed = dragClickSuppressed
+    dragClickSuppressed = false
+    return suppressed
+end
+
 -- Dragging
 
 local function mousePress(data, elem)
-    if data.button ~= 1 or not canDrag() then
+    if data.button ~= 1 then
         return
     end -- Left mouse button
+    dragClickSuppressed = false
+    if not canDrag() then
+        return
+    end
     if not elem.userData then
         elem.userData = {}
     end
+    elem.userData.didDrag = false
     elem.userData.isDragging = true
     elem.userData.dragStartPosition = data.position
     elem.userData.windowStartPosition = followerHUD.root.layout.props.position
@@ -215,6 +235,9 @@ local function mouseMove(data, elem)
     -- Calculate new position based on mouse movement
     local deltaX = data.position.x - elem.userData.dragStartPosition.x
     local deltaY = data.position.y - elem.userData.dragStartPosition.y
+    if math.abs(deltaX) > 3 or math.abs(deltaY) > 3 then
+        elem.userData.didDrag = true
+    end
     local newPosition =
         util.vector2(elem.userData.windowStartPosition.x + deltaX, elem.userData.windowStartPosition.y + deltaY)
     followerHUD.root.layout.props.position = newPosition
@@ -224,6 +247,7 @@ end
 
 local function mouseRelease(data, elem)
     if elem.userData then
+        dragClickSuppressed = elem.userData.didDrag == true
         elem.userData.isDragging = false
     end
     -- kinda idiotic way of doing things, but it works
@@ -370,14 +394,14 @@ followerHUD.rebuildTooltip = function()
     if followerHUD.tooltipElement then
         followerHUD.tooltipElement:destroy()
     end
-    followerHUD.tooltipElement = tooltipUI.create(hudLayer())
+    followerHUD.tooltipElement = tooltipUI.create(tooltipLayer)
     activeTooltipData = nil
 end
 
 followerHUD.new = function(followers)
     followerHUD.destroy()
     followerHUD.root = createRoot()
-    followerHUD.tooltipElement = tooltipUI.create(hudLayer())
+    followerHUD.tooltipElement = tooltipUI.create(tooltipLayer)
     followerHUD.followerData = {}
     local downedFollowers = I.BestFriendsForever and I.BestFriendsForever.getDownedFollowers() or {}
 
@@ -399,7 +423,8 @@ followerHUD.new = function(followers)
             local actorId = fState.actor.id
             local fData
             local layout
-            fData, layout = followerUI.create(fState, down, settingsLocalHUD, showTooltip, hideTooltip)
+            fData, layout =
+                followerUI.create(fState, down, settingsLocalHUD, showTooltip, hideTooltip, consumeDragClick)
             followerHUD.followerData[actorId] = fData
             rootFlex.content:add(layout)
             widgetCount = widgetCount + 1

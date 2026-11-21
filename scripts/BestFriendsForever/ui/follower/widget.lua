@@ -149,8 +149,9 @@ end
 ---@param settings table
 ---@param showTooltip fun(fData: FollowerData, position: openmw.util.Vector2)
 ---@param hideTooltip fun(fData: FollowerData)
+---@param consumeDragClick fun(): boolean
 ---@return openmw.ui.Layout
-local function createLayout(followerState, fData, settings, showTooltip, hideTooltip)
+local function createLayout(followerState, fData, settings, showTooltip, hideTooltip, consumeDragClick)
     local follower = followerState.actor
     local enabledElements = settings.enabledElements
     local barsContainer = createBarsContainer(fData, settings)
@@ -204,10 +205,15 @@ local function createLayout(followerState, fData, settings, showTooltip, hideToo
         },
         events = {
             mouseClick = async:callback(function()
+                if consumeDragClick and consumeDragClick() then
+                    return true
+                end
                 followerMenu.open(followerState)
             end),
             mouseMove = async:callback(function(data)
                 showTooltip(fData, data.position)
+                -- let the HUD root's drag handler receive this event too
+                return true
             end),
             focusLoss = async:callback(function()
                 hideTooltip(fData)
@@ -226,11 +232,12 @@ end
 ---@param settings table
 ---@param showTooltip fun(fData: FollowerData, position: openmw.util.Vector2)
 ---@param hideTooltip fun(fData: FollowerData)
+---@param consumeDragClick fun(): boolean
 ---@return FollowerData
 ---@return openmw.ui.Layout
-followerUI.create = function(followerState, down, settings, showTooltip, hideTooltip)
+followerUI.create = function(followerState, down, settings, showTooltip, hideTooltip, consumeDragClick)
     local fData = newFollowerData(followerState, down, settings)
-    return fData, createLayout(followerState, fData, settings, showTooltip, hideTooltip)
+    return fData, createLayout(followerState, fData, settings, showTooltip, hideTooltip, consumeDragClick)
 end
 
 ---@param fData FollowerData
