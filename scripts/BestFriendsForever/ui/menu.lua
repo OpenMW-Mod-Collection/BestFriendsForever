@@ -12,6 +12,7 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local buttonTemplates = require("scripts.BestFriendsForever.utils.button")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
+local repairGear = require("scripts.BestFriendsForever.ui.menuItems.repairGear")
 
 local MENU_MODE = "Interface"
 local BUTTON_TARGETS = {
@@ -282,5 +283,6 @@ settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_m
 
 followerMenu.registerButton(companionShare)
 followerMenu.registerButton(wait)
+followerMenu.registerButton(repairGear)
 
 return followerMenu

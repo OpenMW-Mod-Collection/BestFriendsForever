@@ -1,6 +1,9 @@
 msg_followerDown: "{npc_name} is down!"
 msg_followerWaiting: "{npc_name} will wait here. Interact with them to make them a follower again."
 msg_followerFollowingAgain: "{npc_name} is following you again."
+msg_repairNoGear: The follower has no damaged gear to repair.
+msg_repairNoTool: No repair tool with uses left was found on you or your follower.
+msg_repairRestoredPartial: Some repaired items could not be returned because their owner is no longer available.
 
 page_name: Best Friends Forever
 page_description: Several utilities for you and your followers.
@@ -206,6 +209,28 @@ menu_groupName: Menu
 menu_groupDesc: Settings for the follower interaction menu.
 maxButtonsPerPage_name: Buttons per Page
 maxButtonsPerPage_desc: Maximum number of action buttons shown on one page of the follower menu.
+repairScope_name: Gear to Repair
+repairScope_desc: >-
+  Which damaged items are borrowed from the follower for the Repair menu.
+  Equipped Only uses their worn gear and carried weapon; All Inventory also
+  includes damaged items stored in their backpack.
+"Equipped Only": Equipped Only
+"All Inventory": All Inventory
+repairThreshold_name: Damage Threshold
+repairThreshold_desc: >-
+  Gear at or below this remaining condition is eligible for repair.
+hidePlayerDamaged_name: Hide Your Damaged Gear
+hidePlayerDamaged_desc: >-
+  Temporarily treats your own damaged items as undamaged while the Repair menu
+  is open, so only the follower's gear is listed. Their real condition is
+  restored when you close the menu.
+repairToolPreference_name: Repair Tool Preference
+repairToolPreference_desc: >-
+  Which repair hammer to use from you and your follower. Any Best picks the
+  highest quality hammer available; the other options prefer one of you first.
+"Any Best": Any Best
+"Player First": Player First
+"Follower First": Follower First
 
 Up: Up
 Center: Center

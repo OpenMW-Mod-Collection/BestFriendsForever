@@ -27,6 +27,7 @@ local downedFollowers = {}
 local unloadedFollowers = {}
 local teleportAccumulator = teleportCooldown
 local uiUpdateAccumulator
+local repairSessionActive = false
 
 -- Fail fast before touching the FDU list.
 deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
@@ -204,8 +205,24 @@ local function followerUp(data)
     end
 end
 
+local function repairGearReady(data)
+    repairSessionActive = true
+    I.UI.setMode("Repair", { target = data.tool })
+end
+
+local function repairGearClosed()
+    if not repairSessionActive then
+        return
+    end
+    repairSessionActive = false
+    core.sendGlobalEvent("BestFriendsForever_repairGearClose")
+end
+
 local function uiModeChanged(data)
     followerMenu.onUiModeChanged(data)
+    if repairSessionActive and data.oldMode == "Repair" and data.newMode ~= "Repair" then
+        repairGearClosed()
+    end
     if not followerHUD.root then
         return
     end
@@ -275,6 +292,7 @@ return {
         BestFriendsForever_followerDown = followerDown,
         BestFriendsForever_followerUp = followerUp,
         BestFriendsForever_openFollowerMenu = openFollowerMenu,
+        BestFriendsForever_repairGearReady = repairGearReady,
     },
     interfaceName = "BestFriendsForever",
     interface = {
