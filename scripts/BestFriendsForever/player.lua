@@ -20,6 +20,7 @@ local handlerList = {
     require("scripts.BestFriendsForever.playerHandlers.menu"),
     require("scripts.BestFriendsForever.playerHandlers.repair"),
     require("scripts.BestFriendsForever.playerHandlers.hud"),
+    require("scripts.BestFriendsForever.playerHandlers.rawUI"),
 }
 local combat = handlerList[1]
 local teleport = handlerList[2]
@@ -108,7 +109,7 @@ local function onLoad(data)
     end
 end
 
-local interface = { version = 4 }
+local interface = { version = 5 }
 for _, handler in ipairs(handlerList) do
     for key, value in pairs(handler.interface or {}) do
         assert(interface[key] == nil, "Duplicate BFF player interface member: " .. key)

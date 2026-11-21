@@ -58,8 +58,7 @@ local function registerFollowerTooltipField(definition)
 end
 
 local function setPosSettings(x, y)
-    sectionWrapper:set("posX", x)
-    sectionWrapper:set("posY", y)
+    sectionWrapper:set("position", { posX = x, posY = y })
 end
 
 local function markFollowerDown(data)

@@ -1,4 +1,4 @@
----@diagnostic disable: param-type-mismatch, need-check-nil
+---@diagnostic disable: param-type-mismatch, need-check-nil, undefined-field
 ---@omw-context player
 local util = require("openmw.util")
 local v2 = util.vector2
@@ -254,6 +254,14 @@ function tooltipUI.create(layer)
         },
     }
     return ui.create(layout)
+end
+
+---@param tooltipElement openmw.ui.Element|nil
+---@return openmw.ui.Content|table
+function tooltipUI.getFields(tooltipElement)
+    local elementLayout = tooltipElement and tooltipElement.layout
+    local fields = elementLayout and elementLayout.content and elementLayout.content.followerTooltipFields
+    return fields and fields.content or {}
 end
 
 function tooltipUI.update(tooltipElement, fData, enabledElements)

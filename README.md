@@ -93,7 +93,7 @@ Load Best Friends Forever as high as possible in the load order - before any mod
 
 ## API
 
-Best Friends Forever is built to be extended. Other mods can react when followers fall or recover, add custom icons and tooltip fields, and register follower-specific actions in the follower menu.
+Best Friends Forever is built to be extended. Other mods can react when followers fall or recover, add custom icons and tooltip fields, register follower-specific actions, and even reach into BFF's live UI elements to reshape the HUD, tooltips, and follower menu.
 
 See [docs/API.md](docs/API.md) for details.
 

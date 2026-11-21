@@ -3,17 +3,18 @@
 ## Unreleased
 
 - Moved the public API contract out of the README into an expanded `docs/API.md` with built-in defaults and reserved values.
+- Added raw UI access to `I.BestFriendsForever`: `getRawUI`, `getFollowerWidget`, `refreshRawUI`, `rebuildRawUI`, and `registerRawUIMutator`.
 - Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
 - Added `I.BestFriendsForever.registerFollowerTooltipField` for player scripts.
 - `registerFollowerTooltipField` now accepts `getLayout` callbacks returning complete UI layouts.
 - `I.BestFriendsForever.setFollowerIcon` now takes a spec table with `recordIds` (string or list; `recordId` for one) or a `rule(actor)` function. Icon lookup is now ID map → rules → built-in class/creature-type fallback.
 - Animunculi uses a rule; the four creature types are handled by the built-in fallback (textures still TODO).
-- `I.BestFriendsForever` interface version is now 4.
+- `I.BestFriendsForever` interface version is now 5.
 - `BestFriendsForever_followerDown` is now also sent to the follower's local scripts.
 
 ## 3.0
 
-- Complete rewrite, especially prominent on the UI side
+- Complete mod rewrite
 - Added Follower Icons (thx butts)
 - Added unique Follower Icons to Biz'kuitz, Julan and Tetra the Pack Guar
 - Added Tooltips to follower widgets
@@ -21,7 +22,7 @@
 - Added follower Interaction Menu
 - Added Companion Share, Wait Here, Follower Info and Repair Gear features to Interaction Menu
 - Added interfaces to add new Follower Icons (unique or conditional), edit or expand Tooltips, add new Interactions and edit the Follower HUD
-- Complete overhaul of the mod's settings
+- Complete overhaul of the mod's settings (I won't list every change, check them for yourself)
 - Added settigns presets
 - Removed all GOTOs
 

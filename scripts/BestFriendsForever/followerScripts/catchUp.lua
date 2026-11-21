@@ -21,14 +21,15 @@ local function getTargetBoost()
     end
 
     local distance = (self.position - leader.position):length()
+    local distances = settings.distances
 
-    if distance <= settings.startDist then
+    if distance <= distances.startDist then
         return 0
-    elseif distance >= settings.maxDist then
+    elseif distance >= distances.maxDist then
         return leaderSpeed.modified * 1.5
     else
-        local t = (distance - settings.startDist)
-            / (settings.maxDist - settings.startDist)
+        local t = (distance - distances.startDist)
+            / (distances.maxDist - distances.startDist)
         return t * leaderSpeed.modified * 1.5
     end
 end

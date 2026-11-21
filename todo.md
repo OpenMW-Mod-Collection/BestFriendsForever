@@ -18,19 +18,6 @@
 
 ## Menu interactions
 
-### Repair Gear
-
-Settings:
-
-- All items or just equipment
-- All followers or just selected
-- Hide the player's items or not
-
 ### Follower Info
 
 self-explanatory
-
-
-
-Remove all redundant type checks and shit
-Add injuries system

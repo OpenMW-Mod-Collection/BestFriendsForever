@@ -1,4 +1,5 @@
 MENU: scripts/BestFriendsForever/settingsRenderers/superSlider6.lua
+MENU: scripts/BestFriendsForever/settingsRenderers/multiSlider.lua
 MENU: scripts/BestFriendsForever/settingsRenderers/textSet.lua
 MENU: scripts/BestFriendsForever/settingsRenderers/colorPicker.lua
 MENU: scripts/BestFriendsForever/settingsRenderers/multiInput.lua

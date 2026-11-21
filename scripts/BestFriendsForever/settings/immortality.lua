@@ -37,20 +37,6 @@ I.Settings.registerGroup {
             },
         },
         {
-            key = "deathChance",
-            name = "deathChance_name",
-            renderer = "SuperSlider6",
-            default = 1,
-            argument = {
-                min = 0,
-                max = 100,
-                default = 1,
-                showResetButton = true,
-                bottomRow = true,
-                unit = "%",
-            },
-        },
-        {
             key = "ingoreCommanded",
             name = "ingoreCommanded_name",
             description = "ingoreCommanded_desc",

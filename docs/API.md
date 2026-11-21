@@ -7,7 +7,7 @@ This is the contract other OpenMW Lua mods can build on. Use it to react when fo
 ## At a glance
 
 - `BestFriendsForever_followerDown` and `BestFriendsForever_followerUp` report changes to a follower's downed state.
-- `I.BestFriendsForever` is the player-side interface for downed-follower lookup, custom icons, tooltip fields, and follower-menu buttons.
+- `I.BestFriendsForever` is the player-side interface for downed-follower lookup, custom icons, tooltip fields, follower-menu buttons, and direct access to BFF's live UI elements.
 - `I.BestFriendsForeverDown` is the local-side hook that lets a follower's own scripts choose between a normal down and real death.
 
 ## BFF defaults and reserved values
@@ -58,7 +58,7 @@ BestFriendsForever_followerUp
 
 ## Interfaces
 
-`I.BestFriendsForever.version` is currently `4`. This is the main player-side interface: it gives you read-only access to the downed-follower table and lets you add custom icons, tooltip fields, and follower-menu buttons.
+`I.BestFriendsForever.version` is currently `5`. This is the main player-side interface: it gives you read-only access to the downed-follower table, lets you add custom icons, tooltip fields, and follower-menu buttons, and exposes BFF's live UI elements for direct modification.
 
 ### Downed followers
 
@@ -147,6 +147,99 @@ I.BestFriendsForever.registerFollowerTooltipField {
 }
 ```
 
+### Raw UI access
+
+`I.BestFriendsForever` also exposes BFF's live UI objects. This surface is available only to other PLAYER scripts on the player, because interfaces do not cross contexts and UI Elements cannot be serialized through events or saved. It is intentionally unsafe: BFF still owns these objects, and its update loop can overwrite visibility, positions, text, bar contents, icon contents, and menu structure during normal updates and rebuilds.
+
+`getRawUI()` returns fresh top-level tables each call. The `root`, `tooltip`, `layout`, `buttons`, `actions`, `followers`, and `tooltipFields` values inside them are live BFF-owned objects. Element handles become invalid when BFF destroys and rebuilds the corresponding surface; a destroyed Element has `layout == nil`.
+
+`menu.buttons` is keyed by layout name and includes the navigation buttons. `menu.actions` is keyed by registered button name and includes only action buttons on the current page. `hud.tooltipFields` is the live tooltip Content keyed by field layout name.
+
+`getFollowerWidget(actorOrId)` accepts a Follower Detection Util Actor object or an actor id string. It returns the same entry as `getRawUI().hud.followers[id]`, or nil when the follower has no current HUD widget.
+
+`refreshRawUI()` calls `Element:update()` on the current HUD, tooltip, menu root, and menu button elements. That refreshes the current layout but does not create new child Elements. `rebuildRawUI()` recreates the HUD and tooltip when the HUD is enabled and rebuilds the follower menu if it is open, rerunning registered mutators.
+
+`registerRawUIMutator()` lets a player script reapply raw changes after BFF rebuilds a surface. Pass a unique `name` and any of `afterHudBuild(hud)`, `afterTooltipBuild(hud)`, and `afterMenuBuild(menu)`. Each callback receives the same table section as `getRawUI()`. Registering the same name again replaces the previous mutator, and mutators are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Registration only affects future rebuilds; call `rebuildRawUI()` after registering to restyle UI that already exists.
+
+There is no error isolation: errors from callbacks propagate into BFF's build path. Mutators should be fast and should not call `rebuildRawUI()` from inside a build callback.
+
+```lua
+-- Scope: Player
+-- Returns a fresh snapshot table:
+-- {
+--   hud = {
+--     root = Element|nil,
+--     tooltip = Element|nil,
+--     followers = {
+--       [actorId] = { actor = Actor, state = FDUState, data = FollowerData, layout = Layout },
+--     },
+--     tooltipFields = Content,
+--   },
+--   menu = {
+--     root = Element|nil,
+--     state = FDUState|nil,
+--     page = number,
+--     buttons = { [layoutName] = Element },
+--     actions = { [buttonName] = Element },
+--   },
+-- }
+I.BestFriendsForever.getRawUI()
+
+-- Scope: Player
+-- Accepts an Actor or actor id string. Returns the follower entry or nil.
+I.BestFriendsForever.getFollowerWidget(actorOrId)
+
+-- Scope: Player
+-- Updates live elements without rebuilding them.
+I.BestFriendsForever.refreshRawUI()
+
+-- Scope: Player
+-- Rebuilds the enabled HUD, its tooltip, and the open follower menu.
+I.BestFriendsForever.rebuildRawUI()
+
+-- Scope: Player
+-- Registers callbacks that rerun after BFF rebuilds a UI surface.
+I.BestFriendsForever.registerRawUIMutator {
+    name = "MyMod_hudTint",
+    afterHudBuild = function(hud) end,
+    afterTooltipBuild = function(hud) end,
+    afterMenuBuild = function(menu) end,
+}
+```
+
+BFF currently uses these layout names in its HUD and menu surfaces:
+
+- HUD root: `root`, `rootOuterPadding`, `rootFlexPadding`, `rootFlex`
+- Follower widget: `followerFlex_<actor.id>`, `followerFlex_V1`, `followex_V1_H1`, `followerFlex_Bars`, `followerName`
+- Tooltip root and fields: `followerTooltip`, `followerTooltipFields`, `followerTooltip_<fieldName>`
+- Menu root: `BestFriendsForever_FollowerMenu`, `followerMenuHeader`, `followerMenuAction_<index>`, `followerMenuPrevious`, `followerMenuExit`, `followerMenuNext`
+
+```lua
+local I = require("openmw.interfaces")
+local util = require("openmw.util")
+
+I.BestFriendsForever.registerRawUIMutator {
+    name = "MyMod_hudTint",
+    afterHudBuild = function(hud)
+        for _, widget in pairs(hud.followers) do
+            local name = widget.layout.content.followerName
+            if name then
+                name.props.textColor = util.color.rgb(1, 0.4, 0.4)
+            end
+        end
+    end,
+}
+
+local ui = I.BestFriendsForever.getRawUI()
+if ui.menu.root then
+    local button = ui.menu.actions["My Action"]
+    if button then
+        button.layout.content[1].content[2].props.text = "Do the thing"
+        button:update()
+    end
+end
+```
+
 ## Follower Down Outcome
 
 This is the local-side counterpart to `I.BestFriendsForever`. It gives quest and roleplay mods a chance to override BFF's down behavior, for example to turn a scripted assassination into a real death instead of a knockdown.
@@ -163,7 +256,7 @@ end)
 I.BestFriendsForeverDown.clearOutcomeProvider("MyMod")
 ```
 
-Only one provider is active; registering a new id replaces the previous one. Providers are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Keep the callback fast and side-effect-free. Errors and unexpected return values fall back to a normal down. BFF's own `deathChance` setting is separate and is checked before the provider is called.
+Only one provider is active; registering a new id replaces the previous one. Providers are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Keep the callback fast and side-effect-free. Errors and unexpected return values fall back to a normal down. Without a provider returning `"death"`, BFF always downs the follower instead of killing them.
 
 ## Follower Menu
 
@@ -199,7 +292,7 @@ I.BestFriendsForever.registerFollowerMenuButton {
 }
 ```
 
-Buttons may set `closeAfterActivation = true` to close the menu without leaving the current UI mode. The built-in Companion Share button uses this to open the follower in Companion mode for trading. <!-- TODO: what? -->
+Buttons may set `closeAfterActivation = true` to close the menu without leaving the current UI mode. The built-in Companion Share button uses this to open the follower in Companion mode for trading.
 
 Player scripts can also reopen the follower menu by sending the `BestFriendsForever_openFollowerMenu` event to the player. Its payload is the follower's Follower Detection Util state:
 

@@ -9,6 +9,7 @@ local async = require("openmw.async")
 local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local rawUIMutators = require("scripts.BestFriendsForever.utils.rawUIMutators")
 local buttonTemplates = require("scripts.BestFriendsForever.utils.button")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
@@ -27,6 +28,8 @@ local currentFollowerState
 local currentPage = 1
 local root
 local buttonElements = {}
+local buttonsByLayoutName = {}
+local actionButtonsByName = {}
 local settings
 
 local function conditionMet(button, state)
@@ -47,6 +50,8 @@ local function destroyMenu()
         end
     end
     buttonElements = {}
+    buttonsByLayoutName = {}
+    actionButtonsByName = {}
 end
 
 local function closeMenu(restoreGame)
@@ -74,9 +79,13 @@ local function sortedButtons()
     return buttons
 end
 
-local function addButtonElement(content, label, name, onClick, disabled)
+local function addButtonElement(content, label, name, onClick, disabled, actionName)
     local element = buttonTemplates.button(label, 16, onClick, name, nil, disabled)
     buttonElements[#buttonElements + 1] = element
+    buttonsByLayoutName[name] = element
+    if actionName then
+        actionButtonsByName[actionName] = element
+    end
     content:add(element)
     return element
 end
@@ -129,7 +138,7 @@ local function buildMenu()
             if button.closeAfterActivation then
                 closeMenu(false)
             end
-        end)
+        end, false, button.name)
         content:add { props = { size = util.vector2(0, 6) } }
     end
 
@@ -193,6 +202,36 @@ local function buildMenu()
         },
         content = ui.content { doublePadding },
     }
+    rawUIMutators.afterMenuBuild(followerMenu.getSnapshot())
+    for _, element in ipairs(buttonElements) do
+        element:update()
+    end
+    root:update()
+end
+
+function followerMenu.getSnapshot()
+    return {
+        root = root,
+        state = currentFollowerState,
+        page = currentPage,
+        buttons = buttonsByLayoutName,
+        actions = actionButtonsByName,
+    }
+end
+
+function followerMenu.refresh()
+    for _, element in ipairs(buttonElements) do
+        element:update()
+    end
+    if root then
+        root:update()
+    end
+end
+
+function followerMenu.rebuild()
+    if currentFollowerState then
+        buildMenu()
+    end
 end
 
 function followerMenu.registerButton(button)

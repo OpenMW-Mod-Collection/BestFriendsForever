@@ -11,6 +11,7 @@ local self = require("openmw.self")
 local input = require("openmw.input")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local rawUIMutators = require("scripts.BestFriendsForever.utils.rawUIMutators")
 local followerUI = require("scripts.BestFriendsForever.ui.follower.widget")
 local tooltipUI = require("scripts.BestFriendsForever.ui.tooltip")
 
@@ -62,6 +63,11 @@ local settingsBlacklists
 local rootFlex
 local wrapperEventCallbacks
 
+local function hudPosition()
+    local position = settingsWrapper.position
+    return v2(position.posX, position.posY)
+end
+
 followerHUD.hudDisplayMap = {
     ---@param uiMode string
     ---@return boolean
@@ -86,9 +92,9 @@ followerHUD.hudDisplayMap = {
 }
 
 local function settingsUpdated(key)
-    if key == "posX" or key == "posY" then
+    if key == "position" then
         if settingsWrapper and followerHUD.root and followerHUD.root.layout then
-            followerHUD.root.layout.props.position = v2(settingsWrapper.posX, settingsWrapper.posY)
+            followerHUD.root.layout.props.position = hudPosition()
             followerHUD.root:update()
         end
         return
@@ -221,7 +227,7 @@ local function mousePress(data, elem)
     elem.userData.isDragging = true
     elem.userData.dragStartPosition = data.position
     elem.userData.windowStartPosition = followerHUD.root.layout.props.position
-        or v2(settingsWrapper.posX, settingsWrapper.posY)
+        or hudPosition()
 
     followerHUD.root:update()
 end
@@ -298,7 +304,7 @@ local function createRoot()
         template = I.MWUI.templates.boxTransparent,
         props = {
             alpha = settingsWrapper.enableBordersAndBg and 1 or 0,
-            position = v2(settingsWrapper.posX, settingsWrapper.posY),
+            position = hudPosition(),
             anchor = v2(
                 alignToAnchor[settingsWrapper.expansionDirectionH],
                 alignToAnchor[settingsWrapper.expansionDirectionV]
@@ -307,7 +313,7 @@ local function createRoot()
         events = wrapperEventCallbacks,
         content = ui.content { rootOuterPadding },
         userData = {
-            windowStartPosition = v2(settingsWrapper.posX, settingsWrapper.posY),
+            windowStartPosition = hudPosition(),
         },
     }
 end
@@ -372,6 +378,41 @@ followerHUD.updateRootVisibility = function(uiMode)
     end
 end
 
+function followerHUD.getSnapshot()
+    local followers = {}
+    for id, fData in pairs(followerHUD.followerData) do
+        followers[id] = {
+            actor = fData.followerState.actor,
+            state = fData.followerState,
+            data = fData,
+            layout = rootFlex and rootFlex.content["followerFlex_" .. id],
+        }
+    end
+    return {
+        root = followerHUD.root,
+        tooltip = followerHUD.tooltipElement,
+        followers = followers,
+        tooltipFields = tooltipUI.getFields(followerHUD.tooltipElement),
+    }
+end
+
+function followerHUD.refresh()
+    if followerHUD.root then
+        followerHUD.root:update()
+    end
+    if followerHUD.tooltipElement then
+        followerHUD.tooltipElement:update()
+    end
+end
+
+function followerHUD.rebuild()
+    if settingsWrapper.enable then
+        followerHUD.new(I.FollowerDetectionUtil.getFollowerList())
+    else
+        followerHUD.destroy()
+    end
+end
+
 followerHUD.destroy = function()
     if followerHUD.root then
         followerHUD.root:destroy()
@@ -394,6 +435,8 @@ followerHUD.rebuildTooltip = function()
     end
     followerHUD.tooltipElement = tooltipUI.create(tooltipLayer)
     activeTooltipData = nil
+    rawUIMutators.afterTooltipBuild(followerHUD.getSnapshot())
+    followerHUD.tooltipElement:update()
 end
 
 followerHUD.new = function(followers)
@@ -430,7 +473,10 @@ followerHUD.new = function(followers)
     end
 
     followerHUD.updateRootVisibility(I.UI.getMode())
+    rawUIMutators.afterHudBuild(followerHUD.getSnapshot())
+    rawUIMutators.afterTooltipBuild(followerHUD.getSnapshot())
     followerHUD.root:update()
+    followerHUD.tooltipElement:update()
 end
 
 followerHUD.updateData = function()

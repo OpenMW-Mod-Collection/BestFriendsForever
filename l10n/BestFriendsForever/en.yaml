@@ -53,7 +53,6 @@ changeAggro_desc: >
 waitUntilCombatEnds_name: Get Up Only Once Combat Ends
 upDelay_name: Getting Up Delay (sec)
 upDelay_desc: Ignored if "Get Up Only Once Combat Ends" is enabled.
-deathChance_name: Death Chance
 
 ward_groupName: Ward
 ward_groupDesc: Protecting followers from diseases and stat damage.
@@ -77,10 +76,10 @@ callDistance_desc: |
 
 catchUp_groupName: Catch Up
 catchUp_groupDesc: Gradually speeds up followers if they get too far.
-startDist_name: Starting Distance
-startDist_desc: Distance at which follower will start speeding up.
-maxDist_name: Maximum Distance
-maxDist_desc: Distance at which the follower will reach max speed.
+distances_name: Catch-Up Distances
+distances_desc: Distances at which followers start and reach maximum catch-up speed.
+startDist: Starting Distance
+maxDist: Maximum Distance
 
 HUDWrapper_groupName: Wrapper Settings
 enable_name: Enable Follower HUD
@@ -101,8 +100,10 @@ Ctrl: Ctrl
 Alt: Alt
 Shift: Shift
 maxWidgets_name: Max Follower Widgets
-posX_name: X Position
-posY_name: Y Position
+position_name: HUD Position
+position_desc: Position of the follower HUD in pixels.
+posX: X Position
+posY: Y Position
 expansionDirectionV_name: Expand HUD Vertically
 expansionDirectionH_name: Expand HUD Horizontally
 enableBordersAndBg_name: Enable Borders and Background
