@@ -21,7 +21,7 @@ local I = require("openmw.interfaces")
 --  key = "BAR_DIMENSIONS",
 --  name = "barDimensions_name",
 --  description = "barDimensions_desc",
---  renderer = "BFFMultiSlider_V1",
+--  renderer = "MultiSlider_V1",
 --  default = { width = 100, height = 16 },
 --  argument = {
 --      keys = { "width", "height", "SEPARATOR" },
@@ -42,8 +42,8 @@ local I = require("openmw.interfaces")
 --
 -- Resulting stored value: { width = 100, height = 16 }
 
-local RENDERER_ID = "BFFMultiSlider_V1"
-local FAMILY_ID = "BFFMultiSlider"
+local RENDERER_ID = "MultiSlider_V1"
+local FAMILY_ID = "MultiSlider"
 local SEPARATOR_KEY = "SEPARATOR"
 
 local installedRenderers = storage.playerSection("InstalledSettingsRenderers")
@@ -76,8 +76,6 @@ local defaultArgument = {
 local statesByArgument = setmetatable({}, { __mode = "k" })
 local activeControl = nil
 
--- Settings values and arguments round-trip through storage as read-only
--- userdata proxies, so treat both userdata and plain tables as containers.
 local function isContainer(value)
     local kind = type(value)
     return kind == "table" or kind == "userdata"
@@ -126,77 +124,11 @@ local function formatValue(value, step)
     return string.format("%.3f", value)
 end
 
-local function colorFromGMST(gmst)
-    local colorString = core.getGMST(gmst) or ""
-    local channels = {}
-    for part in colorString:gmatch("([^,]+)") do
-        if #channels == 3 then
-            break
-        end
-        local number = tonumber(part:match("^%s*(.-)%s*$"))
-        if number then
-            table.insert(channels, number / 255)
-        end
-    end
-    if #channels < 3 then
-        return util.color.rgb(1, 1, 1)
-    end
-    return util.color.rgb(table.unpack(channels))
-end
-
 local resetTextColors = {
-    normal = colorFromGMST("fontcolor_color_normal"),
-    hover = colorFromGMST("fontcolor_color_normal_over"),
-    pressed = colorFromGMST("fontcolor_color_normal_pressed"),
+    normal = util.color.commaString(core.getGMST("fontcolor_color_normal")),
+    hover = util.color.commaString(core.getGMST("fontcolor_color_normal_over")),
+    pressed = util.color.commaString(core.getGMST("fontcolor_color_normal_pressed")),
 }
-
--- Mouse-wheel support mirrors SuperSlider6. Only activate these triggers when
--- this renderer had to create them; otherwise another renderer already owns
--- the game's wheel behavior.
-local ownsWheelTriggers = false
-if not inputApi.triggers["MenuMouseWheelUp"] then
-    inputApi.registerTrigger {
-        key = "MenuMouseWheelUp",
-        l10n = "none",
-        name = "MenuMouseWheelUp",
-        description = "",
-    }
-    inputApi.registerTrigger {
-        key = "MenuMouseWheelDown",
-        l10n = "none",
-        name = "MenuMouseWheelDown",
-        description = "",
-    }
-    ownsWheelTriggers = true
-end
-
-local function onMouseWheel(direction)
-    if ownsWheelTriggers then
-        if direction > 0 then
-            inputApi.activateTrigger("MenuMouseWheelUp")
-        else
-            inputApi.activateTrigger("MenuMouseWheelDown")
-        end
-    end
-
-    local control = activeControl
-    if not control then
-        return
-    end
-
-    -- Prefer the current renderer state in case the settings UI rebuilt after
-    -- the previous change. Fall back to the state captured by the active row.
-    local state = statesByArgument[control.argument] or control.state
-    if not state then
-        return
-    end
-
-    local current = tonumber(state.values[control.key]) or control.min
-    local newValue = snapValue(current + direction * control.step, control.min, control.max, control.step)
-    if newValue ~= current then
-        state.commit(control.key, newValue)
-    end
-end
 
 I.Settings.registerRenderer(RENDERER_ID, function(value, set, argument)
     if not isContainer(argument) or not isContainer(argument.keys) then
@@ -613,9 +545,3 @@ I.Settings.registerRenderer(RENDERER_ID, function(value, set, argument)
     end
     return result
 end)
-
-return {
-    engineHandlers = {
-        onMouseWheel = onMouseWheel,
-    },
-}
