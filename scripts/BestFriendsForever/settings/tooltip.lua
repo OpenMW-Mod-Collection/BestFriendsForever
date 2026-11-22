@@ -44,19 +44,5 @@ I.Settings.registerGroup {
                 },
             },
         },
-        {
-            key = "creatureDisplayMode",
-            name = "creatureDisplayMode_name",
-            description = "creatureDisplayMode_desc",
-            renderer = "SuperSelect3",
-            default = "Base Creature",
-            argument = {
-                l10n = "BestFriendsForever_settings",
-                items = {
-                    "Base Creature",
-                    "Creature Type",
-                },
-            },
-        },
     },
 }

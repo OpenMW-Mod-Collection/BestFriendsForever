@@ -65,13 +65,6 @@ local DYNAMIC_STATS = {
     },
 }
 
-local CREATURE_TYPE_KEYS = {
-    [types.Creature.TYPE.Creatures] = "creatureType_creatures",
-    [types.Creature.TYPE.Daedra] = "creatureType_daedra",
-    [types.Creature.TYPE.Humanoid] = "creatureType_humanoid",
-    [types.Creature.TYPE.Undead] = "creatureType_undead",
-}
-
 local function statColor(stat)
     if stat.modified > stat.base then
         return commonUI.Colors.POSITIVE
@@ -291,11 +284,7 @@ local function addCreatureSkillRows(rows, record)
 end
 
 local function creatureTypeLabel(record)
-    local key = CREATURE_TYPE_KEYS[record.type]
-    if key then
-        return l10n(key)
-    end
-    return tostring(record.type or record.name or "")
+    return commonUI.creatureTypeLabel(record.type) or tostring(record.type or record.name or "")
 end
 
 local function buildContent(actor)

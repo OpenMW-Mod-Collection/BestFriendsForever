@@ -104,7 +104,7 @@ I.BestFriendsForever.setFollowerIcon {
 
 ### Tooltip fields
 
-`registerFollowerTooltipField()` adds extra information to BFF's follower tooltips without taking ownership of the HUD. Give the field a unique name, optionally adjust its sort order, and provide either `getText` for a simple string or `getLayout` for a complete UI layout. Fields can be registered at any time.
+`registerFollowerTooltipField()` adds extra information to BFF's follower tooltips without taking ownership of the HUD. Give the field a unique name, optionally adjust its sort order, and provide either `getText` for a simple string or `getLayout` for a complete UI layout. Text fields can also set `header = true` to use the header text template. Fields can be registered at any time.
 
 ```lua
 -- Adds a field to the follower tooltip
@@ -211,7 +211,7 @@ BFF currently uses these layout names in its HUD and menu surfaces:
 
 - HUD root: `root`, `rootOuterPadding`, `rootFlexPadding`, `rootFlex`
 - Follower widget: `followerFlex_<actor.id>`, `followerFlex_V1`, `followex_V1_H1`, `followerFlex_Bars`, `followerName`
-- Tooltip root and fields: `followerTooltip`, `followerTooltipFields`, `followerTooltip_<fieldName>`
+- Tooltip root and fields: `followerTooltip`, `followerTooltipOuterPadding`, `followerTooltipHorizontalPadding`, `followerTooltipFields`, `followerTooltip_<fieldName>`
 - Menu root: `BestFriendsForever_FollowerMenu`, `followerMenuHeader`, `followerMenuAction_<index>`, `followerMenuPrevious`, `followerMenuExit`, `followerMenuNext`
 
 ```lua

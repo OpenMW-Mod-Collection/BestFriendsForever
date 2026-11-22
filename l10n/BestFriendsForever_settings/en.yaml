@@ -173,10 +173,6 @@ diseaseVerbosity_desc: Choose how much detail to show about follower diseases.
 Names: Names
 "By Type": By Type
 Unclear: Unclear
-creatureDisplayMode_name: Creature Field
-creatureDisplayMode_desc: What to show for creature followers in the class/creature field.
-"Base Creature": Base Creature
-"Creature Type": Creature Type
 menu_groupName: Menu
 menu_groupDesc: Settings for the follower interaction menu.
 maxButtonsPerPage_name: Buttons per Page

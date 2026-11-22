@@ -8,6 +8,7 @@ local ambient = require("openmw.ambient")
 local ui = require("openmw.ui")
 local auxUi = require("openmw_aux.ui")
 local core = require("openmw.core")
+local types = require("openmw.types")
 
 local commonUI = {}
 
@@ -60,6 +61,14 @@ commonUI.Sizes = {
 }
 
 commonUI.Colors = C.Colors
+
+commonUI.creatureTypeLabel = function(creatureType)
+    for label, value in pairs(types.Creature.TYPE) do
+        if value == creatureType then
+            return label
+        end
+    end
+end
 
 local buttonBorderSize = 4
 local borderSideParts = {

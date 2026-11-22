@@ -10,19 +10,17 @@ local async = require("openmw.async")
 local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local commonUI = require("scripts.BestFriendsForever.utils.commonUI")
 
 local l10n = core.l10n("BestFriendsForever_ui")
 local damagedColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
-local creatureTypeLabels = {
-    [types.Creature.TYPE.Creatures] = "creatureType_creatures",
-    [types.Creature.TYPE.Daedra] = "creatureType_daedra",
-    [types.Creature.TYPE.Humanoid] = "creatureType_humanoid",
-    [types.Creature.TYPE.Undead] = "creatureType_undead",
-}
+local OUTER_PADDING = commonUI.Sizes.BOX_OUTER_PADDING
+local FIELD_GAP = 2
 
 local tooltipUI = {}
 local registeredFields = {}
 local fieldsCache
+local fieldSpacers = {}
 local settings
 
 local function getActorName(followerState)
@@ -35,25 +33,24 @@ local function getActorRole(followerState)
     if types.NPC.objectIsInstance(actor) then
         local npcRecord = types.NPC.records[actor.recordId]
         local classRecord = types.NPC.classes.records[npcRecord.class]
-        return l10n("followerTooltip_class", { class_name = classRecord.name })
+        return classRecord.name
     elseif types.Creature.objectIsInstance(actor) then
         local creatureRecord = types.Creature.records[actor.recordId]
-        local creatureName
-        if settings.creatureDisplayMode == "Creature Type" then
-            local typeLabel = creatureTypeLabels[creatureRecord.type]
-            creatureName = typeLabel and l10n(typeLabel) or creatureRecord.type or creatureRecord.name
-        else
-            local baseCreatureId = creatureRecord.baseCreature
-            local baseCreature = baseCreatureId and types.Creature.records[baseCreatureId]
-            creatureName = baseCreature and baseCreature.name or creatureRecord.name
+        local role = commonUI.creatureTypeLabel(creatureRecord.type) or creatureRecord.type or creatureRecord.name or ""
+        local baseCreatureId = creatureRecord.baseCreature
+        if baseCreatureId ~= creatureRecord.id then
+            local baseCreature = types.Creature.records[baseCreatureId]
+            if baseCreature then
+                return baseCreature.name .. ", " .. role
+            end
         end
-        return l10n("followerTooltip_creature", { creature_name = creatureName })
+        return role
     end
 end
 
 local function getDiseases(fData)
     local names = {}
-    local types = {}
+    local diseaseTypes = {}
     local seenTypes = {}
     for _, spell in pairs(fData.spells) do
         if spell.type == core.magic.SPELL_TYPE.Blight or spell.type == core.magic.SPELL_TYPE.Disease then
@@ -61,14 +58,14 @@ local function getDiseases(fData)
             local typeName = spell.type == core.magic.SPELL_TYPE.Blight and "Blight" or "Disease"
             if not seenTypes[typeName] then
                 seenTypes[typeName] = true
-                types[#types + 1] = typeName
+                diseaseTypes[#diseaseTypes + 1] = typeName
             end
         end
     end
 
     table.sort(names)
-    table.sort(types)
-    return names, types
+    table.sort(diseaseTypes)
+    return names, diseaseTypes
 end
 
 local function getDiseaseText(fData, verbosity)
@@ -144,6 +141,7 @@ end
 ---@field enabledSetting string? HUD element setting that can hide the field.
 ---@field toggleKey string? Tooltip field setting that can hide the field.
 ---@field textColor? openmw.util.Color Text color override for text fields.
+---@field header? boolean Use the header text template for text fields.
 ---@field getText? fun(followerState: table, followerData: FollowerData): string|nil
 ---@field getLayout? fun(followerState: table, followerData: FollowerData): openmw.ui.Layout|nil
 
@@ -176,6 +174,7 @@ function tooltipUI.registerField(definition)
         enabledSetting = definition.enabledSetting,
         toggleKey = definition.toggleKey,
         textColor = definition.textColor,
+        header = definition.header,
         getText = definition.getText,
         getLayout = definition.getLayout,
     }
@@ -208,13 +207,17 @@ local function newFieldLayout(definition)
         return {
             name = name,
             type = ui.TYPE.Container,
-            props = { visible = false },
+            props = { visible = false, autoSize = true, size = v2(0, 0) },
             content = ui.content {},
         }
     end
     local props = {
         textSize = 16,
         textShadow = true,
+        textAlignH = ui.ALIGNMENT.Center,
+        textAlignV = ui.ALIGNMENT.Center,
+        autoSize = true,
+        size = v2(0, 0),
         visible = false,
     }
     if definition.textColor then
@@ -222,17 +225,53 @@ local function newFieldLayout(definition)
     end
     return {
         name = name,
-        template = I.MWUI.templates.textNormal,
+        template = definition.header and I.MWUI.templates.textHeader or I.MWUI.templates.textNormal,
         props = props,
     }
 end
 
 function tooltipUI.create(layer)
-    local fieldLayouts = {}
-    for _, definition in ipairs(allFields()) do
-        fieldLayouts[#fieldLayouts + 1] = newFieldLayout(definition)
+    local definitions = allFields()
+    local content = ui.content {}
+    fieldSpacers = {}
+    for index, definition in ipairs(definitions) do
+        content:add(newFieldLayout(definition))
+        if index < #definitions then
+            local spacer = commonUI.intervalV(FIELD_GAP)
+            content:add(spacer)
+            fieldSpacers[definition.name] = spacer
+        end
     end
 
+    local fields = {
+        name = "followerTooltipFields",
+        type = ui.TYPE.Flex,
+        props = {
+            horizontal = false,
+            arrange = ui.ALIGNMENT.Center,
+        },
+        content = content,
+    }
+    local horizontallyPadded = {
+        name = "followerTooltipHorizontalPadding",
+        type = ui.TYPE.Flex,
+        props = { horizontal = true },
+        content = ui.content {
+            commonUI.intervalH(OUTER_PADDING),
+            fields,
+            commonUI.intervalH(OUTER_PADDING),
+        },
+    }
+    local outer = {
+        name = "followerTooltipOuterPadding",
+        type = ui.TYPE.Flex,
+        props = { horizontal = false },
+        content = ui.content {
+            commonUI.intervalV(OUTER_PADDING),
+            horizontallyPadded,
+            commonUI.intervalV(OUTER_PADDING),
+        },
+    }
     local layout = {
         name = "followerTooltip",
         layer = layer,
@@ -241,31 +280,31 @@ function tooltipUI.create(layer)
             position = v2(0, 0),
             visible = false,
         },
-        content = ui.content {
-            {
-                name = "followerTooltipFields",
-                type = ui.TYPE.Flex,
-                props = {
-                    horizontal = false,
-                    gap = 2,
-                },
-                content = ui.content(fieldLayouts),
-            },
-        },
+        content = ui.content { outer },
     }
     return ui.create(layout)
+end
+
+local function getFieldsLayout(tooltipElement)
+    local rootContent = tooltipElement and tooltipElement.layout and tooltipElement.layout.content
+    local outer = rootContent and rootContent.followerTooltipOuterPadding
+    local horizontal = outer and outer.content and outer.content.followerTooltipHorizontalPadding
+    return horizontal and horizontal.content and horizontal.content.followerTooltipFields
 end
 
 ---@param tooltipElement openmw.ui.Element|nil
 ---@return openmw.ui.Content|table
 function tooltipUI.getFields(tooltipElement)
-    local elementLayout = tooltipElement and tooltipElement.layout
-    local fields = elementLayout and elementLayout.content and elementLayout.content.followerTooltipFields
+    local fields = getFieldsLayout(tooltipElement)
     return fields and fields.content or {}
 end
 
 function tooltipUI.update(tooltipElement, fData, enabledElements)
-    local layouts = tooltipElement.layout.content.followerTooltipFields.content
+    local fields = getFieldsLayout(tooltipElement)
+    if not fields then
+        return
+    end
+    local layouts = fields.content
     local toggles = settings.enabledFields
     for _, definition in ipairs(allFields()) do
         local field = layouts["followerTooltip_" .. definition.name]
@@ -283,9 +322,15 @@ function tooltipUI.update(tooltipElement, fData, enabledElements)
                 field.props.text = text
                 visible = text ~= nil
             end
-            field.props.visible = visible
+            local isVisible = visible
                 and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
                 and (not definition.toggleKey or not toggles or toggles[definition.toggleKey] ~= false)
+            field.props.visible = isVisible
+            field.props.autoSize = isVisible
+            local spacer = fieldSpacers[definition.name]
+            if spacer then
+                spacer.props.size = v2(0, isVisible and FIELD_GAP or 0)
+            end
         end
     end
     tooltipElement:update()
@@ -296,6 +341,7 @@ settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_t
 tooltipUI.registerField {
     name = "name",
     order = 1,
+    header = true,
     getText = function(followerState)
         return l10n("followerTooltip_name", { name = getActorName(followerState) })
     end,
