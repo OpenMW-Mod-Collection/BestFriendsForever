@@ -1,0 +1,6 @@
+msg_followerDown: "{npc_name} is down!"
+msg_followerWaiting: "{npc_name} will wait here. Interact with them to make them a follower again."
+msg_followerFollowingAgain: "{npc_name} is following you again."
+msg_repairNoGear: The follower has no damaged gear to repair.
+msg_repairNoTool: No repair tool with uses left was found on you or your follower.
+msg_repairRestoredPartial: Some repaired items could not be returned because their owner is no longer available.

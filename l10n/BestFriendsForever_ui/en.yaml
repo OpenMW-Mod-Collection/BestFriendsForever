@@ -1,0 +1,19 @@
+followerTooltip_name: "Name: {name}"
+followerTooltip_class: "Class: {class_name}"
+followerTooltip_creature: "Creature: {creature_name}"
+followerTooltip_diseases: "Diseases: {diseases}"
+followerTooltip_statDamage: "Stat damage: {stats}"
+Blight: Blight
+Disease: Disease
+followerTooltip_diseased: Diseased
+"Base Creature": Species
+"Creature Type": Type
+creatureType_creatures: Creatures
+statsWindow_title: Follower Stats
+statsWindow_button: Stats
+statsWindow_skills: Skills
+statsWindow_attributes: Attributes
+statsWindow_exit: Exit
+creatureType_daedra: Daedra
+creatureType_humanoid: Humanoid
+creatureType_undead: Undead
