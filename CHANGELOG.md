@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fixed a `focusLoss event propagation has failed: DelayedAction is not allowed to create another DelayedAction` warning when closing the Interaction Menu to open the Repair window. Repair Gear now closes the menu on activation, so its buttons are destroyed before the UI mode changes.
+- Fixed a `Can't remove 0 of 0 items` error when closing the Repair window with a borrowed follower tool that was consumed or whose object reference went stale. Borrowed follower tools are now tracked by record id and stack count, and closing Repair returns as many matching tools as remain without relying on object refs. Followers re-equip returned gear through the built-in `UseItem` event instead of tracked equipment slots.
+- Split Repair Tool Preference into Tool Source Preference (player or follower first) and Initial Tool Preference (highest quality, highest max uses, or highest weight). Ties are broken by weight multiplied by remaining uses.
+
 - Added a Follower Stats window to the Interaction Menu, built with OpenMW's built-in MWUI templates and BFF's shared common UI helpers. NPCs show dynamic stat bars with current/max values, level, factions, and class skills in two columns; creatures show dynamic stat bars with current/max values, level, attributes, creature type, base creature, and their three creature skills in one column.
 - Moved the Interaction Menu to the `Windows` UI layer so the Stats window can render above it without hiding the menu.
 - Moved the public API contract out of the README into an expanded `docs/API.md` with built-in defaults and reserved values.

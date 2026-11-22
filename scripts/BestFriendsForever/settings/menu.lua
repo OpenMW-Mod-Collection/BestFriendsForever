@@ -59,18 +59,33 @@ I.Settings.registerGroup {
             default = true,
         },
         {
-            key = "repairToolPreference",
-            name = "repairToolPreference_name",
-            description = "repairToolPreference_desc",
+            key = "repairToolSource",
+            name = "repairToolSource_name",
+            description = "repairToolSource_desc",
             renderer = "SuperSelect3",
-            default = "Any Best",
+            default = "Player First",
             argument = {
                 l10n = "BestFriendsForever_settings",
                 items = {
-                    "Any Best",
                     "Player First",
                     "Follower First",
                 },
+            },
+        },
+        {
+            key = "repairToolInitialPreference",
+            name = "repairToolInitialPreference_name",
+            description = "repairToolInitialPreference_desc",
+            renderer = "SuperSelect3",
+            default = "Highest Quality",
+            argument = {
+                l10n = "BestFriendsForever_settings",
+                items = {
+                    "Highest Quality",
+                    "Highest Max Uses",
+                    "Highest Weight",
+                },
+                width = 200,
             },
         },
     },

@@ -19,11 +19,13 @@ return {
                 scope = settings.repairScope,
                 threshold = settings.repairThreshold,
                 hidePlayerDamaged = settings.hidePlayerDamaged,
-                toolPreference = settings.repairToolPreference,
+                toolSource = settings.repairToolSource,
+                toolPreference = settings.repairToolInitialPreference,
             },
         })
     end,
     condition = function(followerState)
         return not followerState.isSummon
     end,
+    closeAfterActivation = true,
 }

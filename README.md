@@ -88,8 +88,13 @@ Load Best Friends Forever as high as possible in the load order - before any mod
 
 ## Recommended Mods
 
+For an ultimate follower experience ;)
+
 - [Friendlier Fire](https://www.nexusmods.com/morrowind/mods/57975)
 - [Follower Commands](https://www.nexusmods.com/morrowind/mods/58818)
+- [Fair Care](https://www.nexusmods.com/morrowind/mods/55293)
+- [Disobedient Summons](https://www.nexusmods.com/morrowind/mods/58542)
+- [Rapport - OpenMW Companions](https://www.nexusmods.com/morrowind/mods/54132)
 
 ## API
 
@@ -106,6 +111,5 @@ See [docs/API.md](docs/API.md) for details.
 - **Hyacinth** - Ideas
 - **atka** - Inspiration for the Call feature
 - **Pirate443** - Inspiration for the UI design ([HUD Companion Health Bar](https://www.nexusmods.com/morrowind/mods/60242))
-- **jayserpa** - Inspiration for the Injury system ([Follower Death and Injury Chance - Followers Can Die](https://www.nexusmods.com/skyrimspecialedition/mods/38043))
 
 Powered by [Super Settings Renderers](https://www.nexusmods.com/morrowind/mods/59673) and [Drop-in Utils](https://www.nexusmods.com/morrowind/mods/60374)

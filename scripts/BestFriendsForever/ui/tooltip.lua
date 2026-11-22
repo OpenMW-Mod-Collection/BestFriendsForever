@@ -33,7 +33,15 @@ local function getActorRole(followerState)
     if types.NPC.objectIsInstance(actor) then
         local npcRecord = types.NPC.records[actor.recordId]
         local classRecord = types.NPC.classes.records[npcRecord.class]
-        return classRecord.name
+        local raceRecord = types.NPC.races.records[npcRecord.race]
+        local role = {}
+        if classRecord and classRecord.name then
+            role[#role + 1] = classRecord.name
+        end
+        if raceRecord and raceRecord.name then
+            role[#role + 1] = raceRecord.name
+        end
+        return table.concat(role, ", ")
     elseif types.Creature.objectIsInstance(actor) then
         local creatureRecord = types.Creature.records[actor.recordId]
         local role = commonUI.creatureTypeLabel(creatureRecord.type) or creatureRecord.type or creatureRecord.name or ""

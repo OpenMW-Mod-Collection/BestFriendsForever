@@ -192,13 +192,19 @@ hidePlayerDamaged_desc: >-
   Temporarily treats your own damaged items as undamaged while the Repair menu
   is open, so only the follower's gear is listed. Their real condition is
   restored when you close the menu.
-repairToolPreference_name: Repair Tool Preference
-repairToolPreference_desc: >-
-  Which repair hammer to use from you and your follower. Any Best picks the
-  highest quality hammer available; the other options prefer one of you first.
-"Any Best": Any Best
+repairToolSource_name: Tool Source Preference
+repairToolSource_desc: >-
+  Choose whose repair tools are considered first. The preferred actor's usable
+  tools are selected before the other actor's tools.
+repairToolInitialPreference_name: Initial Tool Preference
+repairToolInitialPreference_desc: >-
+  Choose how repair tools are ranked within the preferred source. Ties are
+  broken by weight multiplied by remaining uses.
 "Player First": Player First
 "Follower First": Follower First
+"Highest Quality": Highest Quality
+"Highest Max Uses": Highest Max Uses
+"Highest Weight": Highest Weight
 Up: Up
 Center: Center
 Down: Down
