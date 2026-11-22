@@ -372,47 +372,54 @@ commonUI.buttonBoxBgr = function(bgrAlpha)
 end
 
 commonUI.button = function(text, textSize, onClick, name, bgrAlpha, disabled)
-    -- TODO: disabled state doesn't show correctly
     disabled = disabled == true
+    local textLayout = {
+        name = "btnText",
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = text,
+            textSize = textSize,
+            textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT,
+        },
+        userData = { colorable = true },
+    }
+    local body = {
+        type = ui.TYPE.Flex,
+        props = {
+            horizontal = true,
+            arrange = ui.ALIGNMENT.Center,
+        },
+        content = ui.content {
+            commonUI.intervalH(8),
+            textLayout,
+            commonUI.intervalH(8),
+        },
+    }
+    -- Dim the label only. Applying alpha to the button root makes the beveled
+    -- border look uneven because the bright top/left edges fade much more than
+    -- the already-dark bottom/right edges.
+    local buttonContent = disabled and {
+        template = I.MWUI.templates.disabled,
+        content = ui.content { body },
+    } or body
+
     local element = ui.create {
         name = name,
         template = commonUI.buttonBoxBgr(bgrAlpha),
         props = {},
-        content = ui.content {
-            {
-                type = ui.TYPE.Flex,
-                props = {
-                    horizontal = true,
-                    arrange = ui.ALIGNMENT.Center,
-                },
-                content = ui.content {
-                    commonUI.intervalH(8),
-                    {
-                        name = "btnText",
-                        template = I.MWUI.templates.textNormal,
-                        props = {
-                            text = text,
-                            textSize = textSize,
-                            textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT,
-                        },
-                        userData = { colorable = true },
-                    },
-                    commonUI.intervalH(8),
-                },
-            },
-        },
+        content = ui.content { buttonContent },
         events = {},
         userData = {
             inFocus = false,
+            disabled = disabled,
         },
     }
-    local btnText = element.layout.content[1].content[2]
     element.layout.events.focusLoss = async:callback(function()
-        btnText.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT
+        textLayout.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT
         element:update()
     end)
     element.layout.events.focusGain = async:callback(function()
-        btnText.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT_LIGHT
+        textLayout.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT_LIGHT
         element:update()
     end)
     element.layout.events.mousePress = async:callback(function()
@@ -420,14 +427,14 @@ commonUI.button = function(text, textSize, onClick, name, bgrAlpha, disabled)
             return
         end
         ambient.playSound("menu click")
-        btnText.props.textColor = C.Colors.DEFAULT_PRESSED
+        textLayout.props.textColor = C.Colors.DEFAULT_PRESSED
         element:update()
     end)
     element.layout.events.mouseRelease = async:callback(function()
         if disabled then
             return
         end
-        btnText.props.textColor = C.Colors.DEFAULT_LIGHT
+        textLayout.props.textColor = C.Colors.DEFAULT_LIGHT
         element:update()
         if onClick then
             onClick()

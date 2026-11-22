@@ -10,11 +10,13 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local rawUIMutators = require("scripts.BestFriendsForever.utils.rawUIMutators")
-local buttonTemplates = require("scripts.BestFriendsForever.utils.commonUI")
+local commonUI = require("scripts.BestFriendsForever.utils.commonUI")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
 local repairGear = require("scripts.BestFriendsForever.ui.menuItems.repairGear")
 local statsWindow = require("scripts.BestFriendsForever.ui.menuItems.statsWindow")
+
+local OUTER_MARGIN = commonUI.Sizes.BOX_OUTER_PADDING
 
 local MENU_MODE = "Interface"
 local BUTTON_TARGETS = {
@@ -82,7 +84,7 @@ local function sortedButtons()
 end
 
 local function addButtonElement(content, label, name, onClick, disabled, actionName)
-    local element = buttonTemplates.button(label, 16, onClick, name, nil, disabled)
+    local element = commonUI.button(label, 16, onClick, name, nil, disabled)
     buttonElements[#buttonElements + 1] = element
     buttonsByLayoutName[name] = element
     if actionName then
@@ -102,6 +104,8 @@ local function buildMenu()
     local pageSize = math.max(1, math.floor(tonumber(settings.maxButtonsPerPage) or 10))
     local pageCount = math.max(1, math.ceil(#buttons / pageSize))
     currentPage = math.max(1, math.min(currentPage, pageCount))
+    local hasPrevious = currentPage > 1
+    local hasNext = currentPage < pageCount
     local firstIndex = (currentPage - 1) * pageSize + 1
     local lastIndex = math.min(firstIndex + pageSize - 1, #buttons)
     local content = ui.content {
@@ -140,33 +144,36 @@ local function buildMenu()
             if button.closeAfterActivation then
                 closeMenu(false)
             end
-        end, false, button.name)
+        end, not enabled, button.name)
         content:add { props = { size = util.vector2(0, 6) } }
     end
 
-    content:add {
-        template = I.MWUI.templates.horizontalLine,
-        props = {
-            size = util.vector2(300, 2),
-        },
-    }
-    content:add { props = { size = util.vector2(0, 8) } }
+    local divider = commonUI.divider()
+    divider.props.relativeSize = nil
+    divider.external = { stretch = 1 }
+    content:add(divider)
+    content:add { props = { size = util.vector2(0, 6) } }
 
     local navigation = ui.content {}
-    -- TODO: disable butttons if nowhere to paginate further
-    addButtonElement(navigation, "Previous", "followerMenuPrevious", function()
+    addButtonElement(navigation, "Back", "followerMenuPrevious", function()
+        if not hasPrevious then
+            return
+        end
         currentPage = currentPage - 1
         buildMenu()
-    end)
-    navigation:add(buttonTemplates.intervalH(12))
+    end, not hasPrevious)
+    navigation:add(commonUI.intervalH(4))
     addButtonElement(navigation, "Exit", "followerMenuExit", function()
         closeMenu(true)
     end)
-    navigation:add(buttonTemplates.intervalH(12))
+    navigation:add(commonUI.intervalH(4))
     addButtonElement(navigation, "Next", "followerMenuNext", function()
+        if not hasNext then
+            return
+        end
         currentPage = currentPage + 1
         buildMenu()
-    end)
+    end, not hasNext)
 
     content:add {
         type = ui.TYPE.Flex,
@@ -185,24 +192,33 @@ local function buildMenu()
         },
         content = content,
     }
-    local doublePadding = {
-        template = I.MWUI.templates.padding,
+    local horizontallyPadded = {
+        type = ui.TYPE.Flex,
+        props = { horizontal = true },
         content = ui.content {
-            {
-                template = I.MWUI.templates.padding,
-                content = ui.content { menuLayout },
-            },
+            commonUI.intervalH(OUTER_MARGIN),
+            menuLayout,
+            commonUI.intervalH(OUTER_MARGIN),
+        },
+    }
+    local outer = {
+        type = ui.TYPE.Flex,
+        props = { horizontal = false },
+        content = ui.content {
+            commonUI.intervalV(OUTER_MARGIN),
+            horizontallyPadded,
+            commonUI.intervalV(OUTER_MARGIN),
         },
     }
     root = ui.create {
         name = "BestFriendsForever_FollowerMenu",
         layer = "Windows",
-        template = I.MWUI.templates.boxSolidThick,
+        template = I.MWUI.templates.boxTransparentThick,
         props = {
             relativePosition = util.vector2(0.5, 0.5),
             anchor = util.vector2(0.5, 0.5),
         },
-        content = ui.content { doublePadding },
+        content = ui.content { outer },
     }
     rawUIMutators.afterMenuBuild(followerMenu.getSnapshot())
     for _, element in ipairs(buttonElements) do
