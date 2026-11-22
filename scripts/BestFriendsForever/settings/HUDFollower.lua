@@ -9,13 +9,13 @@ I.Settings.registerGroup {
     page = "BestFriendsForever_HUD",
     l10n = "BestFriendsForever_settings",
     name = "HUDFollower_groupName",
+    description = "HUDFollower_groupDesc",
     permanentStorage = true,
     order = 21,
     settings = {
         {
             key = "enabledElements",
             name = "enabledElements_name",
-            description = "enabledElements_desc",
             renderer = "multiCheckbox_V1",
             default = {
                 name = true,
@@ -53,7 +53,6 @@ I.Settings.registerGroup {
         {
             key = "keepSummonsAtBottom",
             name = "keepSummonsAtBottom_name",
-            description = "keepSummonsAtBottom_desc",
             renderer = "checkbox",
             default = false,
         },
@@ -73,6 +72,7 @@ I.Settings.registerGroup {
         {
             key = "uiAlign",
             name = "uiAlign_name",
+            description = "uiAlign_desc",
             renderer = "SuperSelect3",
             argument = {
                 l10n = "BestFriendsForever_settings",
@@ -87,7 +87,6 @@ I.Settings.registerGroup {
         {
             key = "barDimensions",
             name = "barDimensions_name",
-            description = "barDimensions_desc",
             renderer = "MultiSlider_V1",
             default = {
                 healthWidth = 100,
@@ -137,7 +136,6 @@ I.Settings.registerGroup {
         {
             key = "barLabels",
             name = "barLabels_name",
-            description = "barLabels_desc",
             renderer = "multiCheckbox_V1",
             default = {
                 health = true,
@@ -180,7 +178,6 @@ I.Settings.registerGroup {
         {
             key = "barInterval",
             name = "barInterval_name",
-            description = "barInterval_desc",
             renderer = "SuperSlider6",
             default = 4,
             argument = {
@@ -243,7 +240,6 @@ I.Settings.registerGroup {
         {
             key = "iconOrientation",
             name = "iconOrientation_name",
-            description = "iconOrientation_desc",
             renderer = "SuperSelect3",
             default = "Horizontal",
             argument = {
@@ -257,7 +253,6 @@ I.Settings.registerGroup {
         {
             key = "iconSide",
             name = "iconSide_name",
-            description = "iconSide_desc",
             renderer = "SuperSelect3",
             default = "Right",
             argument = {
@@ -271,7 +266,6 @@ I.Settings.registerGroup {
         {
             key = "iconDisplayMode",
             name = "iconDisplayMode_name",
-            description = "iconDisplayMode_desc",
             renderer = "SuperSelect3",
             default = "Merged",
             argument = {

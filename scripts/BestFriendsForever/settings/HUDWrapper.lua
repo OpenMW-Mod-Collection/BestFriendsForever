@@ -7,6 +7,7 @@ I.Settings.registerGroup {
     page = "BestFriendsForever_HUD",
     l10n = "BestFriendsForever_settings",
     name = "HUDWrapper_groupName",
+    description = "HUDWrapper_groupDesc",
     permanentStorage = true,
     order = 20,
     settings = {

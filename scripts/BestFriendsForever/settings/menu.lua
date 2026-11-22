@@ -13,7 +13,6 @@ I.Settings.registerGroup {
         {
             key = "maxButtonsPerPage",
             name = "maxButtonsPerPage_name",
-            description = "maxButtonsPerPage_desc",
             renderer = "number",
             default = 10,
             argument = {
@@ -23,7 +22,6 @@ I.Settings.registerGroup {
         {
             key = "repairScope",
             name = "repairScope_name",
-            description = "repairScope_desc",
             renderer = "SuperSelect3",
             default = "Equipped Only",
             argument = {

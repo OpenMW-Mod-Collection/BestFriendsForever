@@ -13,7 +13,6 @@ I.Settings.registerGroup {
         {
             key = "enabledFields",
             name = "enabledFields_name",
-            description = "enabledFields_desc",
             renderer = "multiCheckbox_V1",
             default = {
                 class = true,
@@ -32,7 +31,6 @@ I.Settings.registerGroup {
         {
             key = "diseaseVerbosity",
             name = "diseaseVerbosity_name",
-            description = "diseaseVerbosity_desc",
             renderer = "SuperSelect3",
             default = "Names",
             argument = {

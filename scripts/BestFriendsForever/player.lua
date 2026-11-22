@@ -44,7 +44,6 @@ local function addEvent(name, callback)
     callbacks[#callbacks + 1] = callback
 end
 
--- Coupled paths are wired explicitly to preserve their current order.
 addEvent("UiModeChanged", function(data)
     menu.onUiModeChanged(data)
 end)

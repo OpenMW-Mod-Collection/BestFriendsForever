@@ -1,20 +1,27 @@
 page_name: Best Friends Forever
-page_description: Several utilities for you and your followers.
+page_description: Utilities for you and your followers.
 page_HUD_name: "Best Friends Forever: HUD"
-page_HUD_description: Settings for Best Friends Forever's HUD.
+page_HUD_description: |
+  Settings for Best Friends Forever's HUD and more.
+
+  Click on the follower widget to open their Interaction Menu
+
 toggles_groupName: Toggles
 enableTeleport_name: Enable Teleporting
-enableTeleport_desc: >
+enableTeleport_desc: |
   Your followers follow you everywhere without any exceptions.
+
+  Might cause issues with certain scripted events, but that's rare.
 enableImmortality_name: Enable Immortal Followers
-enableImmortality_desc: >
-  Instead of dying, your followers will get knocked down
-  for a set amount of time or until the end of combat.
+enableImmortality_desc: |
+  Instead of dying, your followers will get knocked down for a set amount of time or until the end of combat.
+
+  Might cause issues with certain scripted events, but that's rare.
 enableCatchUp_name: Enable Catch Up
 enableCatchUp_desc: >
   Your followers will always keep up with you, no matter how fast you'll go.
 enableWard_name: Enable Ward
-enableWard_desc: Protects your followers from diseases and stat damage.
+enableWard_desc: Protects your followers from diseases and stat damage. Cheat zone.
 blacklist_groupName: Blacklisting
 globalScriptBlacklist_name: Global Blacklist by MWScripts
 globalScriptBlacklist_desc: >
@@ -46,16 +53,11 @@ upDelay_desc: Ignored if "Get Up Only Once Combat Ends" is enabled.
 ward_groupName: Ward
 ward_groupDesc: Protecting followers from diseases and stat damage.
 protections_name: Protection
-protections_desc: Select which effects the ward prevents or removes.
-statDamageCheckFrequency_name: Attribute Damage Check Frequency
-statDamageCheckFrequency_desc: How often, in seconds, to check follower's stats for damage.
+statDamageCheckFrequency_name: Stat Damage Check Frequency (sec)
 call_groupName: Call
 call_groupDesc: Keybind which teleports your followers to you.
 callKeybind_name: Keybind
-callKeybind_desc: |
-  Teleports all your followers to you.
-
-  Triggers only on release.
+callKeybind_desc: Teleports all your followers to you.
 callAction_name: Call
 callDistance_name: Teleportation Distance
 callDistance_desc: |
@@ -63,11 +65,12 @@ callDistance_desc: |
   X < 0 = in front of you.
 catchUp_groupName: Catch Up
 catchUp_groupDesc: Gradually speeds up followers if they get too far.
-distances_name: Catch-Up Distances
-distances_desc: Distances at which followers start and reach maximum catch-up speed.
+distances_name: Catch Up Distances
+distances_desc: Distances at which followers start building up and reach maximum speed.
 startDist: Starting Distance
 maxDist: Maximum Distance
-HUDWrapper_groupName: Wrapper Settings
+HUDWrapper_groupName: Follower HUD
+HUDWrapper_groupDesc: Settings for a container that houses all the follower widgets.
 enable_name: Enable Follower HUD
 hudDisplay_name: "When to Show Follower HUD   "
 pollingRate_name: HUD Update Polling Rate (sec)
@@ -76,10 +79,9 @@ dragModifier_name: Drag Modifier
 dragModifier_desc: |
   Hold the selected modifier while dragging the HUD with LMB.
   
-  "Disabled" locks the HUD in place.
-  "None" needs no modifier and is the default.
+  "None" needs no modifier.
 
-  Note: disabling dragging disables Tooltips and Follower Menu.
+  "Disabled" locks the HUD in place and disables all Tooltips and Interaction Menu.
 Disabled: Disabled
 None: None
 Ctrl: Ctrl
@@ -94,16 +96,13 @@ expansionDirectionV_name: Expand HUD Vertically
 expansionDirectionH_name: Expand HUD Horizontally
 enableBordersAndBg_name: Enable Borders and Background
 hudOrientation_name: HUD Orientation
-hudOrientation_desc: Choose whether the follower HUD expands horizontally or vertically.
+hudOrientation_desc: How the follower widgets will stack together.
 HUDFollower_groupName: Follower Widgets
+HUDFollower_groupDesc: Serttings for how individual follower widgets look.
 enabledElements_name: Visible Elements
-enabledElements_desc: Select which HUD widget elements are shown.
-primarySort_name: Primary Sort
-primarySort_desc: >-
-  How follower widgets are ordered. Widgets with the same primary rank are
-  ordered A-Z by default.
-keepSummonsAtBottom_name: Keep Summons at the Bottom
-keepSummonsAtBottom_desc: Always show summoned followers after other followers.
+primarySort_name: Widget Order
+primarySort_desc: Widgets with the same primary rank are ordered A-Z.
+keepSummonsAtBottom_name: Keep Summon Widgets at the Bottom
 "NPCs first": NPCs first
 "Creatures first": Creatures first
 "By level": By level
@@ -112,94 +111,72 @@ name: Follower Name
 health: Health
 magicka: Magicka
 fatigue: Fatigue
-nameTextSize_name: Name Text Size
+nameTextSize_name: Name Font Size
 nameColor_name: Name Color
-uiAlign_name: Element Alignment
+uiAlign_name: Element Horizontal Alignment
+uiAlign_desc: To which side the shortest horizontal element will stick.
 healthBarColor_name: Health Bar Color
 magickaBarColor_name: Magicka Bar Color
 fatigueBarColor_name: Fatigue Bar Color
 barDimensions_name: Bar Dimensions
-barDimensions_desc: >-
-  Set each bar's width and height in pixels.
 healthWidth: Health Width
 healthHeight: Health Height
 magickaWidth: Magicka Width
 magickaHeight: Magicka Height
 fatigueWidth: Fatigue Width
 fatigueHeight: Fatigue Height
-barLabels_name: Bar Labels
-barLabels_desc: Select which statistic bars show a value label.
+barLabels_name: Enabled Bar Labels
 barLabelColor_name: Bar Label Color
 barAlignment_name: Bar Alignment
-barAlignment_desc: Choose how bars are aligned within the follower widget.
-barInterval_name: Bar Interval
-barInterval_desc: Vertical space between bars.
+barAlignment_desc: To which side the bars will stick inside their container.
+barInterval_name: Bar Vertical Interval
 labelDisplayMode_name: Bar Label Format
-iconSize_name: Icon Size
-iconSize_desc: Size of follower and combat icons in pixels.
+iconSize_name: Icon Size (px)
+iconSize_desc: Same for both icons, always square.
 iconInterval_name: Icon Interval
 iconInterval_desc: Space from the bars and between displayed icons.
 iconOrientation_name: Icon Stack Direction
-iconOrientation_desc: Choose whether follower and combat icons stack horizontally or vertically.
-iconSide_name: Icon Side
-iconSide_desc: Choose which side of the bars the icons appear on.
+iconSide_name: Icon Side from the Bars
 Horizontal: Horizontal
 Vertical: Vertical
 iconDisplayMode_name: Icon Display
-iconDisplayMode_desc: >-
-  Choose whether follower and combat icons share one slot or are shown
-  side by side.
 Merged: Merged
 "Follower/combat": Follower / Combat
 "Combat/follower": Combat / Follower
 "Follower only": Follower Only
 "Combat only": Combat Only
-iconBackgroundColor_name: Icon Background Color
-iconBackgroundColor_desc: >-
-  Default color for transparent follower icon backgrounds. Enabled disease and
-  stat damage tooltip fields override it when those conditions are present.
+iconBackgroundColor_name: Follower Icon Background Color
+iconBackgroundColor_desc: |
+  Affects only two-layer icons.
+
+  Gets overriden by damaged stat color when the follower has damaged stats or a disease.
 tooltip_groupName: Tooltip
-tooltip_groupDesc: Details shown in the follower tooltip.
+tooltip_groupDesc: Hovering over follower widget will make a tooltip appear.
 enabledFields_name: Visible Fields
-enabledFields_desc: >-
-  Select which details appear in the follower tooltip. Each enabled field
-  independently tints the follower icon background when that condition is
-  present.
-class: Class / Creature Type
+class: NPC Class / Creature Type
 diseases: Diseases
 statDamage: Stat Damage
 diseaseVerbosity_name: Disease Verbosity
-diseaseVerbosity_desc: Choose how much detail to show about follower diseases.
 Names: Names
 "By Type": By Type
 Unclear: Unclear
 menu_groupName: Menu
-menu_groupDesc: Settings for the follower interaction menu.
+menu_groupDesc: Clicking on a follower widget will open an ineraction menu.
 maxButtonsPerPage_name: Buttons per Page
-maxButtonsPerPage_desc: Maximum number of action buttons shown on one page of the follower menu.
 repairScope_name: Gear to Repair
-repairScope_desc: >-
-  Which damaged items are borrowed from the follower for the Repair menu.
-  Equipped Only uses their worn gear and carried weapon; All Inventory also
-  includes damaged items stored in their backpack.
 "Equipped Only": Equipped Only
 "All Inventory": All Inventory
 repairThreshold_name: Damage Threshold
-repairThreshold_desc: >-
-  Gear at or below this remaining condition is eligible for repair.
-hidePlayerDamaged_name: Hide Your Damaged Gear
-hidePlayerDamaged_desc: >-
-  Temporarily treats your own damaged items as undamaged while the Repair menu
-  is open, so only the follower's gear is listed. Their real condition is
-  restored when you close the menu.
+repairThreshold_desc: Gear at or below this remaining condition is eligible for repair.
+hidePlayerDamaged_name: Hide Player's Damaged Gear
+hidePlayerDamaged_desc: Should your gear appear in the Repair menu when repairing follower's gear.
 repairToolSource_name: Tool Source Preference
-repairToolSource_desc: >-
-  Choose whose repair tools are considered first. The preferred actor's usable
-  tools are selected before the other actor's tools.
+repairToolSource_desc: Whose tools get used first from a merged item stack.
 repairToolInitialPreference_name: Initial Tool Preference
-repairToolInitialPreference_desc: >-
-  Choose how repair tools are ranked within the preferred source. Ties are
-  broken by weight multiplied by remaining uses.
+repairToolInitialPreference_desc: |
+  Which tool gets picked as initial in the Repair menu.
+  
+  Ties are broken by weight multiplied by remaining uses.
 "Player First": Player First
 "Follower First": Follower First
 "Highest Quality": Highest Quality

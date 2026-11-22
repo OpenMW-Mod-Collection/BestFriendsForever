@@ -45,7 +45,7 @@ end
 input.registerAction {
     key = "BestFriendsForever_call",
     type = input.ACTION_TYPE.Boolean,
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "callAction_name",
     description = "",
     defaultValue = false,

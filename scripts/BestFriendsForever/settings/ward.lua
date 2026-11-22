@@ -13,7 +13,6 @@ I.Settings.registerGroup {
         {
             key = "protections",
             name = "protections_name",
-            description = "protections_desc",
             renderer = "multiCheckbox_V1",
             default = {
                 diseases = true,
@@ -30,7 +29,6 @@ I.Settings.registerGroup {
         {
             key = "statDamageCheckFrequency",
             name = "statDamageCheckFrequency_name",
-            description = "statDamageCheckFrequency_desc",
             renderer = "number",
             default = 300,
             argument = {
