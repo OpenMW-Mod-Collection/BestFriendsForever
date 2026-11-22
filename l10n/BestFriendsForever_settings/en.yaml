@@ -4,7 +4,12 @@ page_HUD_name: "Best Friends Forever: HUD"
 page_HUD_description: |
   Settings for Best Friends Forever's HUD and more.
 
-  Click on the follower widget to open their Interaction Menu
+  Did you know the follower widgets have tooltips and are clickable?
+page_Menu_name: "Best Friends Forever: Menu"
+page_Menu_description: |
+  Settings for everything Interaction Menu.
+
+  Click on the follower widget to open their Interaction Menu.
 
 toggles_groupName: Toggles
 enableTeleport_name: Enable Teleporting
@@ -88,6 +93,13 @@ Ctrl: Ctrl
 Alt: Alt
 Shift: Shift
 maxWidgets_name: Max Follower Widgets
+hudFollowerScope_name: Followers Shown
+hudFollowerScope_desc: |
+  Choose which followers are added to the HUD. Every follower in your chain
+  still receives BFF's follower scripts, regardless of this setting.
+"Direct Followers": Direct Followers
+"Followers of Followers": Followers of Followers
+"Everyone in Chain": Everyone in Chain
 position_name: HUD Position
 position_desc: Position of the follower HUD in pixels.
 posX: X Position
@@ -100,7 +112,7 @@ hudOrientation_desc: How the follower widgets will stack together.
 HUDFollower_groupName: Follower Widgets
 HUDFollower_groupDesc: Serttings for how individual follower widgets look.
 enabledElements_name: Visible Elements
-primarySort_name: Widget Order
+primarySort_name: Follower Widget Order
 primarySort_desc: Widgets with the same primary rank are ordered A-Z.
 keepSummonsAtBottom_name: Keep Summon Widgets at the Bottom
 "NPCs first": NPCs first
@@ -131,11 +143,12 @@ barAlignment_name: Bar Alignment
 barAlignment_desc: To which side the bars will stick inside their container.
 barInterval_name: Bar Vertical Interval
 labelDisplayMode_name: Bar Label Format
-iconSize_name: Icon Size (px)
+iconSize_name: Icon Size
 iconSize_desc: Same for both icons, always square.
 iconInterval_name: Icon Interval
 iconInterval_desc: Space from the bars and between displayed icons.
 iconOrientation_name: Icon Stack Direction
+iconOrientation_desc: Matters only when 2 icons are shown at the same time.
 iconSide_name: Icon Side from the Bars
 Horizontal: Horizontal
 Vertical: Vertical
@@ -160,8 +173,8 @@ diseaseVerbosity_name: Disease Verbosity
 Names: Names
 "By Type": By Type
 Unclear: Unclear
-menu_groupName: Menu
-menu_groupDesc: Clicking on a follower widget will open an ineraction menu.
+menuGeneral_groupName: General
+menuRepair_groupName: Repair Gear
 maxButtonsPerPage_name: Buttons per Page
 repairScope_name: Gear to Repair
 "Equipped Only": Equipped Only

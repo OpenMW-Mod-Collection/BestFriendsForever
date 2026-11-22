@@ -2,23 +2,13 @@
 local I = require("openmw.interfaces")
 
 I.Settings.registerGroup {
-    key = "SettingsBestFriendsForever_menu",
-    page = "BestFriendsForever_HUD",
+    key = "SettingsBestFriendsForever_menuRepair",
+    page = "BestFriendsForever_Menu",
     l10n = "BestFriendsForever_settings",
-    name = "menu_groupName",
-    description = "menu_groupDesc",
+    name = "menuRepair_groupName",
     permanentStorage = true,
-    order = 24,
+    order = 20,
     settings = {
-        {
-            key = "maxButtonsPerPage",
-            name = "maxButtonsPerPage_name",
-            renderer = "number",
-            default = 10,
-            argument = {
-                min = 1,
-            },
-        },
         {
             key = "repairScope",
             name = "repairScope_name",

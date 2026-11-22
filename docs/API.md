@@ -39,7 +39,7 @@ Icon resolution is: record ID map first, then rules in registration order, then 
 | Wait Here       | Not a summon, not under a Command effect | `closeAfterActivation = true`          |
 | Repair Gear     | Not a summon                             | Closes when Repair mode actually opens |
 
-Button names are unique case-insensitively. A button must define exactly one of `action` or `event`. Event buttons require `target` (`player`, `follower`, or `global`); action buttons cannot define `target`. The page size setting is `SettingsBestFriendsForever_menu.maxButtonsPerPage`, default `10`.
+Button names are unique case-insensitively. A button must define exactly one of `action` or `event`. Event buttons require `target` (`player`, `follower`, or `global`); action buttons cannot define `target`. The page size setting is `SettingsBestFriendsForever_menuGeneral.maxButtonsPerPage`, default `10`.
 
 ## Events
 

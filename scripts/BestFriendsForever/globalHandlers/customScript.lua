@@ -73,6 +73,7 @@ local function syncScripts(fState, addingScript)
 end
 
 local function followerListUpdated(followers)
+    -- every actor whose chain includes the player receives BFF follower scripts
     for _, fState in pairs(followers) do
         syncScripts(fState, fState.followsPlayer)
     end

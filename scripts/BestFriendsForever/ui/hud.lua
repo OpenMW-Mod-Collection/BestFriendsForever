@@ -147,14 +147,27 @@ local function nameOf(state)
     return state.actor.type.records[state.actor.recordId].name or ""
 end
 
+local followerScopeChecks = {
+    ["Direct Followers"] = function(fState)
+        return fState.leader ~= nil and fState.leader.id == self.id
+    end,
+    ["Followers of Followers"] = function(fState)
+        local secondLeader = fState.leaders and fState.leaders[2]
+        return secondLeader ~= nil and secondLeader.id == self.id
+    end,
+    ["Everyone in Chain"] = function(fState)
+        return fState.followsPlayer == true
+    end,
+}
+
 local function sortedFollowers(followers)
     local list = {}
     for _, state in pairs(followers) do
         list[#list + 1] = state
     end
 
-    local primary = settingsLocalHUD.primarySort
-    local keepSummonsAtBottom = settingsLocalHUD.keepSummonsAtBottom == true
+    local primary = settingsWrapper.primarySort
+    local keepSummonsAtBottom = settingsWrapper.keepSummonsAtBottom == true
 
     table.sort(list, function(left, right)
         if keepSummonsAtBottom then
@@ -452,10 +465,9 @@ followerHUD.new = function(followers)
             break
         end
 
-        local myFollower = fState.superLeader and fState.superLeader.id == self.id
-            or fState.leader and fState.leader.id == self.id
+        local inScope = followerScopeChecks[settingsWrapper.hudFollowerScope](fState)
         local banned = blacklisted(fState.actor, settingsBlacklists.globalScriptBlacklist)
-        if myFollower and not banned then
+        if inScope and not banned then
             if #rootFlex.content ~= 0 then
                 rootFlex.content:add(makeDelimiter())
             end

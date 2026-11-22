@@ -7,7 +7,7 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_menu"), async)
+local settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_menuRepair"), async)
 
 return {
     name = "Repair Gear",

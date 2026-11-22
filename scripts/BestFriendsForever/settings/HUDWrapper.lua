@@ -28,32 +28,6 @@ I.Settings.registerGroup {
             }
         },
         {
-            key = "maxWidgets",
-            name = "maxWidgets_name",
-            renderer = "number",
-            default = 5,
-            argument = {
-                min = 0,
-            }
-        },
-        {
-            key = "dragModifier",
-            name = "dragModifier_name",
-            description = "dragModifier_desc",
-            renderer = "SuperSelect3",
-            default = "Shift",
-            argument = {
-                l10n = "BestFriendsForever_settings",
-                items = {
-                    "Disabled",
-                    "None",
-                    "Ctrl",
-                    "Alt",
-                    "Shift",
-                },
-            },
-        },
-        {
             key = "position",
             name = "position_name",
             description = "position_desc",
@@ -82,6 +56,23 @@ I.Settings.registerGroup {
                 showDefaultMark = true,
                 showResetButton = true,
                 tinyReset = true,
+            },
+        },
+        {
+            key = "dragModifier",
+            name = "dragModifier_name",
+            description = "dragModifier_desc",
+            renderer = "SuperSelect3",
+            default = "Shift",
+            argument = {
+                l10n = "BestFriendsForever_settings",
+                items = {
+                    "Disabled",
+                    "None",
+                    "Ctrl",
+                    "Alt",
+                    "Shift",
+                },
             },
         },
         {
@@ -125,6 +116,54 @@ I.Settings.registerGroup {
                     "Vertical",
                 },
             },
+        },
+        {
+            key = "maxWidgets",
+            name = "maxWidgets_name",
+            renderer = "number",
+            default = 10,
+            argument = {
+                min = 0,
+            }
+        },
+        {
+            key = "hudFollowerScope",
+            name = "hudFollowerScope_name",
+            description = "hudFollowerScope_desc",
+            renderer = "SuperSelect3",
+            default = "Everyone in Chain",
+            argument = {
+                l10n = "BestFriendsForever_settings",
+                items = {
+                    "Direct Followers",
+                    "Followers of Followers",
+                    "Everyone in Chain",
+                },
+                width = 200,
+            },
+        },
+        {
+            key = "primarySort",
+            name = "primarySort_name",
+            description = "primarySort_desc",
+            renderer = "SuperSelect3",
+            default = "None",
+            argument = {
+                l10n = "BestFriendsForever_settings",
+                items = {
+                    "None",
+                    "NPCs first",
+                    "Creatures first",
+                    "By level",
+                    "By max health",
+                },
+            },
+        },
+        {
+            key = "keepSummonsAtBottom",
+            name = "keepSummonsAtBottom_name",
+            renderer = "checkbox",
+            default = false,
         },
         {
             key = "enableBordersAndBg",

@@ -336,7 +336,7 @@ function followerMenu.onFollowerListUpdated(followers)
     currentFollowerState = updatedState
 end
 
-settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_menu"), async)
+settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_menuGeneral"), async)
 
 followerMenu.registerButton(companionShare)
 followerMenu.registerButton(wait)
