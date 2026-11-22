@@ -4,7 +4,7 @@ local I = require("openmw.interfaces")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_catchUp",
     page = "BestFriendsForever",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "catchUp_groupName",
     description = "catchUp_groupDesc",
     permanentStorage = true,
@@ -25,7 +25,7 @@ I.Settings.registerGroup {
                     "startDist",
                     "maxDist",
                 },
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 width = 100,
                 integer = true,
                 min = {

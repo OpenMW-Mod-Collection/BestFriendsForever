@@ -4,7 +4,7 @@ local I = require("openmw.interfaces")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_menu",
     page = "BestFriendsForever_HUD",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "menu_groupName",
     description = "menu_groupDesc",
     permanentStorage = true,
@@ -27,7 +27,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Equipped Only",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Equipped Only",
                     "All Inventory",
@@ -65,7 +65,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Any Best",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Any Best",
                     "Player First",

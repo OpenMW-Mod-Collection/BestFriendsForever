@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added a Follower Stats window to the Interaction Menu, built with OpenMW's built-in MWUI templates and BFF's shared common UI helpers. NPCs show dynamic stat bars with current/max values, level, factions, and class skills in two columns; creatures show dynamic stat bars with current/max values, level, attributes, creature type, base creature, and their three creature skills in one column.
+- Moved the Interaction Menu to the `Windows` UI layer so the Stats window can render above it without hiding the menu.
 - Moved the public API contract out of the README into an expanded `docs/API.md` with built-in defaults and reserved values.
 - Added raw UI access to `I.BestFriendsForever`: `getRawUI`, `getFollowerWidget`, `refreshRawUI`, `rebuildRawUI`, and `registerRawUIMutator`.
 - Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
@@ -21,7 +23,7 @@
 - Tooltips now show general info about the follower, their diseases and damaged stats
 - Added follower Interaction Menu
 - Added Companion Share, Wait Here, Follower Info and Repair Gear features to Interaction Menu
-- Added interfaces to add new Follower Icons (unique or conditional), edit or expand Tooltips, add new Interactions and edit the Follower HUD
+- Overhauled mod's public API. Check docs for more details
 - Complete overhaul of the mod's settings (I won't list every change, check them for yourself)
 - Added settigns presets
 - Removed all GOTOs

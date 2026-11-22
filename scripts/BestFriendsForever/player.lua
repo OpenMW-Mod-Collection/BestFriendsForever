@@ -3,7 +3,7 @@
 local I = require("openmw.interfaces")
 local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")
 
--- Fail fast before touching the FDU list.
+-- Fail fast before touching follower state or UI APIs.
 local FDU = I.FollowerDetectionUtil
 deps.checkAll("Best Friends Forever", "Sosnoviy Bor's Mods", nil, {
     {
@@ -21,6 +21,7 @@ local handlerList = {
     require("scripts.BestFriendsForever.playerHandlers.repair"),
     require("scripts.BestFriendsForever.playerHandlers.hud"),
     require("scripts.BestFriendsForever.playerHandlers.rawUI"),
+    require("scripts.BestFriendsForever.playerHandlers.followerStats"),
 }
 local combat = handlerList[1]
 local teleport = handlerList[2]

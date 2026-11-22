@@ -11,14 +11,14 @@ local groups = {
 
 I.Settings.registerPage {
     key = "BestFriendsForever",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "page_name",
     description = "page_description",
 }
 
 I.Settings.registerPage {
     key = "BestFriendsForever_HUD",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "page_HUD_name",
     description = "page_HUD_description",
 }

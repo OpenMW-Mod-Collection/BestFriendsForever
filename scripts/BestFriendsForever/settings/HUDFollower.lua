@@ -7,7 +7,7 @@ local common = require("scripts.BestFriendsForever.settings.common")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_HUDFollower",
     page = "BestFriendsForever_HUD",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "HUDFollower_groupName",
     permanentStorage = true,
     order = 21,
@@ -24,7 +24,7 @@ I.Settings.registerGroup {
                 fatigue = true,
             },
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 keys = {
                     "name",
                     "health",
@@ -40,7 +40,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "None",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "None",
                     "NPCs first",
@@ -75,7 +75,7 @@ I.Settings.registerGroup {
             name = "uiAlign_name",
             renderer = "SuperSelect3",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Left",
                     "Center",
@@ -88,7 +88,7 @@ I.Settings.registerGroup {
             key = "barDimensions",
             name = "barDimensions_name",
             description = "barDimensions_desc",
-            renderer = "BFFMultiSlider_V1",
+            renderer = "MultiSlider_V1",
             default = {
                 healthWidth = 100,
                 healthHeight = 16,
@@ -98,7 +98,7 @@ I.Settings.registerGroup {
                 fatigueHeight = 16,
             },
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 keys = {
                     "healthWidth",
                     "healthHeight",
@@ -145,7 +145,7 @@ I.Settings.registerGroup {
                 fatigue = true,
             },
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 keys = {
                     "health",
                     "magicka",
@@ -169,7 +169,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Center",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Left",
                     "Center",
@@ -199,7 +199,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Current/Max",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Current",
                     "Current/Max",
@@ -247,7 +247,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Horizontal",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Horizontal",
                     "Vertical",
@@ -261,7 +261,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Right",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Left",
                     "Right",
@@ -275,7 +275,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Merged",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Merged",
                     "Follower/combat",

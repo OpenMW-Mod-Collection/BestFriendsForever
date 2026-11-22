@@ -4,7 +4,7 @@ local I = require("openmw.interfaces")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_call",
     page = "BestFriendsForever",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "call_groupName",
     description = "call_groupDesc",
     permanentStorage = true,

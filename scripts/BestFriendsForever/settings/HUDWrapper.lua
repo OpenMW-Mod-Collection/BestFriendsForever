@@ -5,7 +5,7 @@ local ui = require("openmw.ui")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_HUDWrapper",
     page = "BestFriendsForever_HUD",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "HUDWrapper_groupName",
     permanentStorage = true,
     order = 20,
@@ -42,7 +42,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Shift",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Disabled",
                     "None",
@@ -56,13 +56,13 @@ I.Settings.registerGroup {
             key = "position",
             name = "position_name",
             description = "position_desc",
-            renderer = "BFFMultiSlider_V1",
+            renderer = "MultiSlider_V1",
             default = {
                 posX = 10,
                 posY = 10,
             },
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 keys = {
                     "posX",
                     "posY",
@@ -88,7 +88,7 @@ I.Settings.registerGroup {
             name = "expansionDirectionV_name",
             renderer = "SuperSelect3",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Up",
                     "Center",
@@ -102,7 +102,7 @@ I.Settings.registerGroup {
             name = "expansionDirectionH_name",
             renderer = "SuperSelect3",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Left",
                     "Center",
@@ -118,7 +118,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Vertical",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Horizontal",
                     "Vertical",
@@ -136,7 +136,7 @@ I.Settings.registerGroup {
             name = "hudDisplay_name",
             renderer = "SuperSelect3",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Always",
                     "Interface Only",

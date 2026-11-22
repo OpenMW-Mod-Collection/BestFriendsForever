@@ -10,7 +10,7 @@ local types = require("openmw.types")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 local immortalitySection = storage.globalSection("SettingsBestFriendsForever_immortality")
-local l10n = core.l10n("BestFriendsForever")
+local l10n = core.l10n("BestFriendsForever_messages")
 local selfName = self.type.records[self.recordId].name
 local SCRIPT_PATH = "scripts/BestFriendsForever/followerScripts/immortality.lua"
 

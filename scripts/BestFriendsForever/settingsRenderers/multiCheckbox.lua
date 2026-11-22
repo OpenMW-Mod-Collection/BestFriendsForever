@@ -41,29 +41,13 @@ local CHECK_TEXTURE_ON = ui.texture({ path = "textures/menu_scroll_scroller_midd
 local CHECK_TEXTURE_OFF = ui.texture({ path = "textures/menu_scroll_scroller_middle.dds" })
 local CHECKBOX_SIZE = 12
 
-local colorFromGMST = function(gmst)
-   local colorString = core.getGMST(gmst)
-   local numberTable = {}
-   for numberString in colorString:gmatch("([^,]+)") do
-      if #numberTable == 3 then break end
-      local number = tonumber(numberString:match("^%s*(.-)%s*$"))
-      if number then
-         table.insert(numberTable, number / 255)
-      end
-   end
-
-   if #numberTable < 3 then error('Invalid color GMST name: ' .. gmst) end
-
-   return util.color.rgb(table.unpack(numberTable))
-end
-
 local MORROWIND_TEXT_STATES = {
-   disabled           = { color = colorFromGMST('fontcolor_color_disabled'), alpha = 0.75 },
-   disabledHover      = { color = colorFromGMST('fontcolor_color_disabled_over'), alpha = 0.75 },
-   disabledInteracted = { color = colorFromGMST('fontcolor_color_disabled_pressed'), alpha = 0.75 },
-   enabled            = { color = colorFromGMST('fontcolor_color_normal'), alpha = 1.0 },
-   enabledHover       = { color = colorFromGMST('fontcolor_color_normal_over'), alpha = 1.0 },
-   enabledInteracted  = { color = colorFromGMST('fontcolor_color_normal_pressed'), alpha = 1.0 },
+   disabled           = { color = util.color.commaString(core.getGMST('fontcolor_color_disabled')), alpha = 0.75 },
+   disabledHover      = { color = util.color.commaString(core.getGMST('fontcolor_color_disabled_over')), alpha = 0.75 },
+   disabledInteracted = { color = util.color.commaString(core.getGMST('fontcolor_color_disabled_pressed')), alpha = 0.75 },
+   enabled            = { color = util.color.commaString(core.getGMST('fontcolor_color_normal')), alpha = 1.0 },
+   enabledHover       = { color = util.color.commaString(core.getGMST('fontcolor_color_normal_over')), alpha = 1.0 },
+   enabledInteracted  = { color = util.color.commaString(core.getGMST('fontcolor_color_normal_pressed')), alpha = 1.0 },
 }
 local MORROWIND_CHECK_STATES = {
    disabled           = { color = util.color.rgb(1, 1, 1), alpha = 0 },

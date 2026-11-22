@@ -5,7 +5,7 @@ local I = require("openmw.interfaces")
 local core = require("openmw.core")
 
 local FDU = I.FollowerDetectionUtil
-local l10n = core.l10n("BestFriendsForever")
+local l10n = core.l10n("BestFriendsForever_messages")
 
 local session
 

@@ -4,7 +4,7 @@ local I = require("openmw.interfaces")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_tooltip",
     page = "BestFriendsForever_HUD",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "tooltip_groupName",
     description = "tooltip_groupDesc",
     permanentStorage = true,
@@ -21,7 +21,7 @@ I.Settings.registerGroup {
                 statDamage = true,
             },
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 keys = {
                     "class",
                     "diseases",
@@ -36,7 +36,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Names",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Names",
                     "By Type",
@@ -51,7 +51,7 @@ I.Settings.registerGroup {
             renderer = "SuperSelect3",
             default = "Base Creature",
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 items = {
                     "Base Creature",
                     "Creature Type",

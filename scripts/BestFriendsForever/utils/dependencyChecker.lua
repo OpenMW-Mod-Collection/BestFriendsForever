@@ -44,24 +44,8 @@ local DEFAULT_BODY = "Whoops! Seems like something went wrong!\n\n" ..
 -- Color helpers
 -- ============================================================
 
-local colorFromGMST = function(gmst)
-    local colorString = core.getGMST(gmst) or ""
-    local numberTable = {}
-    for numberString in colorString:gmatch("([^,]+)") do
-        if #numberTable == 3 then break end
-        local number = tonumber(numberString:match("^%s*(.-)%s*$"))
-        if number then
-            table.insert(numberTable, number / 255)
-        end
-    end
-
-    if #numberTable < 3 then error('Invalid color GMST name: ' .. gmst) end
-
-    return util.color.rgb(table.unpack(numberTable))
-end
-
 local colors = {
-    DEFAULT = colorFromGMST('fontcolor_color_normal'),
+    DEFAULT = util.color.commaString(core.getGMST('fontcolor_color_normal')),
     BLACK   = util.color.rgb(0, 0, 0),
 }
 

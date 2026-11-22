@@ -45,7 +45,7 @@ migrateBlacklistSettings()
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_blacklist",
     page = "BestFriendsForever",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "blacklist_groupName",
     permanentStorage = true,
     order = 1,

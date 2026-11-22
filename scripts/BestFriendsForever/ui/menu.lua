@@ -10,10 +10,11 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local rawUIMutators = require("scripts.BestFriendsForever.utils.rawUIMutators")
-local buttonTemplates = require("scripts.BestFriendsForever.utils.button")
+local buttonTemplates = require("scripts.BestFriendsForever.utils.commonUI")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
 local repairGear = require("scripts.BestFriendsForever.ui.menuItems.repairGear")
+local statsWindow = require("scripts.BestFriendsForever.ui.menuItems.statsWindow")
 
 local MENU_MODE = "Interface"
 local BUTTON_TARGETS = {
@@ -56,6 +57,7 @@ end
 
 local function closeMenu(restoreGame)
     destroyMenu()
+    statsWindow.close()
     currentFollowerState = nil
     currentPage = 1
     if restoreGame then
@@ -194,7 +196,7 @@ local function buildMenu()
     }
     root = ui.create {
         name = "BestFriendsForever_FollowerMenu",
-        layer = "Modal",
+        layer = "Windows",
         template = I.MWUI.templates.boxSolidThick,
         props = {
             relativePosition = util.vector2(0.5, 0.5),
@@ -323,5 +325,6 @@ settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_m
 followerMenu.registerButton(companionShare)
 followerMenu.registerButton(wait)
 followerMenu.registerButton(repairGear)
+followerMenu.registerButton(statsWindow)
 
 return followerMenu

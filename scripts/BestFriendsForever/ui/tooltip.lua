@@ -11,7 +11,7 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
-local l10n = core.l10n("BestFriendsForever")
+local l10n = core.l10n("BestFriendsForever_ui")
 local damagedColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 local creatureTypeLabels = {
     [types.Creature.TYPE.Creatures] = "creatureType_creatures",

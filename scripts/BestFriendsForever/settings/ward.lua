@@ -4,7 +4,7 @@ local I = require("openmw.interfaces")
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_ward",
     page = "BestFriendsForever",
-    l10n = "BestFriendsForever",
+    l10n = "BestFriendsForever_settings",
     name = "ward_groupName",
     description = "ward_groupDesc",
     permanentStorage = true,
@@ -20,7 +20,7 @@ I.Settings.registerGroup {
                 statDamage = true,
             },
             argument = {
-                l10n = "BestFriendsForever",
+                l10n = "BestFriendsForever_settings",
                 keys = {
                     "diseases",
                     "statDamage",
