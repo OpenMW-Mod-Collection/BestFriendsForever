@@ -24,7 +24,7 @@ return {
             },
         })
     end,
-    condition = function(followerState)
+    enabledWhen = function(followerState)
         return not followerState.isSummon
     end,
     closeAfterActivation = true,

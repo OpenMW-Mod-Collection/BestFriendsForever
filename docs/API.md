@@ -60,7 +60,7 @@ BestFriendsForever_followerUp
 
 ## Interfaces
 
-`I.BestFriendsForever.version` is currently `5`. This is the main player-side interface: it gives you read-only access to the downed-follower table, lets you add custom icons, tooltip fields, and follower-menu buttons, and exposes BFF's live UI elements for direct modification.
+`I.BestFriendsForever.version` is currently `6`. This is the main player-side interface: it gives you read-only access to the downed-follower table, lets you add custom icons, tooltip fields, and follower-menu buttons, and exposes BFF's live UI elements for direct modification.
 
 ### Downed followers
 
@@ -278,13 +278,13 @@ I.BestFriendsForever.registerFollowerMenuButton {
     action = function(followerState)
         I.UI.setMode("Companion", { target = followerState.actor })
     end,
-    condition = function(followerState)
+    enabledWhen = function(followerState)
         return not followerState.isSummon
     end,
 }
 ```
 
-The optional `condition` function receives the follower state. Any truthy result enables the button; `false` or `nil` disables it and prevents activation. Companion Share uses this to exclude summons.
+The optional `visibleWhen` and `enabledWhen` functions each receive the follower state. A truthy result from `visibleWhen` includes the button in the menu and its pagination; `false` or `nil` hides it. A truthy result from `enabledWhen` draws the button as enabled; `false` or `nil` draws it as disabled and prevents activation. Both default to `true` when omitted. Companion Share uses `enabledWhen` so summons see the button as disabled. The old `condition` field is no longer supported and raises a registration error.
 
 Or send that state as the event payload to the player, follower, or global script:
 

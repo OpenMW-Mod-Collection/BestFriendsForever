@@ -19,7 +19,7 @@ return {
             player = self,
         })
     end,
-    condition = function(followerState)
+    enabledWhen = function(followerState)
         return not followerState.isSummon and not hasCommandEffect(followerState.actor)
     end,
     closeAfterActivation = true,
