@@ -13,6 +13,7 @@ local rawUIMutators = require("scripts.BestFriendsForever.utils.rawUIMutators")
 local commonUI = require("scripts.BestFriendsForever.utils.commonUI")
 local companionShare = require("scripts.BestFriendsForever.ui.menuItems.companionShare")
 local wait = require("scripts.BestFriendsForever.ui.menuItems.wait")
+local stopCombat = require("scripts.BestFriendsForever.ui.menuItems.stopCombat")
 local repairGear = require("scripts.BestFriendsForever.ui.menuItems.repairGear")
 local statsWindow = require("scripts.BestFriendsForever.ui.menuItems.statsWindow")
 
@@ -340,6 +341,7 @@ settings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_m
 
 followerMenu.registerButton(companionShare)
 followerMenu.registerButton(wait)
+followerMenu.registerButton(stopCombat)
 followerMenu.registerButton(repairGear)
 followerMenu.registerButton(statsWindow)
 

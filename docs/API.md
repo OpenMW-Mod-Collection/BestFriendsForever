@@ -20,12 +20,13 @@ The built-in extension points use the following defaults and reserved names. The
 | -------------- | ----: | ------------ | -------------------------------------------- |
 | `name`         |     1 | —            | Always shown                                 |
 | `role`         |     2 | `class`      | Class for NPCs, type/base name for creatures |
-| `diseases`     |     3 | `diseases`   | Uses the `diseaseVerbosity` setting          |
-| `statDamage`   |     4 | `statDamage` | Summarizes drained or damaged stats          |
+| `summon`       |     3 | `summon`     | Shown only for summons                       |
+| `diseases`     |     4 | `diseases`   | Uses the `diseaseVerbosity` setting          |
+| `statDamage`   |     5 | `statDamage` | Summarizes drained or damaged stats          |
 
 Use fractional order values such as `1.5` to insert a field between built-ins. Field names are unique exact strings.
 
-`toggleKey` checks `SettingsBestFriendsForever_tooltip.enabledFields`; the built-in keys are `class`, `diseases`, and `statDamage`. `enabledSetting` checks `SettingsBestFriendsForever_HUDFollower.enabledElements`; the built-in keys are `name`, `health`, `magicka`, and `fatigue`. If your field uses a new `toggleKey`, add that key to the tooltip settings group yourself or the field will stay visible unless its callback returns nil.
+`toggleKey` checks `SettingsBestFriendsForever_tooltip.enabledFields`; the built-in keys are `class`, `summon`, `diseases`, and `statDamage`. `enabledSetting` checks `SettingsBestFriendsForever_HUDFollower.enabledElements`; the built-in keys are `name`, `health`, `magicka`, and `fatigue`. If your field uses a new `toggleKey`, add that key to the tooltip settings group yourself or the field will stay visible unless its callback returns nil.
 
 ### Follower icons
 
@@ -37,6 +38,7 @@ Icon resolution is: record ID map first, then rules in registration order, then 
 | --------------- | ---------------------------------------- | -------------------------------------- |
 | Companion Share | Not a summon                             | `closeAfterActivation = true`          |
 | Wait Here       | Not a summon, not under a Command effect | `closeAfterActivation = true`          |
+| Stop Combat     | Always available                         | `closeAfterActivation = true`          |
 | Repair Gear     | Not a summon                             | Closes when Repair mode actually opens |
 
 Button names are unique case-insensitively. A button must define exactly one of `action` or `event`. Event buttons require `target` (`player`, `follower`, or `global`); action buttons cannot define `target`. The page size setting is `SettingsBestFriendsForever_menuGeneral.maxButtonsPerPage`, default `10`.
@@ -109,7 +111,7 @@ I.BestFriendsForever.setFollowerIcon {
 ```lua
 -- Adds a field to the follower tooltip
 -- name must be unique; order is a numeric weight and defaults to 100
--- built-in fields use 1-4; decimals such as 1.5 are allowed
+-- built-in fields use 1-5; decimals such as 1.5 are allowed
 -- getText receives the Follower Detection Util state and BFF's read-only
 -- follower data, and returns text or nil (nil hides the field).
 -- Safe to register at any time; BFF rebuilds the tooltip.
@@ -265,6 +267,8 @@ The follower menu is a small extension point for player scripts. Buttons can run
 Player scripts can register buttons in the follower menu through the `I.BestFriendsForever` interface. Buttons are sorted alphabetically; the number of action buttons shown per page is configurable (10 by default).
 
 The built-in Wait action dismisses an eligible follower; interact with them to have them follow you again. It is unavailable for summons and actors under a Command effect.
+
+The built-in Stop Combat action removes the follower's Combat and Pursue AI packages. Their existing Follow package is left untouched, so a following follower resumes following and a waiting one stays put. The follower may re-engage if the enemy is still hostile.
 
 Run a function with the current Follower Detection Util state:
 

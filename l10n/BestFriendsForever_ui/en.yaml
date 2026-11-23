@@ -1,4 +1,5 @@
 followerTooltip_name: "{name}"
+followerTooltip_summon: Summon
 followerTooltip_diseases: "Diseases: {diseases}"
 followerTooltip_statDamage: "Stat damage: {stats}"
 Blight: Blight
@@ -8,6 +9,7 @@ followerTooltip_diseased: Diseased
 "Creature Type": Type
 statsWindow_title: Follower Stats
 statsWindow_button: Stats
+stopCombat_button: Stop Combat
 statsWindow_skills: Skills
 statsWindow_attributes: Attributes
 statsWindow_exit: Exit

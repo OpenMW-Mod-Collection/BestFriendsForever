@@ -167,6 +167,7 @@ tooltip_groupName: Tooltip
 tooltip_groupDesc: Hovering over follower widget will make a tooltip appear.
 enabledFields_name: Visible Fields
 class: NPC Class / Creature Type
+summon: Summon
 diseases: Diseases
 statDamage: Stat Damage
 diseaseVerbosity_name: Disease Verbosity

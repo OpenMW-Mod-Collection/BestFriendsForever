@@ -16,6 +16,7 @@ I.Settings.registerGroup {
             renderer = "multiCheckbox_V1",
             default = {
                 class = true,
+                summon = true,
                 diseases = true,
                 statDamage = true,
             },
@@ -23,6 +24,7 @@ I.Settings.registerGroup {
                 l10n = "BestFriendsForever_settings",
                 keys = {
                     "class",
+                    "summon",
                     "diseases",
                     "statDamage",
                 },

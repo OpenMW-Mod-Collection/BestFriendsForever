@@ -9,6 +9,8 @@
 - Split the menu settings group into General and Repair Gear groups. Existing values in the old section are not carried over; reapply custom values if needed.
 - Moved Widget Order and Keep Summon Widgets at the Bottom from the Follower HUD group to the HUD Wrapper group, directly below HUD Orientation. Existing values in the old section are not carried over.
 - Added a Followers Shown setting to choose whether the HUD shows direct followers, followers of followers, or everyone in the player's follower chain. Every follower in the player's chain continues to receive BFF follower scripts regardless of HUD visibility.
+- Added a Summon line to follower tooltips, shown below the class/creature type only for summons, with its own Visible Fields toggle.
+- Added a Stop Combat button to the Interaction Menu. It removes the follower's Combat and Pursue AI packages while preserving their Follow or waiting state.
 
 - Added a Follower Stats window to the Interaction Menu, built with OpenMW's built-in MWUI templates and BFF's shared common UI helpers. NPCs show dynamic stat bars with current/max values, level, factions, and class skills in two columns; creatures show dynamic stat bars with current/max values, level, attributes, creature type, base creature, and their three creature skills in one column.
 - Moved the Interaction Menu to the `Windows` UI layer so the Stats window can render above it without hiding the menu.

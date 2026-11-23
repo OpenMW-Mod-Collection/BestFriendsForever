@@ -363,8 +363,20 @@ tooltipUI.registerField {
 }
 
 tooltipUI.registerField {
-    name = "diseases",
+    name = "summon",
     order = 3,
+    toggleKey = "summon",
+    getText = function(followerState)
+        if followerState.isSummon ~= true then
+            return nil
+        end
+        return l10n("followerTooltip_summon")
+    end,
+}
+
+tooltipUI.registerField {
+    name = "diseases",
+    order = 4,
     toggleKey = "diseases",
     textColor = damagedColor,
     getText = function(_, followerData)
@@ -374,7 +386,7 @@ tooltipUI.registerField {
 
 tooltipUI.registerField {
     name = "statDamage",
-    order = 4,
+    order = 5,
     toggleKey = "statDamage",
     textColor = damagedColor,
     getText = function(_, followerData)
