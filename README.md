@@ -1,66 +1,36 @@
-# Best Friends Forever (OpenMW)
+# Best Friends Forever - Follower HUD and QoL (OpenMW)
 
-A collection of utilities for followers made with performance in mind. Follower HUD, teleportation, immortality and more. Modernized Attend Me, if you will.
+What if I said that your followers don't have to feel like a burden? That you can get modern follower experience in this fossil of a game?
 
-[Attend Me](https://www.nexusmods.com/morrowind/mods/51232) is great, but it can be improved. That's why I'm presenting to you Best Friends Forever - performant and modernized alternative to Attend Me with extra flair!
+What initially started as "[Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but less laggy" gradually evolved into something far more greater. And still less laggy, by the way :D
 
-## Features
+In short, BFFs features can be split into 3 groups:
 
-Note that effectively everything in this mod toggleable and configurable.
+1. Utility Scripts
+    - **Teleportation** - your followers will teleport to you anywhere and everywhere
+    - **Catch Up** - your followers will always keep up with you
+    - **Immortality** - instead of dying, your followers will fall on the ground until the end of combat
+    - **Call keybind** - will teleport all your followers to you. Usually, out of your way
+    - **Ward** - automatic disease curing and stat restoration (cheat zone, disabled by default)
+2. Follower HUD
+    - Health, fatigue and magicka bars
+    - Hand drawn custom follower icons
+    - Icon with selected weapon, spell or enchantment when in combat
+    - Tooltips with current diseases and damaged stats
+3. Interaction Menu
+    - **Companion Share** with anyone
+    - **Repair Gear** - opens repair menu only with follower's gear
+    - **Stats Window** - with the exact stats they have
+    - **Stop Combat** - makes follower stop the current fight
+    - **Wait** - pause follower from following you, until the next interaction with them
 
-### Follower HUD
-
-Convenient way to see you followers' status.
-
-- Current and total health, magicka and fatigue
-- If in combat - equipped weapon, enchanted item or spell
-- If not in combat - custom fancy icon representing who they are
-
-### Teleportation Module
-
-You will never lose your followers again. Everywhere you go - they will be teleported to you, including:
-
-- Cell transitions
-- Recall and intervention
-- Travel services
-- Scripted teleports
-
-> Note: this module might break certain scripted events like follower departure. If you encounter this, use script blacklist and let me know about the issue somewhere so I could add a rule to the default config.
-
-### Catch Up Module
-
-Younger brother to Teleportation. Simply put, your followers will speed up the further they get from you. Meaning they will keep up with you even without needing to wear the Boots of Blinding Speed.
-
-### Immortality Module
-
-Ever been annoyed that your story-rich follower constantly dies in combat, borking the questline and requiring you to reload the save? Yeah, I did too. Well, you will never lose your followers again. Again.
-
-This module will make sure your followers won't ever get killed pernanently. Instead, they will fall on the ground for set amount of time or until the end of the combat. Additionally, all enemies will ignore them lying on the ground, keeping the difficulty mostly in tact.
-
-Does not apply to:
-
-- Summons
-- Actors under any Command effect
-
-> Note: this module might break scripted events when your followers have to engage in combat with you. The solution is the same as with TP module.
-
-### Ward Module
-
-Module to remove one more friction point in playing with followers. Ward will protect your followers from all diseases and stat damage.
-
-Disabled by default.
-
-### Call Keybind
-
-A keybing to unstuck your followers. Teleport everyone to you at the press of a button.
-
-Unbound by default.
+Each feature, as always, as configurable as reasonably possible.
 
 ## Compatibility
 
 Safe to install or update mid-playthrough. When removing the mod, make sure no follower is currently downed and they don't have a speed boost.
 
-Should be compatible with anything. Though Immortality and Teleport modules might break certain scripts - please report such cases so I could expand the default blacklist.
+Should be compatible with anything. Though Immortality and Teleport modules might break certain scripted events. If you encounter this, use script blacklist and let me know about the issue so I could add a rule to the default config.
 
 It is technically compatible with [Attend Me](https://www.nexusmods.com/morrowind/mods/51232), but they should not be used together.
 

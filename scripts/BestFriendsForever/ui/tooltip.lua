@@ -77,15 +77,15 @@ local function getDiseases(fData)
 end
 
 local function getDiseaseText(fData, verbosity)
-    local names, types = getDiseases(fData)
+    local names, dieseaseTypes = getDiseases(fData)
     if #names == 0 then
         return nil
     end
     if verbosity == "By Type" then
-        for i, typeName in ipairs(types) do
-            types[i] = l10n(typeName)
+        for i, typeName in ipairs(dieseaseTypes) do
+            dieseaseTypes[i] = l10n(typeName)
         end
-        return l10n("followerTooltip_diseases", { diseases = table.concat(types, ", ") })
+        return l10n("followerTooltip_diseases", { diseases = table.concat(dieseaseTypes, ", ") })
     elseif verbosity == "Unclear" then
         return l10n("followerTooltip_diseased")
     end
@@ -350,9 +350,7 @@ tooltipUI.registerField {
     name = "name",
     order = 1,
     header = true,
-    getText = function(followerState)
-        return l10n("followerTooltip_name", { name = getActorName(followerState) })
-    end,
+    getText = getActorName,
 }
 
 tooltipUI.registerField {

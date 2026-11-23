@@ -1,41 +1,17 @@
 # Best Friends Forever (OpenMW)
 
-## Unreleased
-
-- Fixed a `focusLoss event propagation has failed: DelayedAction is not allowed to create another DelayedAction` warning when closing the Interaction Menu to open the Repair window. Repair Gear now closes the menu on activation, so its buttons are destroyed before the UI mode changes.
-- Fixed a `Can't remove 0 of 0 items` error when closing the Repair window with a borrowed follower tool that was consumed or whose object reference went stale. Borrowed follower tools are now tracked by record id and stack count, and closing Repair returns as many matching tools as remain without relying on object refs. Followers re-equip returned gear through the built-in `UseItem` event instead of tracked equipment slots.
-- Split Repair Tool Preference into Tool Source Preference (player or follower first) and Initial Tool Preference (highest quality, highest max uses, or highest weight). Ties are broken by weight multiplied by remaining uses.
-- Moved the Interaction Menu and Repair Gear settings from the HUD page to a dedicated Best Friends Forever: Menu settings page.
-- Split the menu settings group into General and Repair Gear groups. Existing values in the old section are not carried over; reapply custom values if needed.
-- Moved Widget Order and Keep Summon Widgets at the Bottom from the Follower HUD group to the HUD Wrapper group, directly below HUD Orientation. Existing values in the old section are not carried over.
-- Added a Followers Shown setting to choose whether the HUD shows direct followers, followers of followers, or everyone in the player's follower chain. Every follower in the player's chain continues to receive BFF follower scripts regardless of HUD visibility.
-- Added a Summon line to follower tooltips, shown below the class/creature type only for summons, with its own Visible Fields toggle.
-- Added a Stop Combat button to the Interaction Menu. It removes the follower's Combat and Pursue AI packages while preserving their Follow or waiting state.
-
-- Added a Follower Stats window to the Interaction Menu, built with OpenMW's built-in MWUI templates and BFF's shared common UI helpers. NPCs show dynamic stat bars with current/max values, level, factions, and class skills in two columns; creatures show dynamic stat bars with current/max values, level, attributes, creature type, base creature, and their three creature skills in one column.
-- Moved the Interaction Menu to the `Windows` UI layer so the Stats window can render above it without hiding the menu.
-- Moved the public API contract out of the README into an expanded `docs/API.md` with built-in defaults and reserved values.
-- Added raw UI access to `I.BestFriendsForever`: `getRawUI`, `getFollowerWidget`, `refreshRawUI`, `rebuildRawUI`, and `registerRawUIMutator`.
-- Added `I.BestFriendsForeverDown`, a local-only interface for choosing whether a would-be down becomes a down or real death.
-- Added `I.BestFriendsForever.registerFollowerTooltipField` for player scripts.
-- `registerFollowerTooltipField` now accepts `getLayout` callbacks returning complete UI layouts.
-- `I.BestFriendsForever.setFollowerIcon` now takes a spec table with `recordIds` (string or list; `recordId` for one) or a `rule(actor)` function. Icon lookup is now ID map → rules → built-in class/creature-type fallback.
-- Animunculi uses a rule; the four creature types are handled by the built-in fallback (textures still TODO).
-- `I.BestFriendsForever` interface version is now 5.
-- `BestFriendsForever_followerDown` is now also sent to the follower's local scripts.
-
 ## 3.0
 
 - Complete mod rewrite
 - Added Follower Icons (thx butts)
-- Added unique Follower Icons to Biz'kuitz, Julan and Tetra the Pack Guar
+- Added unique Follower Icons for Biz'Kuitz, Julan and Tetra the Pack Guar
 - Added Tooltips to follower widgets
-- Tooltips now show general info about the follower, their diseases and damaged stats
-- Added follower Interaction Menu
-- Added Companion Share, Wait Here, Follower Info and Repair Gear features to Interaction Menu
-- Overhauled mod's public API. Check docs for more details
-- Complete overhaul of the mod's settings (I won't list every change, check them for yourself)
+- Added follower Interaction Menu with a few default features: Companion Share, Wait Here, Follower Info and Repair Gear and Stats
+- New unique and conditional icons, tooltip fields and interaction menu buttons can be added via public API
+- Complete overhaul of the mod's settings
 - Added settigns presets
+- Exposed all BBFs UI elements to the interface. Feel free to edit them if you're desperate enough
+- Moved public API docs to its own separate file
 - Removed all GOTOs
 
 ## 2.0

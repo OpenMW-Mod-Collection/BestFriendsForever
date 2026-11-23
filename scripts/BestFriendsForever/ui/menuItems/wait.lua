@@ -3,6 +3,8 @@ local core = require("openmw.core")
 local types = require("openmw.types")
 local self = require("openmw.self")
 
+local l10n = core.l10n("BestFriendsForever_ui")
+
 local function hasCommandEffect(actor)
     local effects = types.Actor.activeEffects(actor)
     return effects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
@@ -10,7 +12,7 @@ local function hasCommandEffect(actor)
 end
 
 return {
-    name = "Wait Here",
+    name = l10n("waitHere_button"),
     action = function(followerState)
         core.sendGlobalEvent("BestFriendsForever_waitHere", {
             actor = followerState.actor,
