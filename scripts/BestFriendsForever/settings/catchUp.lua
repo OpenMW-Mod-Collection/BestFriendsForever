@@ -11,6 +11,16 @@ I.Settings.registerGroup {
     order = 10,
     settings = {
         {
+            key = "updateInterval",
+            name = "updateInterval_name",
+            description = "updateInterval_desc",
+            renderer = "number",
+            default = 0.1,
+            argument = {
+                min = 0,
+            },
+        },
+        {
             key = "distances",
             name = "distances_name",
             description = "distances_desc",

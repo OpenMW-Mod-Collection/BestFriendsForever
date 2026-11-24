@@ -14,6 +14,8 @@ local leader
 local leaderSpeed
 local selfSpeed = types.Actor.stats.attributes.speed(self)
 local settings
+local updateAccumulator
+local lastBoost = 0
 
 local function getTargetBoost()
     if not leader or not leader:isValid() then
@@ -34,10 +36,18 @@ local function getTargetBoost()
     end
 end
 
-local function onCleanup()
-    if self:isValid() then
-        selfSpeed.modifier = 0
+local function setModifier(value)
+    if lastBoost == value then
+        return
     end
+    if self:isValid() then
+        selfSpeed.modifier = value
+    end
+    lastBoost = value
+end
+
+local function onCleanup()
+    setModifier(0)
 end
 
 local function onUpdate(dt)
@@ -50,7 +60,13 @@ local function onUpdate(dt)
         return
     end
 
-    selfSpeed.modifier = getTargetBoost()
+    updateAccumulator = updateAccumulator + dt
+    if updateAccumulator <= settings.updateInterval then
+        return
+    end
+    updateAccumulator = 0
+
+    setModifier(getTargetBoost())
 end
 
 local function onSave()
@@ -69,6 +85,7 @@ settings = settingsCache.new(
     storage.globalSection("SettingsBestFriendsForever_catchUp"),
     async
 )
+updateAccumulator = settings.updateInterval
 
 return {
     engineHandlers = {

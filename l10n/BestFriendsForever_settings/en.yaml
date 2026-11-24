@@ -79,6 +79,8 @@ distances_name: Catch Up Distances
 distances_desc: Distances at which followers start building up and reach maximum speed.
 startDist: Starting Distance
 maxDist: Maximum Distance
+updateInterval_name: Catch Up Update Interval (sec)
+updateInterval_desc: How often follower speed is recalculated. Set it to zero to recalculate every frame.
 HUDWrapper_groupName: Follower HUD
 HUDWrapper_groupDesc: Settings for a container that houses all the follower widgets.
 enable_name: Enable Follower HUD

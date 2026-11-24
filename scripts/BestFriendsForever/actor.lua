@@ -12,6 +12,19 @@ local noOneDowned = true
 local downedFollowersToLeaders = {}
 local settings
 
+local function ensureSettings()
+    if settings then
+        return
+    end
+
+    settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async, function(key)
+        if key == "changeAggro" and not settings[key] then
+            downedFollowersToLeaders = {}
+            noOneDowned = true
+        end
+    end)
+end
+
 -- I have to continuosly check it
 -- so they don't change back to attacking the downed follower
 local function onUpdate()
@@ -33,6 +46,7 @@ local function onUpdate()
 end
 
 local function followerDown(data)
+    ensureSettings()
     if not settings.changeAggro then
         return
     end
@@ -46,6 +60,10 @@ local function followerUp(data)
 end
 
 local function onSave()
+    if not next(downedFollowersToLeaders) then
+        return
+    end
+
     return {
         downedFollowersToLeaders = downedFollowersToLeaders,
     }
@@ -55,14 +73,10 @@ local function onLoad(data)
     data = data or {}
     downedFollowersToLeaders = data.downedFollowersToLeaders or downedFollowersToLeaders
     noOneDowned = not next(downedFollowersToLeaders)
-end
-
-settings = settingsCache.new(storage.globalSection("SettingsBestFriendsForever_immortality"), async, function(key)
-    if key == "changeAggro" and not settings[key] then
-        downedFollowersToLeaders = {}
-        noOneDowned = true
+    if not noOneDowned then
+        ensureSettings()
     end
-end)
+end
 
 return {
     engineHandlers = {
