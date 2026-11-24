@@ -118,6 +118,23 @@ I.Settings.registerGroup {
             },
         },
         {
+            key = "widgetInterval",
+            name = "widgetInterval_name",
+            description = "widgetInterval_desc",
+            renderer = "SuperSlider6",
+            default = 15,
+            argument = {
+                min = 0,
+                max = 50,
+                step = 1,
+                default = 15,
+                showDefaultMark = true,
+                showResetButton = true,
+                bottomRow = true,
+                unit = "px",
+            },
+        },
+        {
             key = "maxWidgets",
             name = "maxWidgets_name",
             renderer = "number",

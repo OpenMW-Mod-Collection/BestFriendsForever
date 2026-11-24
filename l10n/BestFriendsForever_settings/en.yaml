@@ -116,6 +116,8 @@ expansionDirectionH_name: Expand HUD Horizontally
 enableBordersAndBg_name: Enable Borders and Background
 hudOrientation_name: HUD Orientation
 hudOrientation_desc: How the follower widgets will stack together.
+widgetInterval_name: Follower Widget Gap
+widgetInterval_desc: Space between follower widgets, following the HUD stack direction.
 HUDFollower_groupName: Follower Widgets
 HUDFollower_groupDesc: Serttings for how individual follower widgets look.
 enabledElements_name: Visible Elements

@@ -5,6 +5,4 @@
   - Humanoid
   - Undead
 - [ ] Rewrite the API docs
-- [ ] Add a setting to change the gap between follower widgets
-- [ ] Fix the autosize warnings in the follower stats windows
 - [ ] Decide what to do with the stat modifiers in the follower stat window

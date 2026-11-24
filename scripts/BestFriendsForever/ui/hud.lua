@@ -73,6 +73,16 @@ local settingsBlacklists
 local rootFlex
 local wrapperEventCallbacks
 
+local function updateDelimiterSize()
+    local gap = settingsWrapper.widgetInterval
+    local size = settingsWrapper.hudOrientation == "Horizontal"
+        and v2(gap, delimiterH)
+        or v2(delimiterW, gap)
+    delimiterPadding.props.size = size
+    horizontalDelimiter.props.size = size
+    verticalDelimiter.props.size = size
+end
+
 local function hudPosition()
     local position = settingsWrapper.position
     return v2(position.posX, position.posY)
@@ -465,6 +475,7 @@ end
 
 followerHUD.new = function(followers)
     followerHUD.destroy()
+    updateDelimiterSize()
     followerHUD.root = createRoot()
     followerHUD.tooltipElement = tooltipUI.create(tooltipLayer)
     followerHUD.followerData = {}

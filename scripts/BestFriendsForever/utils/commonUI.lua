@@ -225,7 +225,6 @@ commonUI.bar = function(props)
         template = I.MWUI.templates.borders,
         external = { stretch = 1 },
         props = {
-            autoSize = false,
             size = props.size or v2(100, commonUI.Sizes.LINE_HEIGHT),
         },
         content = ui.content {
