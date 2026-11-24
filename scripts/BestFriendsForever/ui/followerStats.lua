@@ -33,6 +33,10 @@ local currentState
 local window
 local registered = false
 
+local function closeStatsWindow()
+    statsWindow.close()
+end
+
 local LABELS = {
     level = core.getGMST("sLevel"),
     race = core.getGMST("sRace"),
@@ -365,9 +369,7 @@ local function buildContent(actor)
     local exitButton = commonUI.button(
         l10n("statsWindow_exit"),
         commonUI.Sizes.TEXT_NORMAL,
-        function()
-            statsWindow.close()
-        end,
+        closeStatsWindow,
         "BestFriendsForever_statsWindow_exit"
     )
     local exitFooter = {

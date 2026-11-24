@@ -37,14 +37,50 @@ local STAT_DEFINITIONS = {
 
 local followerUI = {}
 
+local function onWidgetMouseClick(data, element)
+    local context = element.userData
+    if context.consumeDragClick and context.consumeDragClick() then
+        return true
+    end
+    followerMenu.open(context.followerState)
+end
+
+local function onWidgetMouseMove(data, element)
+    local context = element.userData
+    context.showTooltip(context.fData, data.position)
+    -- let the HUD root's drag handler receive this event too
+    return true
+end
+
+local function onWidgetFocusLoss(data, element)
+    local context = element.userData
+    context.hideTooltip(context.fData)
+end
+
+local widgetEventCallbacks = {
+    mouseClick = async:callback(onWidgetMouseClick),
+    mouseMove = async:callback(onWidgetMouseMove),
+    focusLoss = async:callback(onWidgetFocusLoss),
+}
+
 ---@class IconData
 ---@field container openmw.ui.Layout
+---@field slots table
+---@field spacer openmw.ui.Layout
+---@field signature string|nil
+---@field generation integer
+---@field followerIcon table|nil
 
 ---@class BarData
 ---@field enabled boolean
 ---@field color openmw.util.Color
+---@field size openmw.util.Vector2
 ---@field imgLayout openmw.ui.Layout|nil
 ---@field label openmw.ui.Layout|nil
+---@field lastText string|nil
+---@field lastColor openmw.util.Color|nil
+---@field lastCurr number|nil
+---@field lastBase number|nil
 
 ---@class StatEntry
 ---@field name "health"|"magicka"|"fatigue"
@@ -78,6 +114,7 @@ local function newFollowerData(followerState, down, settings)
             bar = {
                 enabled = settings.enabledElements[definition.name],
                 color = settings[definition.colorSetting],
+                size = barsUI.barSizeFor(definition.name, settings),
                 imgLayout = nil,
                 label = nil,
             },
@@ -100,18 +137,11 @@ local function newFollowerData(followerState, down, settings)
         activeEffects = types.Actor.activeEffects(follower),
         attributes = attributes,
         skills = skills,
-        icons = {
-            container = {
-                type = ui.TYPE.Flex,
-                props = {
-                    horizontal = settings.iconOrientation ~= "Vertical",
-                },
-                content = ui.content {},
-            },
-        },
+        icons = {},
         stats = stats,
     }
 
+    iconsUI.prepareIcons(fData, settings)
     iconsUI.updateIcons(fData, settings)
     return fData
 end
@@ -155,8 +185,7 @@ local function createLayout(followerState, fData, settings, showTooltip, hideToo
     local barsContainer = createBarsContainer(fData, settings)
     local dataContent = { barsContainer }
     if settings.enabledElements.icons ~= false then
-        local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
-        local iconSpacer = { props = { size = v2(iconGap, 0) } }
+        local iconSpacer = { props = { size = v2(settings.iconInterval, 0) } }
         dataContent = settings.iconSide ~= "Left"
             and { barsContainer, iconSpacer, fData.icons.container }
             or { fData.icons.container, iconSpacer, barsContainer }
@@ -206,21 +235,13 @@ local function createLayout(followerState, fData, settings, showTooltip, hideToo
         props = {
             horizontal = true,
         },
-        events = {
-            mouseClick = async:callback(function()
-                if consumeDragClick and consumeDragClick() then
-                    return true
-                end
-                followerMenu.open(followerState)
-            end),
-            mouseMove = async:callback(function(data)
-                showTooltip(fData, data.position)
-                -- let the HUD root's drag handler receive this event too
-                return true
-            end),
-            focusLoss = async:callback(function()
-                hideTooltip(fData)
-            end),
+        events = widgetEventCallbacks,
+        userData = {
+            fData = fData,
+            followerState = followerState,
+            showTooltip = showTooltip,
+            hideTooltip = hideTooltip,
+            consumeDragClick = consumeDragClick,
         },
         content = ui.content {
             interval,

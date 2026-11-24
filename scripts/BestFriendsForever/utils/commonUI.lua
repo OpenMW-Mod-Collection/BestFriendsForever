@@ -99,20 +99,33 @@ commonUI.createTexture = function(path)
     end
 end
 
+local intervalHCache = {}
+local intervalVCache = {}
+
 commonUI.intervalH = function(size)
-    return {
-        props = {
-            size = v2(size, 0),
-        },
-    }
+    local layout = intervalHCache[size]
+    if not layout then
+        layout = {
+            props = {
+                size = v2(size, 0),
+            },
+        }
+        intervalHCache[size] = layout
+    end
+    return layout
 end
 
 commonUI.intervalV = function(size)
-    return {
-        props = {
-            size = v2(0, size),
-        },
-    }
+    local layout = intervalVCache[size]
+    if not layout then
+        layout = {
+            props = {
+                size = v2(0, size),
+            },
+        }
+        intervalVCache[size] = layout
+    end
+    return layout
 end
 
 -- Container that adds an exact amount of padding on every side.
@@ -326,7 +339,9 @@ commonUI.buttonBorders = function(borderSize)
     return template
 end
 
-commonUI.buttonBox = function()
+local buttonBoxTemplates = {}
+
+local function buildButtonBox()
     local template = {
         type = ui.TYPE.Container,
         content = ui.content {},
@@ -365,8 +380,21 @@ commonUI.buttonBox = function()
     return template
 end
 
+local function cachedButtonBox()
+    local template = buttonBoxTemplates[buttonBorderSize]
+    if not template then
+        template = buildButtonBox()
+        buttonBoxTemplates[buttonBorderSize] = template
+    end
+    return template
+end
+
+commonUI.buttonBox = function()
+    return auxUi.deepLayoutCopy(cachedButtonBox())
+end
+
 commonUI.buttonBoxBgr = function(bgrAlpha)
-    local template = auxUi.deepLayoutCopy(commonUI.buttonBox())
+    local template = auxUi.deepLayoutCopy(cachedButtonBox())
     template.content:insert(1, {
         type = ui.TYPE.Image,
         props = {
@@ -379,6 +407,47 @@ commonUI.buttonBoxBgr = function(bgrAlpha)
     })
     return template
 end
+
+local function buttonFocusLoss(data, elem)
+    local context = elem.userData
+    context.textLayout.props.textColor = context.disabled and C.Colors.DISABLED or C.Colors.DEFAULT
+    context.element:update()
+end
+
+local function buttonFocusGain(data, elem)
+    local context = elem.userData
+    context.textLayout.props.textColor = context.disabled and C.Colors.DISABLED or C.Colors.DEFAULT_LIGHT
+    context.element:update()
+end
+
+local function buttonMousePress(data, elem)
+    local context = elem.userData
+    if context.disabled then
+        return
+    end
+    ambient.playSound("menu click")
+    context.textLayout.props.textColor = C.Colors.DEFAULT_PRESSED
+    context.element:update()
+end
+
+local function buttonMouseRelease(data, elem)
+    local context = elem.userData
+    if context.disabled then
+        return
+    end
+    context.textLayout.props.textColor = C.Colors.DEFAULT_LIGHT
+    context.element:update()
+    if context.onClick then
+        context.onClick(context.element)
+    end
+end
+
+local buttonEventCallbacks = {
+    focusLoss = async:callback(buttonFocusLoss),
+    focusGain = async:callback(buttonFocusGain),
+    mousePress = async:callback(buttonMousePress),
+    mouseRelease = async:callback(buttonMouseRelease),
+}
 
 commonUI.button = function(text, textSize, onClick, name, bgrAlpha, disabled)
     disabled = disabled == true
@@ -417,38 +486,15 @@ commonUI.button = function(text, textSize, onClick, name, bgrAlpha, disabled)
         template = commonUI.buttonBoxBgr(bgrAlpha),
         props = {},
         content = ui.content { buttonContent },
-        events = {},
+        events = buttonEventCallbacks,
         userData = {
             inFocus = false,
             disabled = disabled,
+            textLayout = textLayout,
+            onClick = onClick,
         },
     }
-    element.layout.events.focusLoss = async:callback(function()
-        textLayout.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT
-        element:update()
-    end)
-    element.layout.events.focusGain = async:callback(function()
-        textLayout.props.textColor = disabled and C.Colors.DISABLED or C.Colors.DEFAULT_LIGHT
-        element:update()
-    end)
-    element.layout.events.mousePress = async:callback(function()
-        if disabled then
-            return
-        end
-        ambient.playSound("menu click")
-        textLayout.props.textColor = C.Colors.DEFAULT_PRESSED
-        element:update()
-    end)
-    element.layout.events.mouseRelease = async:callback(function()
-        if disabled then
-            return
-        end
-        textLayout.props.textColor = C.Colors.DEFAULT_LIGHT
-        element:update()
-        if onClick then
-            onClick()
-        end
-    end)
+    element.layout.userData.element = element
     return element
 end
 

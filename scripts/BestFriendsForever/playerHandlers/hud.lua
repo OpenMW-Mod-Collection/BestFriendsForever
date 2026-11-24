@@ -29,7 +29,6 @@ local function updateHUD(dt)
             followerHUD.new(I.FollowerDetectionUtil.getFollowerList())
         else
             followerHUD.updateData()
-            followerHUD.root:update()
         end
     else
         destroyHUD()

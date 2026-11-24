@@ -16,6 +16,8 @@ local l10n = core.l10n("BestFriendsForever_ui")
 local damagedColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 local OUTER_PADDING = commonUI.Sizes.BOX_OUTER_PADDING
 local FIELD_GAP = 2
+local spacerVisibleSize = v2(0, FIELD_GAP)
+local spacerHiddenSize = v2(0, 0)
 
 local tooltipUI = {}
 local registeredFields = {}
@@ -178,6 +180,7 @@ function tooltipUI.registerField(definition)
 
     registeredFields[#registeredFields + 1] = {
         name = definition.name,
+        layoutName = "followerTooltip_" .. definition.name,
         order = order,
         enabledSetting = definition.enabledSetting,
         toggleKey = definition.toggleKey,
@@ -210,7 +213,7 @@ local function allFields()
 end
 
 local function newFieldLayout(definition)
-    local name = "followerTooltip_" .. definition.name
+    local name = definition.layoutName
     if definition.getLayout then
         return {
             name = name,
@@ -243,9 +246,12 @@ function tooltipUI.create(layer)
     local content = ui.content {}
     fieldSpacers = {}
     for index, definition in ipairs(definitions) do
+        definition.lastText = nil
+        definition.lastLayout = nil
+        definition.lastVisible = nil
         content:add(newFieldLayout(definition))
         if index < #definitions then
-            local spacer = commonUI.intervalV(FIELD_GAP)
+            local spacer = { props = { size = spacerVisibleSize } }
             content:add(spacer)
             fieldSpacers[definition.name] = spacer
         end
@@ -315,29 +321,36 @@ function tooltipUI.update(tooltipElement, fData, enabledElements)
     local layouts = fields.content
     local toggles = settings.enabledFields
     for _, definition in ipairs(allFields()) do
-        local field = layouts["followerTooltip_" .. definition.name]
+        local field = layouts[definition.layoutName]
         if field then
             local followerState = fData.followerState
             local visible
             if definition.getLayout then
                 local layout = definition.getLayout(followerState, fData)
-                if field.content[1] ~= layout then
+                if definition.lastLayout ~= layout then
                     field.content = layout and ui.content { layout } or ui.content {}
+                    definition.lastLayout = layout
                 end
                 visible = layout ~= nil
             else
                 local text = definition.getText(followerState, fData)
-                field.props.text = text
+                if definition.lastText ~= text then
+                    field.props.text = text
+                    definition.lastText = text
+                end
                 visible = text ~= nil
             end
             local isVisible = visible
                 and (not definition.enabledSetting or enabledElements[definition.enabledSetting] ~= false)
                 and (not definition.toggleKey or not toggles or toggles[definition.toggleKey] ~= false)
-            field.props.visible = isVisible
-            field.props.autoSize = isVisible
-            local spacer = fieldSpacers[definition.name]
-            if spacer then
-                spacer.props.size = v2(0, isVisible and FIELD_GAP or 0)
+            if definition.lastVisible ~= isVisible then
+                field.props.visible = isVisible
+                field.props.autoSize = isVisible
+                local spacer = fieldSpacers[definition.name]
+                if spacer then
+                    spacer.props.size = isVisible and spacerVisibleSize or spacerHiddenSize
+                end
+                definition.lastVisible = isVisible
             end
         end
     end

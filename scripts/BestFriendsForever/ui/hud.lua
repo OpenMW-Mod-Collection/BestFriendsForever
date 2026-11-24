@@ -31,28 +31,38 @@ local sideToAlignment = {
 }
 local interval = { template = I.MWUI.templates.interval }
 local delimiterPadding = { props = { size = v2(delimiterW, delimiterH) } }
-local delimiterLine = {
-    props = {
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-    },
-}
 local tooltipCursorOffset = v2(16, 16)
 local tooltipLayer = "Notification"
-local delimiter = {
-    external = {
-        stretch = 1,
-    },
-    props = {
-        size = v2(delimiterW, delimiterH),
-    },
-    content = ui.content { delimiterLine },
-}
+
+local function newDelimiter(template)
+    return {
+        external = {
+            stretch = 1,
+        },
+        props = {
+            size = v2(delimiterW, delimiterH),
+        },
+        content = ui.content {
+            {
+                template = template,
+                props = {
+                    relativePosition = v2(0.5, 0.5),
+                    anchor = v2(0.5, 0.5),
+                },
+            },
+        },
+    }
+end
+
+local horizontalDelimiter = newDelimiter(I.MWUI.templates.horizontalLine)
+local verticalDelimiter = newDelimiter(I.MWUI.templates.verticalLine)
 
 local followerHUD = {}
 
 ---@type table<string, FollowerData>
 followerHUD.followerData = {}
+---@type FollowerData[]
+followerHUD.followerList = {}
 ---@type openmw.ui.Element|nil
 followerHUD.tooltipElement = nil
 local activeTooltipData
@@ -161,35 +171,37 @@ local followerScopeChecks = {
 }
 
 local function sortedFollowers(followers)
-    local list = {}
-    for _, state in pairs(followers) do
-        list[#list + 1] = state
-    end
-
     local primary = settingsWrapper.primarySort
     local keepSummonsAtBottom = settingsWrapper.keepSummonsAtBottom == true
+    local list = {}
+    for _, state in pairs(followers) do
+        list[#list + 1] = {
+            state = state,
+            name = nameOf(state):lower(),
+            weight = primaryWeight(primary, state),
+            summon = state.isSummon == true,
+        }
+    end
 
     table.sort(list, function(left, right)
-        if keepSummonsAtBottom then
-            local leftSummon = left.isSummon == true
-            local rightSummon = right.isSummon == true
-            if leftSummon ~= rightSummon then
-                return not leftSummon
-            end
+        if keepSummonsAtBottom and left.summon ~= right.summon then
+            return not left.summon
         end
 
-        local leftWeight = primaryWeight(primary, left)
-        local rightWeight = primaryWeight(primary, right)
+        local leftWeight = left.weight
+        local rightWeight = right.weight
         if leftWeight and rightWeight and leftWeight ~= rightWeight then
             return leftWeight < rightWeight
         end
 
-        local leftName = nameOf(left):lower()
-        local rightName = nameOf(right):lower()
-        return leftName < rightName
+        return left.name < right.name
     end)
 
-    return list
+    local states = {}
+    for index, entry in ipairs(list) do
+        states[index] = entry.state
+    end
+    return states
 end
 
 local modifierChecks = {
@@ -356,25 +368,24 @@ local function showTooltip(fData, mousePosition)
         return
     end
 
-    if activeTooltipData ~= fData then
-        activeTooltipData = fData
-        tooltipUI.update(tooltipElement, fData, settingsLocalHUD.enabledElements)
-    end
+    local isNewFollower = activeTooltipData ~= fData
+    activeTooltipData = fData
 
     tooltipElement.layout.props.position = mousePosition + tooltipCursorOffset
     tooltipElement.layout.props.visible = true
-    tooltipElement:update()
+    if isNewFollower then
+        tooltipUI.update(tooltipElement, fData, settingsLocalHUD.enabledElements)
+    else
+        tooltipElement:update()
+    end
 end
 
 ---@return openmw.ui.Layout
 local function makeDelimiter()
-    if settingsWrapper.enableBordersAndBg then
-        delimiterLine.template = settingsWrapper.hudOrientation == "Horizontal" and I.MWUI.templates.verticalLine
-            or I.MWUI.templates.horizontalLine
-        return delimiter
-    else
+    if not settingsWrapper.enableBordersAndBg then
         return delimiterPadding
     end
+    return settingsWrapper.hudOrientation == "Horizontal" and verticalDelimiter or horizontalDelimiter
 end
 
 followerHUD.updateRootVisibility = function(uiMode)
@@ -435,6 +446,7 @@ followerHUD.destroy = function()
         followerHUD.tooltipElement = nil
     end
     followerHUD.followerData = {}
+    followerHUD.followerList = {}
     activeTooltipData = nil
 end
 
@@ -456,6 +468,7 @@ followerHUD.new = function(followers)
     followerHUD.root = createRoot()
     followerHUD.tooltipElement = tooltipUI.create(tooltipLayer)
     followerHUD.followerData = {}
+    followerHUD.followerList = {}
     local downedFollowers = I.BestFriendsForever and I.BestFriendsForever.getDownedFollowers() or {}
 
     local widgetCount = 0
@@ -478,20 +491,22 @@ followerHUD.new = function(followers)
             fData, layout =
                 followerUI.create(fState, down, settingsLocalHUD, showTooltip, hideTooltip, consumeDragClick)
             followerHUD.followerData[actorId] = fData
+            followerHUD.followerList[#followerHUD.followerList + 1] = fData
             rootFlex.content:add(layout)
             widgetCount = widgetCount + 1
         end
     end
 
     followerHUD.updateRootVisibility(I.UI.getMode())
-    rawUIMutators.afterHudBuild(followerHUD.getSnapshot())
-    rawUIMutators.afterTooltipBuild(followerHUD.getSnapshot())
+    local snapshot = followerHUD.getSnapshot()
+    rawUIMutators.afterHudBuild(snapshot)
+    rawUIMutators.afterTooltipBuild(snapshot)
     followerHUD.root:update()
     followerHUD.tooltipElement:update()
 end
 
 followerHUD.updateData = function()
-    for _, fData in pairs(followerHUD.followerData) do
+    for _, fData in ipairs(followerHUD.followerList) do
         followerUI.update(fData, settingsLocalHUD)
     end
     if activeTooltipData and followerHUD.tooltipElement then

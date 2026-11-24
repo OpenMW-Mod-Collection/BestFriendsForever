@@ -26,11 +26,13 @@ local followerMenu = {}
 local buttonsByName = {}
 local currentFollowerState
 local currentPage = 1
+local currentPageCount = 1
 local root
 local buttonElements = {}
 local buttonsByLayoutName = {}
 local actionButtonsByName = {}
 local settings
+local buildMenu
 
 local function checkCondition(condition, state)
     if not condition then
@@ -59,9 +61,46 @@ local function closeMenu(restoreGame)
     statsWindow.close()
     currentFollowerState = nil
     currentPage = 1
+    currentPageCount = 1
     if restoreGame then
         I.UI.setMode()
     end
+end
+
+local function activateActionButton(element)
+    local button = element.layout.userData.followerMenuAction
+    local state = currentFollowerState
+    if not state
+        or not checkCondition(button.visibleWhen, state)
+        or not checkCondition(button.enabledWhen, state) then
+        return
+    end
+
+    button.action(state)
+
+    if button.closeAfterActivation then
+        closeMenu(false)
+    end
+end
+
+local function previousMenuPage()
+    if currentPage <= 1 then
+        return
+    end
+    currentPage = currentPage - 1
+    buildMenu()
+end
+
+local function exitMenu()
+    closeMenu(true)
+end
+
+local function nextMenuPage()
+    if currentPage >= currentPageCount then
+        return
+    end
+    currentPage = currentPage + 1
+    buildMenu()
 end
 
 local function visibleButtons(state)
@@ -72,18 +111,21 @@ local function visibleButtons(state)
         end
     end
     table.sort(buttons, function(left, right)
-        local leftName = left.name:lower()
-        local rightName = right.name:lower()
-        if leftName == rightName then
+        if left.sortName == right.sortName then
             return left.name < right.name
         end
-        return leftName < rightName
+        return left.sortName < right.sortName
     end)
     return buttons
 end
 
-local function addButtonElement(content, label, name, onClick, disabled, actionName)
+local function addButtonElement(content, label, name, onClick, disabled, actionName, userData)
     local element = commonUI.button(label, 16, onClick, name, nil, disabled)
+    if userData then
+        for key, value in pairs(userData) do
+            element.layout.userData[key] = value
+        end
+    end
     buttonElements[#buttonElements + 1] = element
     buttonsByLayoutName[name] = element
     if actionName then
@@ -93,7 +135,7 @@ local function addButtonElement(content, label, name, onClick, disabled, actionN
     return element
 end
 
-local function buildMenu()
+buildMenu = function()
     if not currentFollowerState then
         return
     end
@@ -102,6 +144,7 @@ local function buildMenu()
     local buttons = visibleButtons(currentFollowerState)
     local pageSize = math.max(1, math.floor(tonumber(settings.maxButtonsPerPage) or 10))
     local pageCount = math.max(1, math.ceil(#buttons / pageSize))
+    currentPageCount = pageCount
     currentPage = math.max(1, math.min(currentPage, pageCount))
     local hasPrevious = currentPage > 1
     local hasNext = currentPage < pageCount
@@ -137,20 +180,8 @@ local function buildMenu()
     for index = firstIndex, lastIndex do
         local button = buttons[index]
         local enabled = checkCondition(button.enabledWhen, currentFollowerState)
-        addButtonElement(content, button.name, "followerMenuAction_" .. index, function()
-            local state = currentFollowerState
-            if not state
-                or not checkCondition(button.visibleWhen, state)
-                or not checkCondition(button.enabledWhen, state) then
-                return
-            end
-
-            button.action(state)
-
-            if button.closeAfterActivation then
-                closeMenu(false)
-            end
-        end, not enabled, button.name)
+        addButtonElement(content, button.name, "followerMenuAction_" .. index, activateActionButton,
+            not enabled, button.name, { followerMenuAction = button })
         content:add { props = { size = util.vector2(0, 6) } }
     end
 
@@ -161,25 +192,11 @@ local function buildMenu()
     content:add { props = { size = util.vector2(0, 6) } }
 
     local navigation = ui.content {}
-    addButtonElement(navigation, "Back", "followerMenuPrevious", function()
-        if not hasPrevious then
-            return
-        end
-        currentPage = currentPage - 1
-        buildMenu()
-    end, not hasPrevious)
+    addButtonElement(navigation, "Back", "followerMenuPrevious", previousMenuPage, not hasPrevious)
     navigation:add(commonUI.intervalH(4))
-    addButtonElement(navigation, "Exit", "followerMenuExit", function()
-        closeMenu(true)
-    end)
+    addButtonElement(navigation, "Exit", "followerMenuExit", exitMenu)
     navigation:add(commonUI.intervalH(4))
-    addButtonElement(navigation, "Next", "followerMenuNext", function()
-        if not hasNext then
-            return
-        end
-        currentPage = currentPage + 1
-        buildMenu()
-    end, not hasNext)
+    addButtonElement(navigation, "Next", "followerMenuNext", nextMenuPage, not hasNext)
 
     content:add {
         type = ui.TYPE.Flex,
@@ -292,6 +309,7 @@ function followerMenu.registerButton(button)
 
     buttonsByName[key] = {
         name = button.name,
+        sortName = key,
         action = button.action,
         closeAfterActivation = button.closeAfterActivation == true,
         visibleWhen = button.visibleWhen,

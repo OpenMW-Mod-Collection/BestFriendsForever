@@ -25,9 +25,13 @@ local followerIconBackground = ui.texture { path = "textures/bffs/bg.png" }
 local defaultIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
 local unhealthyIconBackgroundColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 local downedIconBackgroundColor = util.color.rgb(0.5, 0.5, 0.5)
+local effectIconPathPattern = "^(.*[/\\])(.*)$"
 
 ---@type table<string, openmw.ui.TextureResource>
 local iconCache = {}
+---@type table<string, openmw.ui.TextureResource>
+local effectIconCache = {}
+local iconGeneration = 0
 local iconsUI = {}
 ---@type table<string, FollowerIcon>
 local iconById = {}
@@ -123,50 +127,14 @@ end
 ---@param id string
 ---@return openmw.ui.TextureResource
 local function getEffectIcon(id)
-    local effect = core.magic.effects.records[id]
-    local path = effect.icon:gsub("^(.*[/\\])(.*)$", "%1b_%2")
-
-    return getTexture(path)
-end
-
----@param icon openmw.ui.TextureResource
----@param magic boolean
----@param size number
----@return openmw.ui.Layout
-local function renderEquipmentIcon(icon, magic, size)
-    local box = {
-        props = {
-            size = v2(size, size),
-        },
-        content = ui.content {},
-    }
-
-    if magic then
-        local magicSize = size + 8
-        local magicOffset = -(magicSize - size) / 2
-        box.content:add {
-            type = ui.TYPE.Image,
-            props = {
-                resource = magicIcon,
-                position = v2(magicOffset, magicOffset),
-                size = v2(1, 1) * magicSize,
-            },
-        }
+    local icon = effectIconCache[id]
+    if not icon then
+        local effect = core.magic.effects.records[id]
+        local path = effect.icon:gsub(effectIconPathPattern, "%1b_%2")
+        icon = getTexture(path)
+        effectIconCache[id] = icon
     end
-
-    box.content:add {
-        type = ui.TYPE.Image,
-        props = {
-            resource = icon,
-            size = v2(size, size),
-        },
-    }
-
-    return {
-        template = I.MWUI.templates.boxTransparent,
-        props = { visible = true },
-        content = ui.content { box },
-    }
+    return icon
 end
 
 ---@param spell openmw.core.Spell
@@ -221,15 +189,16 @@ end
 ---@param actor openmw.GObject
 ---@param skills table<string, openmw.types.DynamicStat>
 ---@return FollowerIcon
+---@return boolean
 local function getFollowerIcon(actor, skills)
     local icon = iconById[actor.recordId]
-    if icon then return icon end
+    if icon then return icon, false end
 
     for _, entry in ipairs(iconRules) do
-        if entry.rule(actor) then return entry end
+        if entry.rule(actor) then return entry, false end
     end
 
-    return getFallbackIcon(actor, skills)
+    return getFallbackIcon(actor, skills), true
 end
 
 local function hasDisease(fData)
@@ -264,48 +233,180 @@ local function shouldHighlight(fData)
     return (showDiseases and hasDisease(fData)) or (showStatDamage and hasDamagedStats(fData))
 end
 
----@param icon { path: string, transparent: boolean }
----@param backgroundColor openmw.util.Color|nil
+---@param name string
 ---@param size number
 ---@return openmw.ui.Layout
-local function renderFollowerIcon(icon, backgroundColor, size)
-    local content = ui.content {}
-    if icon.transparent then
-        content:add {
-            type = ui.TYPE.Image,
-            props = {
-                resource = followerIconBackground,
-                color = backgroundColor or defaultIconBackgroundColor,
-                size = v2(size, size),
-            },
-        }
-    end
-    content:add {
-        type = ui.TYPE.Image,
-        props = {
-            resource = getTexture(icon.path),
-            size = v2(size, size),
-        },
-    }
-
+local function newFollowerSlot(name, size)
+    local iconSize = v2(size, size)
     return {
-        name = "followerIcon",
-        type = ui.TYPE.Widget,
+        name = name,
+        template = I.MWUI.templates.boxTransparent,
         props = {
-            size = v2(size, size),
+            size = iconSize,
         },
-        content = content,
+        content = ui.content {
+            {
+                name = "background",
+                type = ui.TYPE.Image,
+                props = {
+                    resource = followerIconBackground,
+                    color = defaultIconBackgroundColor,
+                    size = iconSize,
+                    visible = false,
+                },
+            },
+            {
+                name = "icon",
+                type = ui.TYPE.Image,
+                props = {
+                    resource = h2hIcon,
+                    size = iconSize,
+                },
+            },
+        },
     }
 end
 
----@param actor openmw.GObject
+---@param name string
 ---@param size number
 ---@return openmw.ui.Layout
-iconsUI.renderCombat = function(actor, size)
+local function newCombatSlot(name, size)
+    local iconSize = v2(size, size)
+    local magicSize = size + 8
+    local magicOffset = -(magicSize - size) / 2
+    local slot = {
+        name = name,
+        template = I.MWUI.templates.boxTransparent,
+        props = {
+            visible = true,
+        },
+        content = ui.content {
+            {
+                name = "combatBox",
+                props = {
+                    size = iconSize,
+                },
+                content = ui.content {
+                    {
+                        name = "magic",
+                        type = ui.TYPE.Image,
+                        props = {
+                            resource = magicIcon,
+                            position = v2(magicOffset, magicOffset),
+                            size = v2(0, 0),
+                            visible = false,
+                        },
+                    },
+                    {
+                        name = "icon",
+                        type = ui.TYPE.Image,
+                        props = {
+                            resource = h2hIcon,
+                            size = iconSize,
+                        },
+                    },
+                },
+            },
+        },
+    }
+    slot.userData = {
+        magicSize = v2(1, 1) * magicSize,
+        zeroSize = v2(0, 0),
+    }
+    return slot
+end
+
+---@param slot openmw.ui.Layout
+---@param icon FollowerIcon
+---@param backgroundColor openmw.util.Color|nil
+local function applyFollowerSlot(slot, icon, backgroundColor)
+    local data = slot.userData or {}
+    slot.userData = data
+
+    local background = slot.content.background
+    if icon.transparent then
+        if data.hasBackground ~= true then
+            background.props.visible = true
+            data.hasBackground = true
+        end
+        if data.backgroundColor ~= backgroundColor then
+            background.props.color = backgroundColor or defaultIconBackgroundColor
+            data.backgroundColor = backgroundColor
+        end
+    elseif data.hasBackground ~= false then
+        background.props.visible = false
+        data.hasBackground = false
+    end
+
+    if data.path ~= icon.path then
+        slot.content.icon.props.resource = getTexture(icon.path)
+        data.path = icon.path
+    end
+end
+
+---@param slot openmw.ui.Layout
+---@param icon openmw.ui.TextureResource
+---@param magic boolean
+local function applyCombatSlot(slot, icon, magic)
+    local data = slot.userData
+    local box = slot.content.combatBox
+    if data.magic ~= magic then
+        box.content.magic.props.visible = magic
+        box.content.magic.props.size = magic and data.magicSize or data.zeroSize
+        data.magic = magic
+    end
+    if data.icon ~= icon then
+        box.content.icon.props.resource = icon
+        data.icon = icon
+    end
+end
+
+---@param mode string
+---@param stance number
+---@return string
+local function iconSignature(mode, stance)
+    if mode == "Merged" then
+        return stance == STANCE.Nothing and "Merged follower" or "Merged combat"
+    end
+    return mode
+end
+
+---@param signature string
+---@return string
+---@return string|nil
+local function iconKinds(signature)
+    if signature == "Follower/combat" then
+        return "follower", "combat"
+    elseif signature == "Combat/follower" then
+        return "combat", "follower"
+    elseif signature == "Follower only" or signature == "Merged follower" then
+        return "follower"
+    end
+    return "combat"
+end
+
+---@param icons IconData
+---@param signature string
+local function buildIconContent(icons, signature)
+    local firstKind, secondKind = iconKinds(signature)
+    local content = ui.content {}
+    content:add(icons.slots.first[firstKind])
+    if secondKind then
+        content:add(icons.spacer)
+        content:add(icons.slots.second[secondKind])
+    end
+    icons.container.content = content
+    icons.signature = signature
+end
+
+---@param actor openmw.GObject
+---@param stance number
+---@return openmw.ui.TextureResource
+---@return boolean
+local function combatIconFor(actor, stance)
     local icon = h2hIcon
     local magic = false
 
-    local stance = types.Actor.getStance(actor)
     if stance == STANCE.Spell then
         local spell = types.Actor.getSelectedSpell(actor)
         local enchantedItem = types.Actor.getSelectedEnchantedItem(actor)
@@ -318,7 +419,17 @@ iconsUI.renderCombat = function(actor, size)
         end
     end
 
-    return renderEquipmentIcon(icon, magic, size)
+    return icon, magic
+end
+
+---@param actor openmw.GObject
+---@param size number
+---@return openmw.ui.Layout
+iconsUI.renderCombat = function(actor, size)
+    local slot = newCombatSlot("combatIcon", size)
+    local icon, magic = combatIconFor(actor, types.Actor.getStance(actor))
+    applyCombatSlot(slot, icon, magic)
+    return slot
 end
 
 ---@param ids string|string[]
@@ -368,74 +479,119 @@ iconsUI.setFollowerIcon = function(spec)
         for _, id in ipairs(ids) do
             iconById[id] = icon
         end
+        iconGeneration = iconGeneration + 1
         return
     end
 
     for index, entry in ipairs(iconRules) do
         if entry.rule == rule then
             iconRules[index] = { rule = rule, path = icon.path, transparent = icon.transparent }
+            iconGeneration = iconGeneration + 1
             return
         end
     end
     table.insert(iconRules, { rule = rule, path = icon.path, transparent = icon.transparent })
+    iconGeneration = iconGeneration + 1
 end
 
 ---@param fData FollowerData
 ---@param settings table
----@return openmw.ui.Layout
-local function followerIconLayout(fData, settings)
-    local backgroundColor = settings.iconBackgroundColor or defaultIconBackgroundColor
-    if fData.down then
-        backgroundColor = downedIconBackgroundColor
-    elseif shouldHighlight(fData) then
-        backgroundColor = unhealthyIconBackgroundColor
-    end
-    local actor = fData.followerState.actor
-    return renderFollowerIcon(getFollowerIcon(actor, fData.skills), backgroundColor, iconSizeFrom(settings))
+iconsUI.prepareIcons = function(fData, settings)
+    local iconSize = iconSizeFrom(settings)
+    local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
+    local spacerSize = settings.iconOrientation == "Vertical" and v2(0, iconGap) or v2(iconGap, 0)
+    local spacer = {
+        name = "followerIconSpacer",
+        props = { size = spacerSize },
+    }
+    local slotPool = {
+        first = {
+            follower = newFollowerSlot("followerIcon", iconSize),
+            combat = newCombatSlot("combatIcon", iconSize),
+        },
+        second = {
+            follower = newFollowerSlot("followerIcon2", iconSize),
+            combat = newCombatSlot("combatIcon2", iconSize),
+        },
+    }
+
+    local icons = fData.icons
+    icons.container = {
+        type = ui.TYPE.Flex,
+        props = {
+            horizontal = settings.iconOrientation ~= "Vertical",
+        },
+        content = ui.content {},
+    }
+    icons.slots = slotPool
+    icons.spacer = spacer
+    icons.signature = nil
+    icons.generation = iconGeneration
+    icons.followerIcon = nil
+
+    local mode = settings.iconDisplayMode or "Merged"
+    local stance = types.Actor.getStance(fData.followerState.actor)
+    buildIconContent(icons, iconSignature(mode, stance))
 end
 
 ---@param fData FollowerData
 ---@param settings table
 iconsUI.updateIcons = function(fData, settings)
-    local container = fData.icons.container
+    local icons = fData.icons
+    local container = icons.container
     if settings.enabledElements.icons == false then
         container.props.visible = false
-        container.content = ui.content {}
         return
     end
 
     local actor = fData.followerState.actor
+    local stance = types.Actor.getStance(actor)
     local mode = settings.iconDisplayMode or "Merged"
-    local iconSize = iconSizeFrom(settings)
-    local layouts
+    local signature = iconSignature(mode, stance)
+    if icons.signature ~= signature then
+        buildIconContent(icons, signature)
+    end
+    local firstKind, secondKind = iconKinds(signature)
 
-    if mode == "Follower/combat" then
-        layouts = { followerIconLayout(fData, settings), iconsUI.renderCombat(actor, iconSize) }
-    elseif mode == "Combat/follower" then
-        layouts = { iconsUI.renderCombat(actor, iconSize), followerIconLayout(fData, settings) }
-    elseif mode == "Follower only" then
-        layouts = { followerIconLayout(fData, settings) }
-    elseif mode == "Combat only" then
-        layouts = { iconsUI.renderCombat(actor, iconSize) }
-    elseif types.Actor.getStance(actor) == STANCE.Nothing then
-        layouts = { followerIconLayout(fData, settings) }
-    else
-        layouts = { iconsUI.renderCombat(actor, iconSize) }
+    if icons.generation ~= iconGeneration then
+        icons.followerIcon = nil
+        icons.generation = iconGeneration
     end
 
-    local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
-    local spacerSize = settings.iconOrientation == "Vertical" and v2(0, iconGap) or v2(iconGap, 0)
-    local content = ui.content {}
-    for index, layout in ipairs(layouts) do
-        if index > 1 then
-            content:add { props = { size = spacerSize } }
+    if firstKind == "follower" or secondKind == "follower" then
+        local followerIcon = icons.followerIcon
+        if not followerIcon then
+            local icon, isFallback = getFollowerIcon(actor, fData.skills)
+            followerIcon = icon
+            if not isFallback then
+                icons.followerIcon = followerIcon
+            end
         end
-        content:add(layout)
+        local backgroundColor = settings.iconBackgroundColor or defaultIconBackgroundColor
+        if fData.down then
+            backgroundColor = downedIconBackgroundColor
+        elseif shouldHighlight(fData) then
+            backgroundColor = unhealthyIconBackgroundColor
+        end
+        if firstKind == "follower" then
+            applyFollowerSlot(icons.slots.first.follower, followerIcon, backgroundColor)
+        end
+        if secondKind == "follower" then
+            applyFollowerSlot(icons.slots.second.follower, followerIcon, backgroundColor)
+        end
     end
 
-    container.props.horizontal = settings.iconOrientation ~= "Vertical"
+    if firstKind == "combat" or secondKind == "combat" then
+        local icon, magic = combatIconFor(actor, stance)
+        if firstKind == "combat" then
+            applyCombatSlot(icons.slots.first.combat, icon, magic)
+        end
+        if secondKind == "combat" then
+            applyCombatSlot(icons.slots.second.combat, icon, magic)
+        end
+    end
+
     container.props.visible = true
-    container.content = content
 end
 
 -- Priority: unique. Order-independent: record IDs are looked up directly.
