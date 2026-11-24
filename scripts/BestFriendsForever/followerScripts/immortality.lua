@@ -42,10 +42,10 @@ end
 ---@param fn fun(): ("down"|"death"|nil)
 local function setOutcomeProvider(id, fn)
     if type(id) ~= "string" or id == "" then
-        error("BestFriendsForeverDown.setOutcomeProvider: id must be a non-empty string", 2)
+        error("BestFriendsForever.setOutcomeProvider: id must be a non-empty string", 2)
     end
     if type(fn) ~= "function" then
-        error("BestFriendsForeverDown.setOutcomeProvider: provider must be a function", 2)
+        error("BestFriendsForever.setOutcomeProvider: provider must be a function", 2)
     end
 
     outcomeProviderId = id
@@ -253,9 +253,9 @@ return {
             })
         end,
     },
-    interfaceName = "BestFriendsForeverDown",
+    interfaceName = "BestFriendsForever",
     interface = {
-        version = 1,
+        version = 2,
         setOutcomeProvider = setOutcomeProvider,
         clearOutcomeProvider = clearOutcomeProvider,
     },

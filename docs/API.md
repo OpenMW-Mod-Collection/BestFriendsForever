@@ -1,100 +1,102 @@
 # Best Friends Forever Public API
 
-This is the contract other OpenMW Lua mods can build on. Use it to react when followers fall or recover, customize their HUD icons and tooltips, extend the follower menu, and let story mods decide whether a would-be down becomes a real death.
+The API is used mostly for adding UI elements to existing menus, altering the current UI if your'brave enough and interacting/reacting to downed followers.
 
-[Back to the README](../README.md)
+## Contents
 
-## At a glance
-
-- `BestFriendsForever_followerDown` and `BestFriendsForever_followerUp` report changes to a follower's downed state.
-- `I.BestFriendsForever` is the player-side interface for downed-follower lookup, custom icons, tooltip fields, follower-menu buttons, and direct access to BFF's live UI elements.
-- `I.BestFriendsForeverDown` is the local-side hook that lets a follower's own scripts choose between a normal down and real death.
+- [BFF defaults and reserved values](#bff-defaults-and-reserved-values)
+  - [Tooltip field defaults](#tooltip-field-defaults)
+  - [Icon defaults](#icon-defaults)
+  - [Menu defaults](#menu-defaults)
+- [Events](#events)
+- [Interfaces](#interfaces)
+  - [Downed followers](#downed-followers)
+  - [Follower icons](#follower-icons)
+  - [Tooltip fields](#tooltip-fields)
+  - [Raw UI access](#raw-ui-access)
+- [Follower Down Outcome](#follower-down-outcome)
+- [Follower Menu](#follower-menu)
 
 ## BFF defaults and reserved values
 
-The built-in extension points use the following defaults and reserved names. They matter when you want your own icons, tooltip fields, or menu buttons to coexist with BFF's own UI.
+The built-in extension points use the defaults and reserved names below. They matter when your extensions coexist with BFF's own UI.
 
-### Tooltip fields
+### Tooltip field defaults
 
-| Built-in field | Order | Toggle key   | Notes                                        |
-| -------------- | ----: | ------------ | -------------------------------------------- |
-| `name`         |     1 | —            | Always shown                                 |
-| `role`         |     2 | `class`      | Class for NPCs, type/base name for creatures |
-| `summon`       |     3 | `summon`     | Shown only for summons                       |
-| `diseases`     |     4 | `diseases`   | Uses the `diseaseVerbosity` setting          |
-| `statDamage`   |     5 | `statDamage` | Summarizes drained or damaged stats          |
+| Built-in field | Order |
+| -------------- | :---: |
+| `name`         |   1   |
+| `role`         |   2   |
+| `summon`       |   3   |
+| `diseases`     |   4   |
+| `statDamage`   |   5   |
 
-Use fractional order values such as `1.5` to insert a field between built-ins. Field names are unique exact strings.
+Use fractional order values such as `1.5` to insert a field between built-ins. Field names are unique exact strings, so they can be overriden.
 
-`toggleKey` checks `SettingsBestFriendsForever_tooltip.enabledFields`; the built-in keys are `class`, `summon`, `diseases`, and `statDamage`. `enabledSetting` checks `SettingsBestFriendsForever_HUDFollower.enabledElements`; the built-in keys are `name`, `health`, `magicka`, and `fatigue`. If your field uses a new `toggleKey`, add that key to the tooltip settings group yourself or the field will stay visible unless its callback returns nil.
+### Icon defaults
 
-### Follower icons
+Icons resolve in this order:
 
-Icon resolution is: record ID map first, then rules in registration order, then BFF's built-in class/creature-type fallback. Registering the same rule function again replaces its previous registration.
+- Unique IDs
+- Conditional icons
+- Fallback icons (by creature type or NPC class)
 
-### Follower menu
+### Menu defaults
 
-| Built-in button | Condition                                | Close behavior                         |
-| --------------- | ---------------------------------------- | -------------------------------------- |
-| Companion Share | Not a summon                             | `closeAfterActivation = true`          |
-| Wait Here       | Not a summon, not under a Command effect | `closeAfterActivation = true`          |
-| Stop Combat     | Always available                         | `closeAfterActivation = true`          |
-| Repair Gear     | Not a summon                             | Closes when Repair mode actually opens |
+| Built-in button | Enabled when                             |
+| --------------- | ---------------------------------------- |
+| Companion Share | Not a summon                             |
+| Wait Here       | Not a summon, not under a Command effect |
+| Stop Combat     | Always available                         |
+| Repair Gear     | Not a summon                             |
 
-Button names are unique case-insensitively. A button must define exactly one of `action` or `event`. Event buttons require `target` (`player`, `follower`, or `global`); action buttons cannot define `target`. The page size setting is `SettingsBestFriendsForever_menuGeneral.maxButtonsPerPage`, default `10`.
+Button names are case-insensitively unique, so they can be overriden.
 
 ## Events
 
-BFF broadcasts these events so other mods can react to downed state without polling follower state. The scope tells you which script contexts receive each event.
+These events get broadcasted when a follower enters or leaves the Downed state.
 
 ```lua
--- Sent when the follower enters Downed state
--- Payload: { follower: Actor, leader: Actor }
 -- Scope: Player, Global, and the follower's local script
+-- Payload: { follower: Actor, leader: Actor }
 BestFriendsForever_followerDown
 
--- Sent when the follower is released from the Downed state
+-- Scope: Player and Global
 -- Payload: { follower: Actor, leader: Actor }
 BestFriendsForever_followerUp
 ```
 
 ## Interfaces
 
-`I.BestFriendsForever.version` is currently `6`. This is the main player-side interface: it gives you read-only access to the downed-follower table, lets you add custom icons, tooltip fields, and follower-menu buttons, and exposes BFF's live UI elements for direct modification.
-
 ### Downed followers
 
-`getDownedFollowers()` returns the live downed-follower table. BFF owns that table and may update it at any time, so treat it as read-only.
+`getDownedFollowers()` returns BFF's live table of downed followers of the player. BFF owns and updates the table; treat it as read-only.
 
 ```lua
--- Returns downed followers of the player
--- Returns: table<string, Actor>  (live table, treat it as read-only)
+-- Returns: table<string, Actor>
 -- Scope: Player
 I.BestFriendsForever.getDownedFollowers()
 ```
 
 ### Follower icons
 
-`setFollowerIcon()` assigns a texture to followers that match either record IDs or a custom rule. IDs are looked up first; rules are checked in registration order and the first match wins. Anything unmatched falls back to BFF's built-in class and creature-type icons. Registrations can happen at any time from a player script.
+`setFollowerIcon()` assigns a texture to followers that match record IDs or a custom rule. Pass exactly one of `recordIds` (or the `recordId` shorthand) or `rule`. `recordIds` accepts one ID or a list; use a list when a follower can be replaced by a twin. `rule(actor)` is checked after ID lookup, in registration order, and the first match wins. Unmatched followers fall back to BFF's class and creature-type icons. Registrations can happen at any time from a player script.
+
+`fileName` is a texture path relative to Data Files. `isTransparent = true` layers the texture over the default background; `false` displays it by itself.
 
 ```lua
--- Assigns an icon to followers. Provide exactly one of recordIds or rule.
--- recordIds is a record ID string or a list of IDs (useful when a follower
--- is replaced by a twin with a different ID); recordId = "..." is shorthand
--- for one ID. IDs are looked up first.
--- rule(actor) is checked after ID lookup, in registration order; the first
--- matching rule wins. Anything unmatched falls back to BFF's built-in
--- class/creature-type icons.
--- fileName is a texture path relative to Data Files
--- isTransparent=true layers the image over the default background
--- false displays the image by itself
 -- Scope: Player
 I.BestFriendsForever.setFollowerIcon {
     recordIds = { "julan", "julan_twin" },
     fileName = "textures/bffs/Julan 1.png",
     isTransparent = true,
 }
+```
 
+Use `rule` instead of IDs when the match cannot be expressed as a record ID:
+
+```lua
+-- Scope: Player
 I.BestFriendsForever.setFollowerIcon {
     rule = function(actor)
         return actor.recordId == "some_creature"
@@ -106,15 +108,11 @@ I.BestFriendsForever.setFollowerIcon {
 
 ### Tooltip fields
 
-`registerFollowerTooltipField()` adds extra information to BFF's follower tooltips without taking ownership of the HUD. Give the field a unique name, optionally adjust its sort order, and provide either `getText` for a simple string or `getLayout` for a complete UI layout. Text fields can also set `header = true` to use the header text template. Fields can be registered at any time.
+`registerFollowerTooltipField()` adds information to BFF's follower tooltips without taking ownership of the HUD. Give each field a unique `name`, optionally set a numeric `order` (default `100`; built-ins use `1`-`5`, decimals allowed), and provide either `getText` or `getLayout`. Text fields can also set `header = true` to use the header template. Fields can be registered at any time; BFF rebuilds the tooltip.
+
+`getText(followerState, followerData)` receives the FDU state and BFF's read-only follower data, and returns text or nil; nil hides the field.
 
 ```lua
--- Adds a field to the follower tooltip
--- name must be unique; order is a numeric weight and defaults to 100
--- built-in fields use 1-5; decimals such as 1.5 are allowed
--- getText receives the Follower Detection Util state and BFF's read-only
--- follower data, and returns text or nil (nil hides the field).
--- Safe to register at any time; BFF rebuilds the tooltip.
 -- Scope: Player
 I.BestFriendsForever.registerFollowerTooltipField {
     name = "MyMod_status",
@@ -123,13 +121,14 @@ I.BestFriendsForever.registerFollowerTooltipField {
         return followerState.isSummon and "Summon" or nil
     end,
 }
+```
 
--- Instead of text, a field can provide a complete UI layout.
--- getLayout receives the FDU state and BFF's read-only follower data
--- (down, spells, activeEffects, attributes, skills).
--- Return an openmw.ui.Layout table to show the field, or nil to hide it.
--- Provide either getText or getLayout, never both.
--- ui = require("openmw.ui")
+Use `getLayout` when the field needs its own UI instead of text. It receives the same two arguments and returns an `openmw.ui.Layout` table or nil. Provide either `getText` or `getLayout`, never both.
+
+```lua
+local ui = require("openmw.ui")
+
+-- Scope: Player
 I.BestFriendsForever.registerFollowerTooltipField {
     name = "MyMod_custom",
     order = 5,
@@ -151,24 +150,15 @@ I.BestFriendsForever.registerFollowerTooltipField {
 
 ### Raw UI access
 
-`I.BestFriendsForever` also exposes BFF's live UI objects. This surface is available only to other PLAYER scripts on the player, because interfaces do not cross contexts and UI Elements cannot be serialized through events or saved. It is intentionally unsafe: BFF still owns these objects, and its update loop can overwrite visibility, positions, text, bar contents, icon contents, and menu structure during normal updates and rebuilds.
+`I.BestFriendsForever` also exposes BFF's live UI objects to other player scripts on the player. Interfaces do not cross contexts and UI Elements cannot be serialized through events or saved. This surface is intentionally unsafe: BFF still owns the objects, and normal updates and rebuilds can overwrite visibility, positions, text, bar contents, icon contents, and menu structure.
 
-`getRawUI()` returns fresh top-level tables each call. The `root`, `tooltip`, `layout`, `buttons`, `actions`, `followers`, and `tooltipFields` values inside them are live BFF-owned objects. Element handles become invalid when BFF destroys and rebuilds the corresponding surface; a destroyed Element has `layout == nil`.
+`getRawUI()` returns fresh top-level tables each call. Their values are live BFF-owned objects. Element handles become invalid when BFF destroys and rebuilds the corresponding surface; a destroyed Element has `layout == nil`.
 
-`menu.buttons` is keyed by layout name and includes the navigation buttons. `menu.actions` is keyed by registered button name and includes only action buttons on the current page. `hud.tooltipFields` is the live tooltip Content keyed by field layout name.
-
-`getFollowerWidget(actorOrId)` accepts a Follower Detection Util Actor object or an actor id string. It returns the same entry as `getRawUI().hud.followers[id]`, or nil when the follower has no current HUD widget.
-
-`refreshRawUI()` calls `Element:update()` on the current HUD, tooltip, menu root, and menu button elements. That refreshes the current layout but does not create new child Elements. `rebuildRawUI()` recreates the HUD and tooltip when the HUD is enabled and rebuilds the follower menu if it is open, rerunning registered mutators.
-
-`registerRawUIMutator()` lets a player script reapply raw changes after BFF rebuilds a surface. Pass a unique `name` and any of `afterHudBuild(hud)`, `afterTooltipBuild(hud)`, and `afterMenuBuild(menu)`. Each callback receives the same table section as `getRawUI()`. Registering the same name again replaces the previous mutator, and mutators are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Registration only affects future rebuilds; call `rebuildRawUI()` after registering to restyle UI that already exists.
-
-There is no error isolation: errors from callbacks propagate into BFF's build path. Mutators should be fast and should not call `rebuildRawUI()` from inside a build callback.
+`menu.buttons` is keyed by layout name and includes navigation buttons. `menu.actions` is keyed by registered button name and includes only action buttons on the current page. `hud.tooltipFields` is the live tooltip Content keyed by field layout name.
 
 ```lua
 -- Scope: Player
--- Returns a fresh snapshot table:
--- {
+-- Returns: {
 --   hud = {
 --     root = Element|nil,
 --     tooltip = Element|nil,
@@ -186,21 +176,35 @@ There is no error isolation: errors from callbacks propagate into BFF's build pa
 --   },
 -- }
 I.BestFriendsForever.getRawUI()
+```
 
+`getFollowerWidget(actorOrId)` accepts an FDU Actor object or actor id string. It returns the same entry as `getRawUI().hud.followers[id]`, or nil when the follower has no current HUD widget.
+
+```lua
 -- Scope: Player
--- Accepts an Actor or actor id string. Returns the follower entry or nil.
+-- Params: actorOrId = Actor|string
+-- Returns: follower entry|nil
 I.BestFriendsForever.getFollowerWidget(actorOrId)
+```
 
+`refreshRawUI()` calls `Element:update()` on the current HUD, tooltip, menu root, and menu buttons. It refreshes existing layout only; it does not create child Elements.
+
+`rebuildRawUI()` recreates the HUD and tooltip when the HUD is enabled, and rebuilds the open follower menu. It reruns registered mutators.
+
+```lua
 -- Scope: Player
--- Updates live elements without rebuilding them.
 I.BestFriendsForever.refreshRawUI()
 
 -- Scope: Player
--- Rebuilds the enabled HUD, its tooltip, and the open follower menu.
 I.BestFriendsForever.rebuildRawUI()
+```
 
+`registerRawUIMutator()` reapplies raw changes after BFF rebuilds a surface. Pass a unique `name` and any of `afterHudBuild(hud)`, `afterTooltipBuild(hud)`, and `afterMenuBuild(menu)`. Each callback receives the matching section of `getRawUI()`. Registering the same name again replaces the previous mutator. Mutators are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Registration affects future rebuilds only; call `rebuildRawUI()` afterward to restyle UI that already exists.
+
+Mutators have no error isolation: callback errors propagate into BFF's build path. Keep them fast and do not call `rebuildRawUI()` from inside a build callback.
+
+```lua
 -- Scope: Player
--- Registers callbacks that rerun after BFF rebuilds a UI surface.
 I.BestFriendsForever.registerRawUIMutator {
     name = "MyMod_hudTint",
     afterHudBuild = function(hud) end,
@@ -214,7 +218,9 @@ BFF currently uses these layout names in its HUD and menu surfaces:
 - HUD root: `root`, `rootOuterPadding`, `rootFlexPadding`, `rootFlex`
 - Follower widget: `followerFlex_<actor.id>`, `followerFlex_V1`, `followex_V1_H1`, `followerFlex_Bars`, `followerName`
 - Tooltip root and fields: `followerTooltip`, `followerTooltipOuterPadding`, `followerTooltipHorizontalPadding`, `followerTooltipFields`, `followerTooltip_<fieldName>`
-- Menu root: `BestFriendsForever_FollowerMenu`, `followerMenuHeader`, `followerMenuAction_<index>`, `followerMenuPrevious`, `followerMenuExit`, `followerMenuNext`
+- Menu root: `BestFriendsForever_FollowerMenu`, `followerMenuHeader`, `followerMenuSummon`, `followerMenuAction_<index>`, `followerMenuPrevious`, `followerMenuExit`, `followerMenuNext`
+
+The following mutator tints follower names after each HUD rebuild:
 
 ```lua
 local I = require("openmw.interfaces")
@@ -231,6 +237,12 @@ I.BestFriendsForever.registerRawUIMutator {
         end
     end,
 }
+```
+
+The following renames a menu action button on the current page:
+
+```lua
+local I = require("openmw.interfaces")
 
 local ui = I.BestFriendsForever.getRawUI()
 if ui.menu.root then
@@ -244,35 +256,33 @@ end
 
 ## Follower Down Outcome
 
-This is the local-side counterpart to `I.BestFriendsForever`. It gives quest and roleplay mods a chance to override BFF's down behavior, for example to turn a scripted assassination into a real death instead of a knockdown.
+The follower-local `I.BestFriendsForever` is a separate interface from the player-side one with the same name. It lets quest and roleplay mods override BFF's down behavior, for example turning a scripted assassination into real death. Interfaces are object-local, so this is not the player-side interface.
 
-Local scripts attached to the same follower can provide a synchronous outcome through `I.BestFriendsForeverDown`. BFF calls the provider when the follower would otherwise be downed. Returning `"death"` commits real death; returning `"down"` or `nil` uses the normal down behavior.
+Local scripts attached to the same follower can provide a synchronous outcome provider through this interface (version 2). BFF calls it when the follower would otherwise be downed. Returning `"death"` commits real death; returning `"down"` or `nil` uses the normal down behavior.
 
 ```lua
 -- Scope: local scripts on a BFF-immortal follower
--- Interface version: 1
-I.BestFriendsForeverDown.setOutcomeProvider("MyMod", function()
+I.BestFriendsForever.setOutcomeProvider("MyMod", function()
     return "down" -- "down" | "death" | nil
 end)
 
-I.BestFriendsForeverDown.clearOutcomeProvider("MyMod")
+I.BestFriendsForever.clearOutcomeProvider("MyMod")
 ```
 
-Only one provider is active; registering a new id replaces the previous one. Providers are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Keep the callback fast and side-effect-free. Errors and unexpected return values fall back to a normal down. Without a provider returning `"death"`, BFF always downs the follower instead of killing them.
+Only one provider is active; registering a new id replaces the previous one. Providers are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Keep the callback fast and side-effect-free. Errors and unexpected values fall back to a normal down. Without a `"death"` result, BFF always downs the follower.
 
 ## Follower Menu
 
-The follower menu is a small extension point for player scripts. Buttons can run code directly or send an event to another context, so you can expose follower-specific actions without drawing your own UI. Buttons can be registered at any time; an open menu rebuilds when a new button is added.
+The follower menu lets player scripts add follower-specific actions without drawing their own UI. Buttons run a function with the current follower state, can be registered at any time, and rebuild an open menu when added. Buttons are sorted alphabetically; the number shown per page is configurable (10 by default).
 
-Player scripts can register buttons in the follower menu through the `I.BestFriendsForever` interface. Buttons are sorted alphabetically; the number of action buttons shown per page is configurable (10 by default).
+The built-in Wait action dismisses an eligible follower; interact with them to follow again. It is unavailable for summons and actors under a Command effect.
 
-The built-in Wait action dismisses an eligible follower; interact with them to have them follow you again. It is unavailable for summons and actors under a Command effect.
+The built-in Stop Combat action removes Combat and Pursue AI packages. It preserves Follow, so a following follower resumes following and a waiting one stays put. The follower may re-engage if the enemy is still hostile.
 
-The built-in Stop Combat action removes the follower's Combat and Pursue AI packages. Their existing Follow package is left untouched, so a following follower resumes following and a waiting one stays put. The follower may re-engage if the enemy is still hostile.
-
-Run a function with the current Follower Detection Util state:
+To run a function with the current FDU state:
 
 ```lua
+-- Scope: Player
 I.BestFriendsForever.registerFollowerMenuButton {
     name = "My Action",
     action = function(followerState)
@@ -284,22 +294,25 @@ I.BestFriendsForever.registerFollowerMenuButton {
 }
 ```
 
-The optional `visibleWhen` and `enabledWhen` functions each receive the follower state. A truthy result from `visibleWhen` includes the button in the menu and its pagination; `false` or `nil` hides it. A truthy result from `enabledWhen` draws the button as enabled; `false` or `nil` draws it as disabled and prevents activation. Both default to `true` when omitted. Companion Share uses `enabledWhen` so summons see the button as disabled. The old `condition` field is no longer supported and raises a registration error.
+`visibleWhen` and `enabledWhen` are optional and receive the follower state. `visibleWhen` controls whether the button appears and counts toward pagination; a false or nil result hides it. `enabledWhen` controls disabled styling and activation; a false or nil result disables it and prevents activation. Both default to true. Companion Share uses `enabledWhen`, so summons see it disabled. `condition`, `event`, and `target` are removed and raise registration errors; send events from `action`.
 
-Or send that state as the event payload to the player, follower, or global script:
+To send an event from a button, do it inside `action`:
 
 ```lua
+-- Scope: Player
 I.BestFriendsForever.registerFollowerMenuButton {
     name = "My Event",
-    event = "MyMod_followerAction",
-    target = "follower", -- "player", "follower", or "global"
+    action = function(followerState)
+        followerState.actor:sendEvent("MyMod_followerAction", followerState)
+    end,
 }
 ```
 
-Buttons may set `closeAfterActivation = true` to close the menu without leaving the current UI mode. The built-in Companion Share button uses this to open the follower in Companion mode for trading.
+Buttons may set `closeAfterActivation = true` to close the menu without leaving the current UI mode. Companion Share uses this when opening Companion mode.
 
-Player scripts can also reopen the follower menu by sending the `BestFriendsForever_openFollowerMenu` event to the player. Its payload is the follower's Follower Detection Util state:
+Player scripts can reopen the menu by sending `BestFriendsForever_openFollowerMenu` to the player with an FDU state payload:
 
 ```lua
+-- Scope: Player
 self:sendEvent("BestFriendsForever_openFollowerMenu", followerState)
 ```

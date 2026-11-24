@@ -4,7 +4,6 @@ local ui = require("openmw.ui")
 local util = require("openmw.util")
 local I = require("openmw.interfaces")
 local core = require("openmw.core")
-local self = require("openmw.self")
 local async = require("openmw.async")
 local storage = require("openmw.storage")
 
@@ -22,11 +21,6 @@ local statsWindow = require("scripts.BestFriendsForever.ui.menuItems.statsWindow
 local OUTER_MARGIN = commonUI.Sizes.BOX_OUTER_PADDING
 
 local MENU_MODE = "Interface"
-local BUTTON_TARGETS = {
-    player = true,
-    follower = true,
-    global = true,
-}
 
 local followerMenu = {}
 local buttonsByName = {}
@@ -151,15 +145,7 @@ local function buildMenu()
                 return
             end
 
-            if button.action then
-                button.action(state)
-            elseif button.target == "player" then
-                self:sendEvent(button.event, state)
-            elseif button.target == "follower" then
-                state.actor:sendEvent(button.event, state)
-            else
-                core.sendGlobalEvent(button.event, state)
-            end
+            button.action(state)
 
             if button.closeAfterActivation then
                 closeMenu(false)
@@ -280,23 +266,11 @@ function followerMenu.registerButton(button)
         error("Follower menu button name must be a non-empty string")
     end
 
-    if button.action ~= nil and type(button.action) ~= "function" then
+    if button.event ~= nil or button.target ~= nil then
+        error("Follower menu button event and target have been removed; send events from action")
+    end
+    if type(button.action) ~= "function" then
         error("Follower menu button action must be a function")
-    end
-    if button.event ~= nil and (type(button.event) ~= "string" or not button.event:match("%S")) then
-        error("Follower menu button event must be a non-empty string")
-    end
-
-    local hasAction = button.action ~= nil
-    local hasEvent = button.event ~= nil
-    if hasAction == hasEvent then
-        error("Follower menu button must define exactly one of action or event")
-    end
-    if hasEvent and not BUTTON_TARGETS[button.target] then
-        error("Follower menu event target must be player, follower, or global")
-    end
-    if hasAction and button.target ~= nil then
-        error("Follower menu action buttons cannot define an event target")
     end
     if button.closeAfterActivation ~= nil and type(button.closeAfterActivation) ~= "boolean" then
         error("Follower menu closeAfterActivation must be a boolean")
@@ -319,8 +293,6 @@ function followerMenu.registerButton(button)
     buttonsByName[key] = {
         name = button.name,
         action = button.action,
-        event = button.event,
-        target = button.target,
         closeAfterActivation = button.closeAfterActivation == true,
         visibleWhen = button.visibleWhen,
         enabledWhen = button.enabledWhen,
