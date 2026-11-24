@@ -147,11 +147,10 @@ I.Settings.registerGroup {
             name = "primarySort_name",
             description = "primarySort_desc",
             renderer = "SuperSelect3",
-            default = "None",
+            default = "By level",
             argument = {
                 l10n = "BestFriendsForever_settings",
                 items = {
-                    "None",
                     "NPCs first",
                     "Creatures first",
                     "By level",
@@ -163,13 +162,13 @@ I.Settings.registerGroup {
             key = "keepSummonsAtBottom",
             name = "keepSummonsAtBottom_name",
             renderer = "checkbox",
-            default = false,
+            default = true,
         },
         {
             key = "enableBordersAndBg",
             name = "enableBordersAndBg_name",
             renderer = "checkbox",
-            default = true,
+            default = false,
         },
         {
             key = "hudDisplay",

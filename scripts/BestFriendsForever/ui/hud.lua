@@ -278,7 +278,6 @@ end
 -- Layout construction
 
 local function createRoot()
-    local layer = hudLayer()
     rootFlex = {
         name = "rootFlex",
         type = ui.TYPE.Flex,
@@ -313,7 +312,7 @@ local function createRoot()
 
     return ui.create {
         name = "root",
-        layer = layer,
+        layer = hudLayer(),
         template = I.MWUI.templates.boxTransparent,
         props = {
             alpha = settingsWrapper.enableBordersAndBg and 1 or 0,

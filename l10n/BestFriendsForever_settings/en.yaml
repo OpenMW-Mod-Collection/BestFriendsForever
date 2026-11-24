@@ -5,6 +5,11 @@ page_HUD_description: |
   Settings for Best Friends Forever's HUD and more.
 
   Did you know the follower widgets have tooltips and are clickable?
+hudPresets_groupName: HUD Presets
+hudPreset_name: HUD Preset
+attendMe: Attend Me
+authorsChoice: "Author's Choice"
+compact: Compact
 page_Menu_name: "Best Friends Forever: Menu"
 page_Menu_description: |
   Settings for everything Interaction Menu.
@@ -123,6 +128,7 @@ name: Follower Name
 health: Health
 magicka: Magicka
 fatigue: Fatigue
+icons: Icons
 nameTextSize_name: Name Font Size
 nameColor_name: Name Color
 uiAlign_name: Element Horizontal Alignment

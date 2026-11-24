@@ -5,18 +5,18 @@
 -- Standalone, single-file OpenMW module for settings presets.
 --
 -- Copy it anywhere in your mod (e.g. scripts/MyMod/SettingsPresets.lua) and
--- require it from a GLOBAL, PLAYER or MENU script. Each script uses it for
--- its own scope only:
+-- require it from a GLOBAL, PLAYER or MENU script. The scope is detected
+-- automatically:
 --
---   * PLAYER / MENU script -> works with player sections (isGlobal = false)
---   * GLOBAL script        -> works with global sections (isGlobal = true)
+--   * PLAYER / MENU script -> works with player sections
+--   * GLOBAL script        -> works with global sections
 --
--- Global scripts cannot read player sections, and only global scripts can
--- write global sections, so a mixed preset is not supported. To control both
+-- Global scripts cannot read player sections, and player/menu scripts cannot
+-- access global sections, so a mixed preset is not supported. To control both
 -- kinds of sections, keep a separate selector + registration in each scope.
 --
 -- The selector (the setting the player picks the preset with) must live in a
--- different section than the values it controls, in the same scope as them.
+-- different section than the values it controls.
 --
 -- USAGE:
 --   local SettingsPresets = require('scripts.MyMod.utils.presetManager')
@@ -24,16 +24,14 @@
 --   local presets = SettingsPresets.register {
 --       -- The setting that chooses the preset. Its value is a preset name.
 --       selector = {
---           section  = 'SettingsMyModPresets',
---           key      = 'preset',
---           isGlobal = false,           -- default: false
+--           section = 'SettingsMyModPresets',
+--           key     = 'preset',
 --       },
 --
 --       -- Every section used by presets must be declared here.
---       -- isGlobal defaults to false.
 --       sections = {
---           SettingsMyModGraphics = { isGlobal = false },
---           SettingsMyModHud      = { isGlobal = false },
+--           'SettingsMyModGraphics',
+--           'SettingsMyModHud',
 --       },
 --
 --       -- presetName -> sectionKey -> { settingKey = value }
@@ -60,9 +58,9 @@
 --   * Manual edits of controlled settings never change the selector.
 --   * Nothing is applied on load; only selector changes / apply() do it.
 --   * Writes are idempotent: a value is only set if it differs.
---   * Registration raises an error if any section (or the selector) does not
---     match the scope of the current script, e.g. a global section
---     registered from a player or menu script.
+--   * Loading the module raises an error in unsupported script contexts.
+--     Registration raises an error if the selector is also listed as a
+--     controlled section.
 --   * Do not register the same selector twice within one script scope, or
 --     the preset will be applied twice (harmless, but wasteful).
 -- ============================================================================
@@ -103,10 +101,9 @@ local IS_GLOBAL_SCOPE = SCOPE == 'global'
 ---------------------------------------------------------------------------
 
 ---@param name string
----@param isGlobal boolean
 ---@return openmw.storage.StorageSection
-local function getSection(name, isGlobal)
-    if isGlobal then
+local function getSection(name)
+    if IS_GLOBAL_SCOPE then
         return storage.globalSection(name)
     end
     return storage.playerSection(name)
@@ -128,23 +125,6 @@ local function deepEqual(a, b)
     return true
 end
 
----@param what string
----@param name string
----@param isGlobal boolean
-local function checkScope(what, name, isGlobal)
-    if isGlobal and not IS_GLOBAL_SCOPE then
-        error(string.format(
-            "SettingsPresets: %s '%s' is a global section, but this is a %s script. " ..
-            "Global sections can only be handled from a global script.",
-            what, name, SCOPE), 3)
-    elseif not isGlobal and IS_GLOBAL_SCOPE then
-        error(string.format(
-            "SettingsPresets: %s '%s' is a player section (isGlobal = false), but this is a " ..
-            "global script. Global scripts cannot access player sections.",
-            what, name), 3)
-    end
-end
-
 ---@param value any
 ---@param expected type
 ---@param path string
@@ -162,17 +142,13 @@ end
 ---@class SettingsPresetsSelector
 ---@field section string           Storage section the selector setting lives in
 ---@field key string                Setting key within that section
----@field isGlobal? boolean         Default: false
-
----@class SettingsPresetsSectionInfo
----@field isGlobal? boolean         Default: false
 
 ---@alias SettingsPresetsSectionValues table<string, any>              -- settingKey -> value
 ---@alias SettingsPresetsPreset table<string, SettingsPresetsSectionValues> -- sectionName -> values
 
 ---@class SettingsPresetsConfig
 ---@field selector SettingsPresetsSelector
----@field sections table<string, SettingsPresetsSectionInfo>
+---@field sections string[]                                             -- storage section names
 ---@field presets table<string, SettingsPresetsPreset>                 -- presetName -> preset
 
 ---@class SettingsPresetsAPI
@@ -197,24 +173,18 @@ function M.register(config)
     expectType(selector, 'table', 'config.selector')
     expectType(selector.section, 'string', 'config.selector.section')
     expectType(selector.key, 'string', 'config.selector.key')
-    local selectorIsGlobal = selector.isGlobal == true
-    checkScope('selector section', selector.section, selectorIsGlobal)
 
     -- Declared sections
-    local sectionFlags = {}
+    local declaredSections = {}
     expectType(config.sections, 'table', 'config.sections')
-    for name, info in pairs(config.sections) do
-        expectType(name, 'string', 'config.sections key')
-        info = info == nil and {} or info
-        expectType(info, 'table', 'config.sections.' .. name)
-        local isGlobal = info.isGlobal == true
-        checkScope('section', name, isGlobal)
+    for _, name in ipairs(config.sections) do
+        expectType(name, 'string', 'config.sections entry')
         if name == selector.section then
             error(string.format(
                 "SettingsPresets: selector section '%s' must be separate from the " ..
                 "sections it controls", name), 2)
         end
-        sectionFlags[name] = isGlobal
+        declaredSections[name] = true
     end
 
     -- Presets
@@ -223,7 +193,7 @@ function M.register(config)
     for presetName, sections in pairs(presets) do
         expectType(sections, 'table', 'config.presets.' .. tostring(presetName))
         for sectionName, values in pairs(sections) do
-            if sectionFlags[sectionName] == nil then
+            if not declaredSections[sectionName] then
                 error(string.format(
                     "SettingsPresets: preset '%s' uses section '%s' which is not declared " ..
                     "in config.sections", tostring(presetName), tostring(sectionName)), 2)
@@ -233,7 +203,7 @@ function M.register(config)
         end
     end
 
-    local selectorSection = getSection(selector.section, selectorIsGlobal)
+    local selectorSection = getSection(selector.section)
 
     ---@type SettingsPresetsAPI
     local api = {}
@@ -245,7 +215,7 @@ function M.register(config)
             error(string.format("SettingsPresets: unknown preset '%s'", tostring(presetName)), 2)
         end
         for sectionName, values in pairs(preset) do
-            local section = getSection(sectionName, sectionFlags[sectionName])
+            local section = getSection(sectionName)
             for key, value in pairs(values) do
                 if not deepEqual(section:getCopy(key), value) then
                     section:set(key, value)

@@ -8,6 +8,7 @@ local groups = {
     "tooltip",
     "menuGeneral",
     "menuRepair",
+    "uiPresets",
 }
 
 I.Settings.registerPage {

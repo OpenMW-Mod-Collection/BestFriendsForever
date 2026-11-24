@@ -88,12 +88,12 @@ I.BestFriendsForever.getDownedFollowers()
 -- Scope: Player
 I.BestFriendsForever.setFollowerIcon {
     recordIds = { "julan", "julan_twin" },
-    fileName = "textures/bffs/Julan 1.png",
+    fileName = "textures/bffs/unique_julan.png",
     isTransparent = true,
 }
 ```
 
-Use `rule` instead of IDs when the match cannot be expressed as a record ID:
+Use `rule` instead of IDs when the match cannot be expressed as a record ID. The `Animunculi.png` path in this example is a TODO placeholder:
 
 ```lua
 -- Scope: Player

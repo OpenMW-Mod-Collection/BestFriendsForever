@@ -42,12 +42,13 @@ local function iconSizeFrom(settings)
 end
 
 local defaultIcons = {
-    combat = { path = "textures/bffs/Generic Warrior.png", transparent = true },
-    magic = { path = "textures/bffs/Generic Mage.png", transparent = true },
-    stealth = { path = "textures/bffs/Generic Thief.png", transparent = true },
-    civilian = { path = "textures/bffs/Citizen.png", transparent = true },
+    combat = { path = "textures/bffs/npc_warrior.png", transparent = true },
+    magic = { path = "textures/bffs/npc_mage.png", transparent = true },
+    stealth = { path = "textures/bffs/npc_thief.png", transparent = true },
+    civilian = { path = "textures/bffs/npc_citizen.png", transparent = true },
 }
 
+-- TODO: add these creature-type textures; the paths below are placeholders.
 local creatureTypeIcons = {
     [types.Creature.TYPE.Creatures] = { path = "textures/bffs/Creatures.png", transparent = true },
     [types.Creature.TYPE.Daedra] = { path = "textures/bffs/Daedra.png", transparent = true },
@@ -55,6 +56,7 @@ local creatureTypeIcons = {
     [types.Creature.TYPE.Undead] = { path = "textures/bffs/Undead.png", transparent = true },
 }
 
+-- TODO: add these summon-type textures; the paths below are placeholders.
 local summonTypeIcons = {
     [types.Creature.TYPE.Creatures] = { path = "textures/bffs/Creatures.png", transparent = true },
     [types.Creature.TYPE.Daedra] = { path = "textures/bffs/Daedra.png", transparent = true },
@@ -395,6 +397,13 @@ end
 ---@param fData FollowerData
 ---@param settings table
 iconsUI.updateIcons = function(fData, settings)
+    local container = fData.icons.container
+    if settings.enabledElements.icons == false then
+        container.props.visible = false
+        container.content = ui.content {}
+        return
+    end
+
     local actor = fData.followerState.actor
     local mode = settings.iconDisplayMode or "Merged"
     local iconSize = iconSizeFrom(settings)
@@ -424,41 +433,31 @@ iconsUI.updateIcons = function(fData, settings)
         content:add(layout)
     end
 
-    fData.icons.container.props.horizontal = settings.iconOrientation ~= "Vertical"
-    fData.icons.container.props.visible = true
-    fData.icons.container.content = content
+    container.props.horizontal = settings.iconOrientation ~= "Vertical"
+    container.props.visible = true
+    container.content = content
 end
 
 -- Priority: unique. Order-independent: record IDs are looked up directly.
 -- TODO: replace these placeholder record IDs when the actor IDs are known.
 iconsUI.setFollowerIcon {
     recordId = "bff_placeholder_julan_1",
-    fileName = "textures/bffs/Julan 1.png",
-    isTransparent = true,
-}
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_julan_2",
-    fileName = "textures/bffs/Julan 2.png",
+    fileName = "textures/bffs/unique_julan.png",
     isTransparent = true,
 }
 iconsUI.setFollowerIcon {
     recordId = "bff_placeholder_biz_kuit_1",
-    fileName = "textures/bffs/Biz'Kuit 1.png",
-    isTransparent = true,
-}
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_biz_kuit_2",
-    fileName = "textures/bffs/Biz'Kuit 2.png",
+    fileName = "textures/bffs/unique_bizkuitz.png",
     isTransparent = true,
 }
 iconsUI.setFollowerIcon {
     recordId = "bff_placeholder_pack_guar",
-    fileName = "textures/bffs/Pack Guar.png",
+    fileName = "textures/bffs/unique_packguar.png",
     isTransparent = true,
 }
 
 -- Priority: slightly special. Order-dependent: first matching rule wins.
--- TODO: add the corresponding texture files under textures/bffs.
+-- TODO: add the Animunculi texture; the path below is a placeholder.
 iconsUI.setFollowerIcon {
     rule = function(actor)
         if not types.Creature.objectIsInstance(actor) then return false end
@@ -479,7 +478,7 @@ iconsUI.setFollowerIcon {
         return leftGauntlet == "slave_bracer_left"
             or rightGauntlet == "slave_bracer_right"
     end,
-    fileName = "textures/bffs/Slave.png",
+    fileName = "textures/bffs/cond_slave.png",
     isTransparent = true,
 }
 

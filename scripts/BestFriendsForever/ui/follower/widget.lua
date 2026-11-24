@@ -153,10 +153,14 @@ local function createLayout(followerState, fData, settings, showTooltip, hideToo
     local follower = followerState.actor
     local enabledElements = settings.enabledElements
     local barsContainer = createBarsContainer(fData, settings)
-    local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
-    local iconSpacer = { props = { size = v2(iconGap, 0) } }
-    local dataContent = settings.iconSide ~= "Left" and { barsContainer, iconSpacer, fData.icons.container }
-        or { fData.icons.container, iconSpacer, barsContainer }
+    local dataContent = { barsContainer }
+    if settings.enabledElements.icons ~= false then
+        local iconGap = math.max(0, tonumber(settings.iconInterval) or 4)
+        local iconSpacer = { props = { size = v2(iconGap, 0) } }
+        dataContent = settings.iconSide ~= "Left"
+            and { barsContainer, iconSpacer, fData.icons.container }
+            or { fData.icons.container, iconSpacer, barsContainer }
+    end
 
     local dataFlex = {
         name = "followex_V1_H1",
@@ -180,6 +184,7 @@ local function createLayout(followerState, fData, settings, showTooltip, hideToo
                 textColor = settings.nameColor,
             },
         })
+        table.insert(followerContent, 2, interval)
     end
 
     local followerFlex = {
