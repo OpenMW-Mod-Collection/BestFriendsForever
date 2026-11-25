@@ -5,3 +5,5 @@
   - Humanoid
   - Undead
 - [ ] Rewrite the API docs
+- [ ] Set correct ids for unique icons
+  - Tetra Pack Guar
