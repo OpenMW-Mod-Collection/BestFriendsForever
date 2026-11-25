@@ -37,13 +37,13 @@ Use fractional order values such as `1.5` to insert a field between built-ins. F
 
 Icon packs live in `textures/bff/icons/<preset>/`. Textures use `category_key.png`:
 
-| Category  | Used for                                      |
-| --------- | --------------------------------------------- |
-| `class`   | NPC specialization fallback                   |
-| `creature` | Creature-type fallback                       |
-| `summon`  | Summoned-creature fallback                    |
-| `id`      | Record ID, matched automatically              |
-| `rule`    | Predicate conditions, first match wins        |
+| Category   | Used for                               |
+| ---------- | -------------------------------------- |
+| `class`    | NPC specialization fallback            |
+| `creature` | Creature-type fallback                 |
+| `summon`   | Summoned-creature fallback             |
+| `id`       | Record ID, matched automatically       |
+| `rule`     | Predicate conditions, first match wins |
 
 Built-in keys are `combat`, `mage`, `stealth`, and `civilian` for `class_*`, plus lowercase creature-type names for `creature_*` and `summon_*`. An `id_<recordId>` texture applies automatically to that record ID; no API call is needed. Keys may contain underscores and spaces, such as `id_julan twin.png`. `rule_*` keys come from registered suffixes.
 

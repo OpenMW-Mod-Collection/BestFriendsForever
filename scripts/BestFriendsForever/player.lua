@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-field, param-type-mismatch
+---@diagnostic disable: undefined-field, param-type-mismatch, assign-type-mismatch
 ---@omw-context player
 local I = require("openmw.interfaces")
 local deps = require("scripts.BestFriendsForever.utils.dependencyChecker")

@@ -5,4 +5,3 @@
   - Humanoid
   - Undead
 - [ ] Rewrite the API docs
-- [ ] Decide what to do with the stat modifiers in the follower stat window

@@ -177,6 +177,20 @@ I.Settings.registerGroup {
             },
         },
         {
+            key = "iconPreset",
+            name = "iconPreset_name",
+            renderer = "SuperSelect3",
+            default = followerIconPacks.DEFAULT_PACK,
+            argument = {
+                l10n = "BestFriendsForever_settings",
+                items = followerIconPacks.names(),
+                icon = followerIconPacks.previewIcons(),
+                iconBackground = followerIconPacks.backgroundIcons(),
+                iconBackgroundColor = util.color.hex("ffcd7b"),
+                iconSize = 32,
+            },
+        },
+        {
             key = "iconDisplayMode",
             name = "iconDisplayMode_name",
             renderer = "SuperSelect3",
@@ -191,21 +205,6 @@ I.Settings.registerGroup {
                     "Combat only",
                 },
                 width = 200,
-            },
-        },
-        {
-            key = "iconPreset",
-            name = "iconPreset_name",
-            description = "iconPreset_desc",
-            renderer = "SuperSelect3",
-            default = followerIconPacks.DEFAULT_PACK,
-            argument = {
-                l10n = "BestFriendsForever_settings",
-                items = followerIconPacks.names(),
-                icon = followerIconPacks.previewIcons(),
-                iconBackground = followerIconPacks.backgroundIcons(),
-                iconBackgroundColor = util.color.hex("ffcd7b"),
-                iconSize = 32,
             },
         },
         {
