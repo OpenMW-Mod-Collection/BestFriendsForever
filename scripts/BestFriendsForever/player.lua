@@ -109,7 +109,7 @@ local function onLoad(data)
     end
 end
 
-local interface = { version = 6 }
+local interface = { version = 7 }
 for _, handler in ipairs(handlerList) do
     for key, value in pairs(handler.interface or {}) do
         assert(interface[key] == nil, "Duplicate BFF player interface member: " .. key)

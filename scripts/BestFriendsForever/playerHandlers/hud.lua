@@ -92,7 +92,7 @@ return {
     frame = updateHUD,
     interface = {
         setPosSettings = setPosSettings,
-        setFollowerIcon = iconsUI.setFollowerIcon,
+        registerFollowerIconSuffix = iconsUI.registerFollowerIconSuffix,
         registerFollowerTooltipField = registerFollowerTooltipField,
     },
 }

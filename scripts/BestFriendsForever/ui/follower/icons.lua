@@ -10,6 +10,7 @@ local async = require("openmw.async")
 local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local followerIconPacks = require("scripts.BestFriendsForever.utils.followerIconPacks")
 
 local defaultIconSize = 32
 local skillThreshold = 30
@@ -21,7 +22,6 @@ local magicIcon = ui.texture {
     size = v2(42, 42),
 }
 local h2hIcon = ui.texture { path = "icons/k/stealth_handtohand.dds" }
-local followerIconBackground = ui.texture { path = "textures/bffs/bg.png" }
 local defaultIconBackgroundColor = util.color.rgb(1, 205 / 255, 123 / 255)
 local unhealthyIconBackgroundColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
 local downedIconBackgroundColor = util.color.rgb(0.5, 0.5, 0.5)
@@ -33,10 +33,10 @@ local iconCache = {}
 local effectIconCache = {}
 local iconGeneration = 0
 local iconsUI = {}
----@type table<string, FollowerIcon>
-local iconById = {}
----@type FollowerIcon[]
-local iconRules = {}
+---@type table<string, fun(actor: openmw.GObject): boolean|nil>
+local ruleConditions = {}
+---@type string[]
+local ruleSuffixes = {}
 local tooltipSettings = settingsCache.new(storage.playerSection("SettingsBestFriendsForever_tooltip"), async)
 
 ---@param settings table
@@ -45,27 +45,20 @@ local function iconSizeFrom(settings)
     return math.max(1, tonumber(settings.iconSize) or defaultIconSize)
 end
 
-local defaultIcons = {
-    combat = { path = "textures/bffs/npc_warrior.png", transparent = true },
-    magic = { path = "textures/bffs/npc_mage.png", transparent = true },
-    stealth = { path = "textures/bffs/npc_thief.png", transparent = true },
-    civilian = { path = "textures/bffs/npc_citizen.png", transparent = true },
+local FALLBACK_ICON_PATH = "textures/bff/icons/default/class_civilian.png"
+local FALLBACK_BACKGROUND_PATH = "textures/bff/icons/default/background.png"
+
+local creatureTypeKeys = {
+    [types.Creature.TYPE.Creatures] = "creatures",
+    [types.Creature.TYPE.Daedra] = "daedra",
+    [types.Creature.TYPE.Humanoid] = "humanoid",
+    [types.Creature.TYPE.Undead] = "undead",
 }
 
--- TODO: add these creature-type textures; the paths below are placeholders.
-local creatureTypeIcons = {
-    [types.Creature.TYPE.Creatures] = { path = "textures/bffs/Creatures.png", transparent = true },
-    [types.Creature.TYPE.Daedra] = { path = "textures/bffs/Daedra.png", transparent = true },
-    [types.Creature.TYPE.Humanoid] = { path = "textures/bffs/Humanoid.png", transparent = true },
-    [types.Creature.TYPE.Undead] = { path = "textures/bffs/Undead.png", transparent = true },
-}
-
--- TODO: add these summon-type textures; the paths below are placeholders.
-local summonTypeIcons = {
-    [types.Creature.TYPE.Creatures] = { path = "textures/bffs/Creatures.png", transparent = true },
-    [types.Creature.TYPE.Daedra] = { path = "textures/bffs/Daedra.png", transparent = true },
-    [types.Creature.TYPE.Humanoid] = { path = "textures/bffs/Humanoid.png", transparent = true },
-    [types.Creature.TYPE.Undead] = { path = "textures/bffs/Undead.png", transparent = true },
+local classIconKeys = {
+    combat = "combat",
+    magic = "mage",
+    stealth = "stealth",
 }
 
 local specializationSkills = {
@@ -105,15 +98,10 @@ local specializationSkills = {
 
 ---@class FollowerIcon
 ---@field path string
----@field transparent boolean
----@field rule? fun(actor: openmw.GObject): boolean|nil
 
----@class FollowerIconSpec
----@field recordIds? string|string[]
----@field recordId? string
----@field rule? fun(actor: openmw.GObject): boolean|nil
----@field fileName string
----@field isTransparent boolean
+---@class FollowerIconSuffixSpec
+---@field suffix string
+---@field rule fun(actor: openmw.GObject): boolean|nil
 
 ---@param path string
 ---@return openmw.ui.TextureResource
@@ -161,13 +149,20 @@ end
 
 ---@param actor openmw.GObject
 ---@param skills table<string, openmw.types.DynamicStat>
+---@param pack table
 ---@return FollowerIcon
-local function getFallbackIcon(actor, skills)
+local function getFallbackIcon(actor, skills, pack)
     if types.Creature.objectIsInstance(actor) then
-        local creatureType = types.Creature.records[actor.recordId].type
-        return I.FollowerDetectionUtil.isSummon(actor)
-            and summonTypeIcons[creatureType]
-            or creatureTypeIcons[creatureType]
+        local creatureType = creatureTypeKeys[types.Creature.records[actor.recordId].type]
+        if creatureType then
+            local path = I.FollowerDetectionUtil.isSummon(actor)
+                and (pack.summon[creatureType] or pack.creature[creatureType])
+                or pack.creature[creatureType]
+            if path then
+                return { path = path }
+            end
+        end
+        return { path = pack.class.civilian or FALLBACK_ICON_PATH }
     end
 
     if types.NPC.objectIsInstance(actor) then
@@ -178,27 +173,37 @@ local function getFallbackIcon(actor, skills)
         for _, skillId in ipairs(skillIds) do
             local skill = skills[skillId]
             if skill and skill.base >= skillThreshold then
-                return defaultIcons[specializationId]
+                local classKey = classIconKeys[specializationId] or specializationId
+                return { path = pack.class[classKey] or FALLBACK_ICON_PATH }
             end
         end
     end
 
-    return defaultIcons.civilian
+    return { path = pack.class.civilian or FALLBACK_ICON_PATH }
 end
 
 ---@param actor openmw.GObject
 ---@param skills table<string, openmw.types.DynamicStat>
+---@param pack table
 ---@return FollowerIcon
 ---@return boolean
-local function getFollowerIcon(actor, skills)
-    local icon = iconById[actor.recordId]
-    if icon then return icon, false end
-
-    for _, entry in ipairs(iconRules) do
-        if entry.rule(actor) then return entry, false end
+local function getFollowerIcon(actor, skills, pack)
+    local path = pack.id[actor.recordId:lower()]
+    if path then
+        return { path = path }, false
     end
 
-    return getFallbackIcon(actor, skills), true
+    for _, ruleSuffix in ipairs(ruleSuffixes) do
+        local condition = ruleConditions[ruleSuffix]
+        if condition(actor) then
+            path = pack.rule[ruleSuffix]
+            if path then
+                return { path = path }, false
+            end
+        end
+    end
+
+    return getFallbackIcon(actor, skills, pack), true
 end
 
 local function hasDisease(fData)
@@ -249,7 +254,7 @@ local function newFollowerSlot(name, size)
                 name = "background",
                 type = ui.TYPE.Image,
                 props = {
-                    resource = followerIconBackground,
+                    resource = getTexture(FALLBACK_BACKGROUND_PATH),
                     color = defaultIconBackgroundColor,
                     size = iconSize,
                     visible = false,
@@ -318,24 +323,24 @@ end
 
 ---@param slot openmw.ui.Layout
 ---@param icon FollowerIcon
+---@param backgroundPath string
 ---@param backgroundColor openmw.util.Color|nil
-local function applyFollowerSlot(slot, icon, backgroundColor)
+local function applyFollowerSlot(slot, icon, backgroundPath, backgroundColor)
     local data = slot.userData or {}
     slot.userData = data
 
     local background = slot.content.background
-    if icon.transparent then
-        if data.hasBackground ~= true then
-            background.props.visible = true
-            data.hasBackground = true
-        end
-        if data.backgroundColor ~= backgroundColor then
-            background.props.color = backgroundColor or defaultIconBackgroundColor
-            data.backgroundColor = backgroundColor
-        end
-    elseif data.hasBackground ~= false then
-        background.props.visible = false
-        data.hasBackground = false
+    if data.backgroundVisible ~= true then
+        background.props.visible = true
+        data.backgroundVisible = true
+    end
+    if data.backgroundPath ~= backgroundPath then
+        background.props.resource = getTexture(backgroundPath)
+        data.backgroundPath = backgroundPath
+    end
+    if data.backgroundColor ~= backgroundColor then
+        background.props.color = backgroundColor or defaultIconBackgroundColor
+        data.backgroundColor = backgroundColor
     end
 
     if data.path ~= icon.path then
@@ -432,66 +437,33 @@ iconsUI.renderCombat = function(actor, size)
     return slot
 end
 
----@param ids string|string[]
----@return string[]
-local function normalizeIds(ids)
-    if type(ids) == "string" then ids = { ids } end
-    if type(ids) ~= "table" or #ids == 0 then
-        error("recordIds must be a non-empty string or list of strings", 3)
+---@param suffix string
+---@return string
+local function normalizeSuffix(suffix)
+    if type(suffix) ~= "string" then
+        error("registerFollowerIconSuffix: suffix must be a non-empty key", 3)
     end
-    local result = {}
-    for _, id in ipairs(ids) do
-        if type(id) ~= "string" or id == "" then
-            error("recordIds must contain non-empty strings", 3)
-        end
-        table.insert(result, id:lower())
+    local key = suffix:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%s+", " ")
+    if key == "" or not key:match("^[%w_ ]+$") then
+        error("registerFollowerIconSuffix: suffix must be a non-empty key", 3)
     end
-    return result
+    return key:lower()
 end
 
---- Provide exactly one of recordIds/recordId or rule.
----@param spec FollowerIconSpec
-iconsUI.setFollowerIcon = function(spec)
-    if spec.recordIds ~= nil and spec.recordId ~= nil then
-        error("provide either recordIds or recordId, not both", 3)
-    end
+--- Provide a rule for a rule_* suffix.
+---@param spec FollowerIconSuffixSpec
+iconsUI.registerFollowerIconSuffix = function(spec)
+    local suffix = normalizeSuffix(spec.suffix)
     local rule = spec.rule
-    local ids = spec.recordIds or spec.recordId
-    if ids ~= nil then
-        if rule ~= nil then
-            error("setFollowerIcon requires either recordIds or rule, not both", 3)
-        end
-        ids = normalizeIds(ids)
-    elseif type(rule) ~= "function" then
-        error("setFollowerIcon requires recordIds or rule", 3)
+    if type(rule) ~= "function" then
+        error("registerFollowerIconSuffix requires a rule function", 3)
     end
 
-    local fileName = spec.fileName
-    if type(fileName) ~= "string" or fileName == "" then
-        error("fileName must be a non-empty texture path", 3)
-    end
-    if type(spec.isTransparent) ~= "boolean" then
-        error("isTransparent must be a boolean", 3)
-    end
-
-    local icon = { path = fileName, transparent = spec.isTransparent }
-    if ids then
-        for _, id in ipairs(ids) do
-            iconById[id] = icon
-        end
-        iconGeneration = iconGeneration + 1
-        return
-    end
-
-    for index, entry in ipairs(iconRules) do
-        if entry.rule == rule then
-            iconRules[index] = { rule = rule, path = icon.path, transparent = icon.transparent }
-            iconGeneration = iconGeneration + 1
-            return
-        end
-    end
-    table.insert(iconRules, { rule = rule, path = icon.path, transparent = icon.transparent })
     iconGeneration = iconGeneration + 1
+    if ruleConditions[suffix] == nil then
+        ruleSuffixes[#ruleSuffixes + 1] = suffix
+    end
+    ruleConditions[suffix] = rule
 end
 
 ---@param fData FollowerData
@@ -528,6 +500,7 @@ iconsUI.prepareIcons = function(fData, settings)
     icons.signature = nil
     icons.generation = iconGeneration
     icons.followerIcon = nil
+    icons.preset = nil
 
     local mode = settings.iconDisplayMode or "Merged"
     local stance = types.Actor.getStance(fData.followerState.actor)
@@ -553,15 +526,18 @@ iconsUI.updateIcons = function(fData, settings)
     end
     local firstKind, secondKind = iconKinds(signature)
 
-    if icons.generation ~= iconGeneration then
+    local presetName = settings.iconPreset
+    if icons.generation ~= iconGeneration or icons.preset ~= presetName then
         icons.followerIcon = nil
         icons.generation = iconGeneration
+        icons.preset = presetName
     end
+    local pack = followerIconPacks.get(presetName)
 
     if firstKind == "follower" or secondKind == "follower" then
         local followerIcon = icons.followerIcon
         if not followerIcon then
-            local icon, isFallback = getFollowerIcon(actor, fData.skills)
+            local icon, isFallback = getFollowerIcon(actor, fData.skills, pack)
             followerIcon = icon
             if not isFallback then
                 icons.followerIcon = followerIcon
@@ -573,11 +549,12 @@ iconsUI.updateIcons = function(fData, settings)
         elseif shouldHighlight(fData) then
             backgroundColor = unhealthyIconBackgroundColor
         end
+        local backgroundPath = pack.background or FALLBACK_BACKGROUND_PATH
         if firstKind == "follower" then
-            applyFollowerSlot(icons.slots.first.follower, followerIcon, backgroundColor)
+            applyFollowerSlot(icons.slots.first.follower, followerIcon, backgroundPath, backgroundColor)
         end
         if secondKind == "follower" then
-            applyFollowerSlot(icons.slots.second.follower, followerIcon, backgroundColor)
+            applyFollowerSlot(icons.slots.second.follower, followerIcon, backgroundPath, backgroundColor)
         end
     end
 
@@ -594,36 +571,17 @@ iconsUI.updateIcons = function(fData, settings)
     container.props.visible = true
 end
 
--- Priority: unique. Order-independent: record IDs are looked up directly.
--- TODO: replace these placeholder record IDs when the actor IDs are known.
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_julan_1",
-    fileName = "textures/bffs/unique_julan.png",
-    isTransparent = true,
-}
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_biz_kuit_1",
-    fileName = "textures/bffs/unique_bizkuitz.png",
-    isTransparent = true,
-}
-iconsUI.setFollowerIcon {
-    recordId = "bff_placeholder_pack_guar",
-    fileName = "textures/bffs/unique_packguar.png",
-    isTransparent = true,
-}
-
 -- Priority: slightly special. Order-dependent: first matching rule wins.
--- TODO: add the Animunculi texture; the path below is a placeholder.
-iconsUI.setFollowerIcon {
+iconsUI.registerFollowerIconSuffix {
+    suffix = "animunculi",
     rule = function(actor)
         if not types.Creature.objectIsInstance(actor) then return false end
         local record = types.Creature.records[actor.recordId]
         return record.bloodType == 2 and record.soulValue == 0
     end,
-    fileName = "textures/bffs/Animunculi.png",
-    isTransparent = true,
 }
-iconsUI.setFollowerIcon {
+iconsUI.registerFollowerIconSuffix {
+    suffix = "slave",
     rule = function(actor)
         if not types.NPC.objectIsInstance(actor) then
             return false
@@ -634,8 +592,6 @@ iconsUI.setFollowerIcon {
         return leftGauntlet == "slave_bracer_left"
             or rightGauntlet == "slave_bracer_right"
     end,
-    fileName = "textures/bffs/cond_slave.png",
-    isTransparent = true,
 }
 
 return iconsUI

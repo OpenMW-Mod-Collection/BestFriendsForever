@@ -24,6 +24,8 @@ local v2 = util.vector2
 -- 		textSize = nil,                       -- optional: font size + row height (default: textNormal size)
 -- 		icon = nil,                           -- optional table { [item] = "textures/path.dds" }
 -- 		iconColor = nil,                      -- optional table { [item] = util.color.rgb(...) }, defaults to white
+-- 		iconBackground = nil,                 -- optional table { [item] = "textures/path.dds" }, drawn under icon
+-- 		iconBackgroundColor = nil,            -- optional color or table { [item] = color }, defaults to white
 -- 		iconSize = nil,                       -- optional, defaults to ~1.3 * textSize
 -- 		buttons = nil,                        -- optional array of extra buttons, see "extra buttons" below
 -- 	},
@@ -69,9 +71,11 @@ local defaultArgument = {
 	items = {},
 	l10n = nil,
 	width = 150,
-	icon = nil,      -- table { [item] = "textures/path.dds" }
-	iconColor = nil, -- optional table { [item] = util.color.rgb(...) }, white when missing
-	iconSize = nil,  -- defaults to 1.3 * textSize
+	icon = nil,                -- table { [item] = "textures/path.dds" }
+	iconColor = nil,           -- optional table { [item] = util.color.rgb(...) }, white when missing
+	iconBackground = nil,      -- optional table { [item] = "textures/path.dds" }, drawn under icon
+	iconBackgroundColor = nil, -- optional color or table { [item] = color }, white when missing
+	iconSize = nil,            -- defaults to 1.3 * textSize
 	textSize = nil,  -- defaults to the textNormal font size (also drives row height)
 }
 local fallbackIconSizeMult = 1.3
@@ -132,13 +136,68 @@ local function paddedBox(layout)
 	}
 end
 
-local function resolveIcon(iconTable, iconColorTable, key)
-	if iconTable == nil then return nil end
-	local path = iconTable[key]
+local function resolveTexture(textureTable, key)
+	if textureTable == nil then return nil end
+	local path = textureTable[key]
 	if path == nil then return nil end
-	local tex = type(path) == 'string' and ui.texture { path = path } or path
-	local color = iconColorTable and iconColorTable[key] or util.color.rgb(1, 1, 1)
+	return type(path) == 'string' and ui.texture { path = path } or path
+end
+
+local function resolveColor(colorOrTable, key)
+	if colorOrTable == nil then return nil end
+	if type(colorOrTable) == 'table' then return colorOrTable[key] end
+	return colorOrTable
+end
+
+local function resolveIcon(iconTable, iconColorTable, key)
+	local tex = resolveTexture(iconTable, key)
+	if tex == nil then return nil end
+	local color = resolveColor(iconColorTable, key) or util.color.rgb(1, 1, 1)
 	return tex, color
+end
+
+local function layeredIcon(iconTex, iconColor, backgroundTex, backgroundColor, iconSize, position)
+	local size = v2(iconSize, iconSize)
+	if backgroundTex == nil then
+		return {
+			type = ui.TYPE.Image,
+			props = {
+				resource = iconTex,
+				color = iconColor,
+				size = size,
+				position = position,
+			},
+		}
+	end
+
+	local content = ui.content {
+		{
+			type = ui.TYPE.Image,
+			props = {
+				resource = backgroundTex,
+				color = backgroundColor or util.color.rgb(1, 1, 1),
+				size = size,
+			},
+		},
+	}
+	if iconTex ~= nil then
+		content:add {
+			type = ui.TYPE.Image,
+			props = {
+				resource = iconTex,
+				color = iconColor,
+				size = size,
+			},
+		}
+	end
+	return {
+		type = ui.TYPE.Widget,
+		props = {
+			size = size,
+			position = position,
+		},
+		content = content,
+	}
 end
 
 local function disable(disabled, layout)
@@ -167,19 +226,21 @@ local function closeDropdown()
 	end
 end
 
--- opts: { key, topLeft, contentWidth, items, l10n, currentValue, onSelect, iconTable, iconColorTable, iconSize, textSize }
+-- opts: { key, topLeft, contentWidth, items, l10n, currentValue, onSelect, iconTable, iconColorTable, iconBackgroundTable, iconBackgroundColorTable, iconSize, textSize }
 local function openDropdown(opts)
 	closeDropdown()
 	local contentWidth = opts.contentWidth
 	local iconTable    = opts.iconTable
 	local iconColorTable = opts.iconColorTable
+	local iconBackgroundTable = opts.iconBackgroundTable
+	local iconBackgroundColorTable = opts.iconBackgroundColorTable
 	local iconSize     = opts.iconSize
 	local textSize     = opts.textSize
 	local items        = opts.items
 	local onSelect     = opts.onSelect
 	local currentValue = opts.currentValue
 	local translator = opts.l10n and core.l10n(opts.l10n) or nil
-	local hasIcons = iconTable ~= nil
+	local hasIcons = iconTable ~= nil or iconBackgroundTable ~= nil
 	local rowHeight = hasIcons and math.max(textSize, iconSize) or textSize
 	local textWidth = hasIcons and (contentWidth - iconSize - mwuiBorder) or contentWidth
 	local textXOffset = hasIcons and (iconSize + mwuiBorder) or 0
@@ -246,17 +307,12 @@ local function openDropdown(opts)
 		
 		if hasIcons then
 			local iconTex, iconColor = resolveIcon(iconTable, iconColorTable, item)
+			local backgroundTex = resolveTexture(iconBackgroundTable, item)
+			local backgroundColor = resolveColor(iconBackgroundColorTable, item)
 			local rowContent = ui.content { textElement }
-			if iconTex then
-				rowContent:add {
-					type = ui.TYPE.Image,
-					props = {
-						resource = iconTex,
-						color = iconColor,
-						size = v2(iconSize, iconSize),
-						position = v2(0, (rowHeight - iconSize) / 2),
-					},
-				}
+			if iconTex or backgroundTex then
+				rowContent:add(layeredIcon(iconTex, iconColor, backgroundTex, backgroundColor,
+					iconSize, v2(0, (rowHeight - iconSize) / 2)))
 			end
 			table.insert(rows, {
 				type = ui.TYPE.Widget,
@@ -523,7 +579,10 @@ I.Settings.registerRenderer(SELECT_RENDERER_ID, function(value, set, argument)
 	local textSize = argument.textSize or labelHeight
 	local iconSize = argument.iconSize or textSize * fallbackIconSizeMult
 	local iconTex, iconColor = resolveIcon(argument.icon, argument.iconColor, value)
-	local rowHeight = argument.icon and math.max(textSize, iconSize) or textSize
+	local backgroundTex = resolveTexture(argument.iconBackground, value)
+	local backgroundColor = resolveColor(argument.iconBackgroundColor, value)
+	local hasIcons = argument.icon ~= nil or argument.iconBackground ~= nil
+	local rowHeight = hasIcons and math.max(textSize, iconSize) or textSize
 	
 	-- detecting the position on the screen
 	local mouseOffset = v2(-(arrowSize + 3 * mwuiBorder), rowHeight + 2 * mwuiBorder)
@@ -542,10 +601,12 @@ I.Settings.registerRenderer(SELECT_RENDERER_ID, function(value, set, argument)
 			l10n           = argument.l10n,
 			currentValue   = value,
 			onSelect       = set,
-			iconTable      = argument.icon,
-			iconColorTable = argument.iconColor,
-			iconSize       = iconSize,
-			textSize       = textSize,
+			iconTable                = argument.icon,
+			iconColorTable           = argument.iconColor,
+			iconBackgroundTable      = argument.iconBackground,
+			iconBackgroundColorTable = argument.iconBackgroundColor,
+			iconSize                 = iconSize,
+			textSize                 = textSize,
 		}
 	end)
 	
@@ -577,18 +638,11 @@ I.Settings.registerRenderer(SELECT_RENDERER_ID, function(value, set, argument)
 	
 	-- label area: either the text fills it (centered), or an icon+text Flex auto-sizes and centers itself
 	local labelInner
-	if argument.icon then
+	if hasIcons then
 		labelText.props.autoSize = true
 		local flexContent = ui.content {}
-		if iconTex then
-			flexContent:add {
-				type = ui.TYPE.Image,
-				props = {
-					resource = iconTex,
-					color = iconColor,
-					size = v2(iconSize, iconSize),
-				},
-			}
+		if iconTex or backgroundTex then
+			flexContent:add(layeredIcon(iconTex, iconColor, backgroundTex, backgroundColor, iconSize))
 			flexContent:add { template = I.MWUI.templates.interval }
 		end
 		flexContent:add(labelText)

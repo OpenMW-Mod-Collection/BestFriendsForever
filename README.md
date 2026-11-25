@@ -43,7 +43,9 @@ Script blacklist:
 - [Inquisitive Guards](https://www.nexusmods.com/morrowind/mods/46538) by RubberMan
 - [Morrowind Comes Alive](https://www.nexusmods.com/morrowind/mods/6006) by Neoptolemus and Morrowind community
 
-Unique follower icons:
+Icon packs:
+
+BFF ships `Default` and `Flat` presets under `textures/bff/icons` (`default` and `flat` folders). Copy a folder to make a custom pack; textures are named `category_key.png` with underscores and spaces allowed in keys. Unique icons use `id_<recordId>` and match automatically, `background.png` overrides the icon background, and missing files fall back to `default`. Built-in support includes icons for:
 
 - [Biz'Kuitz Blissful Mind - Alfiq Scholar Companion](https://www.nexusmods.com/morrowind/mods/59156) by 6moonless
 - Julan, Ashlander Companion by Kateri

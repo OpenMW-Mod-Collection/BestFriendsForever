@@ -35,11 +35,25 @@ Use fractional order values such as `1.5` to insert a field between built-ins. F
 
 ### Icon defaults
 
+Icon packs live in `textures/bff/icons/<preset>/`. Textures use `category_key.png`:
+
+| Category  | Used for                                      |
+| --------- | --------------------------------------------- |
+| `class`   | NPC specialization fallback                   |
+| `creature` | Creature-type fallback                       |
+| `summon`  | Summoned-creature fallback                    |
+| `id`      | Record ID, matched automatically              |
+| `rule`    | Predicate conditions, first match wins        |
+
+Built-in keys are `combat`, `mage`, `stealth`, and `civilian` for `class_*`, plus lowercase creature-type names for `creature_*` and `summon_*`. An `id_<recordId>` texture applies automatically to that record ID; no API call is needed. Keys may contain underscores and spaces, such as `id_julan twin.png`. `rule_*` keys come from registered suffixes.
+
+`background.png` is a pack-level background override. Missing textures and backgrounds fall back to the `default` pack. Icons are always drawn over the background.
+
 Icons resolve in this order:
 
-- Unique IDs
-- Conditional icons
-- Fallback icons (by creature type or NPC class)
+- Unique IDs (`id_*`)
+- Conditional icons (`rule_*`)
+- Fallback icons (`creature_*`, `summon_*`, or `class_*`)
 
 ### Menu defaults
 
@@ -80,29 +94,18 @@ I.BestFriendsForever.getDownedFollowers()
 
 ### Follower icons
 
-`setFollowerIcon()` assigns a texture to followers that match record IDs or a custom rule. Pass exactly one of `recordIds` (or the `recordId` shorthand) or `rule`. `recordIds` accepts one ID or a list; use a list when a follower can be replaced by a twin. `rule(actor)` is checked after ID lookup, in registration order, and the first match wins. Unmatched followers fall back to BFF's class and creature-type icons. Registrations can happen at any time from a player script.
+Unique icons need no API call: an `id_<recordId>` texture applies automatically to that record ID. Use `registerFollowerIconSuffix()` only to bind a predicate to a `rule_*` texture. The API never takes a path. Automatic ID matching runs before rules; rules use the selected icon pack, run in registration order, and the first match wins. Registrations can happen at any time from a player script.
 
-`fileName` is a texture path relative to Data Files. `isTransparent = true` layers the texture over the default background; `false` displays it by itself.
-
-```lua
--- Scope: Player
-I.BestFriendsForever.setFollowerIcon {
-    recordIds = { "julan", "julan_twin" },
-    fileName = "textures/bffs/unique_julan.png",
-    isTransparent = true,
-}
-```
-
-Use `rule` instead of IDs when the match cannot be expressed as a record ID. The `Animunculi.png` path in this example is a TODO placeholder:
+Changing the Icon Pack setting reloads the merged pack. Missing textures and backgrounds fall back to `default`.
 
 ```lua
 -- Scope: Player
-I.BestFriendsForever.setFollowerIcon {
+-- Payload: { suffix: string, rule: fun(actor: Actor): boolean }
+I.BestFriendsForever.registerFollowerIconSuffix {
+    suffix = "animunculi",
     rule = function(actor)
         return actor.recordId == "some_creature"
     end,
-    fileName = "textures/bffs/Animunculi.png",
-    isTransparent = true,
 }
 ```
 

@@ -3,6 +3,7 @@ local I = require("openmw.interfaces")
 local util = require("openmw.util")
 
 local common = require("scripts.BestFriendsForever.settings.common")
+local followerIconPacks = require("scripts.BestFriendsForever.utils.followerIconPacks")
 
 I.Settings.registerGroup {
     key = "SettingsBestFriendsForever_HUDFollower",
@@ -190,6 +191,21 @@ I.Settings.registerGroup {
                     "Combat only",
                 },
                 width = 200,
+            },
+        },
+        {
+            key = "iconPreset",
+            name = "iconPreset_name",
+            description = "iconPreset_desc",
+            renderer = "SuperSelect3",
+            default = followerIconPacks.DEFAULT_PACK,
+            argument = {
+                l10n = "BestFriendsForever_settings",
+                items = followerIconPacks.names(),
+                icon = followerIconPacks.previewIcons(),
+                iconBackground = followerIconPacks.backgroundIcons(),
+                iconBackgroundColor = util.color.hex("ffcd7b"),
+                iconSize = 32,
             },
         },
         {

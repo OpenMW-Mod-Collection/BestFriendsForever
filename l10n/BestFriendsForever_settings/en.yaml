@@ -168,6 +168,10 @@ Merged: Merged
 "Combat/follower": Combat / Follower
 "Follower only": Follower Only
 "Combat only": Combat Only
+iconPreset_name: Icon Pack
+iconPreset_desc: Folder under textures/bff/icons. Missing icons fall back to the default pack.
+default: Default
+flat: Flat
 iconBackgroundColor_name: Follower Icon Background Color
 iconBackgroundColor_desc: |
   Affects only two-layer icons.
