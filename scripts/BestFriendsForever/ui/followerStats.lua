@@ -70,10 +70,10 @@ local DYNAMIC_STATS = {
 }
 
 local function statColor(stat)
-    if stat.modified > stat.base then
-        return commonUI.Colors.POSITIVE
-    elseif stat.modified < stat.base then
+    if stat.damage > 0 then
         return commonUI.Colors.DAMAGED
+    elseif stat.modifier > 0 then
+        return commonUI.Colors.POSITIVE
     end
     return nil
 end

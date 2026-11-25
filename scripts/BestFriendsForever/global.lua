@@ -18,6 +18,7 @@ local eventHandlers = {
     end,
 }
 local saveHandlers = {}
+local activationHandlers = {}
 
 for _, handler in ipairs(handlers) do
     for name, callback in pairs(handler.eventHandlers or {}) do
@@ -25,6 +26,9 @@ for _, handler in ipairs(handlers) do
     end
     if handler.onSave then
         saveHandlers[#saveHandlers + 1] = handler.onSave
+    end
+    if handler.onActivate then
+        activationHandlers[#activationHandlers + 1] = handler.onActivate
     end
 end
 
@@ -47,10 +51,17 @@ local function onLoad(data)
     end
 end
 
+local function onActivate(object, actor)
+    for _, callback in ipairs(activationHandlers) do
+        callback(object, actor)
+    end
+end
+
 return {
     engineHandlers = {
         onSave = onSave,
         onLoad = onLoad,
+        onActivate = onActivate,
     },
     eventHandlers = eventHandlers,
 }

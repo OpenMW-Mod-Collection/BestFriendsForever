@@ -55,11 +55,8 @@ local function onActorActivated(object, activator)
     })
 end
 
--- TODO: change it to onActivate
-I.Activation.addHandlerForType(types.NPC, onActorActivated)
-I.Activation.addHandlerForType(types.Creature, onActorActivated)
-
 return {
+    onActivate = onActorActivated,
     eventHandlers = {
         BestFriendsForever_waitHere = waitHere,
     },
