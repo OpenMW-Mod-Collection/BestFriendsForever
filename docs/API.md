@@ -14,7 +14,6 @@ The API is used mostly for adding UI elements to existing menus, altering the cu
   - [Follower icons](#follower-icons)
   - [Tooltip fields](#tooltip-fields)
   - [Raw UI access](#raw-ui-access)
-- [Follower Down Outcome](#follower-down-outcome)
 - [Follower Menu](#follower-menu)
 
 ## BFF defaults and reserved values
@@ -45,7 +44,7 @@ Icon packs live in `textures/bff/icons/<preset>/`. Textures use `category_key.pn
 | `id`       | Record ID, matched automatically       |
 | `rule`     | Predicate conditions, first match wins |
 
-Built-in keys are `combat`, `mage`, `stealth`, and `civilian` for `class_*`, plus lowercase creature-type names for `creature_*` and `summon_*`. An `id_<recordId>` texture applies automatically to that record ID; no API call is needed. Keys may contain underscores and spaces, such as `id_julan twin.png`. `rule_*` keys come from registered suffixes.
+Built-in keys are `combat`, `mage`, `stealth`, and `civilian` for `class_*`, and `creatures`, `daedra`, `humanoid`, and `undead` for `creature_*` and `summon_*`. An `id_<recordId>` texture applies automatically to that record ID; no API call is needed. Keys may contain underscores, spaces, and apostrophes, such as `id_julan twin.png` or `id_mlss_biz'kuitz.png`. `rule_*` keys come from registered suffixes; BFF registers `animunculi`, `animunculi_summoned`, and `slave`.
 
 `background.png` is a pack-level background override. Missing textures and backgrounds fall back to the `default` pack. Icons are always drawn over the background.
 
@@ -96,7 +95,7 @@ I.BestFriendsForever.getDownedFollowers()
 
 Unique icons need no API call: an `id_<recordId>` texture applies automatically to that record ID. Use `registerFollowerIconSuffix()` only to bind a predicate to a `rule_*` texture. The API never takes a path. Automatic ID matching runs before rules; rules use the selected icon pack, run in registration order, and the first match wins. Registrations can happen at any time from a player script.
 
-Changing the Icon Pack setting reloads the merged pack. Missing textures and backgrounds fall back to `default`.
+Changing the Icon Pack setting reloads the merged pack. Missing textures and backgrounds fall back to `default`. The built-in `animunculi_summoned` rule is registered before `animunculi`, so summoned animunculi can use a separate `rule_animunculi_summoned.png` texture.
 
 ```lua
 -- Scope: Player
@@ -256,23 +255,6 @@ if ui.menu.root then
     end
 end
 ```
-
-## Follower Down Outcome
-
-The follower-local `I.BestFriendsForever` is a separate interface from the player-side one with the same name. It lets quest and roleplay mods override BFF's down behavior, for example turning a scripted assassination into real death. Interfaces are object-local, so this is not the player-side interface.
-
-Local scripts attached to the same follower can provide a synchronous outcome provider through this interface (version 2). BFF calls it when the follower would otherwise be downed. Returning `"death"` commits real death; returning `"down"` or `nil` uses the normal down behavior.
-
-```lua
--- Scope: local scripts on a BFF-immortal follower
-I.BestFriendsForever.setOutcomeProvider("MyMod", function()
-    return "down" -- "down" | "death" | nil
-end)
-
-I.BestFriendsForever.clearOutcomeProvider("MyMod")
-```
-
-Only one provider is active; registering a new id replaces the previous one. Providers are not persisted, so re-register them in `onInit`, `onLoad`, or `onActive`. Keep the callback fast and side-effect-free. Errors and unexpected values fall back to a normal down. Without a `"death"` result, BFF always downs the follower.
 
 ## Follower Menu
 

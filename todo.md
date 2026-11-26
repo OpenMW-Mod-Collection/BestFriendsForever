@@ -1,4 +1,4 @@
-- [ ] Add textures for the rule-based follower icons (currently referenced but missing)
+- [x] Add textures for the rule-based follower icons
   - Animunculi
   - Creatures
   - Daedra
@@ -7,3 +7,4 @@
 - [ ] Rewrite the API docs
 - [ ] Set correct ids for unique icons
   - Tetra Pack Guar
+- [ ] Check compatibility with the Vivec Lighthouse quest?

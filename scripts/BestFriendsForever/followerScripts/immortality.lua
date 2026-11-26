@@ -12,7 +12,6 @@ local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local immortalitySection = storage.globalSection("SettingsBestFriendsForever_immortality")
 local l10n = core.l10n("BestFriendsForever_messages")
 local selfName = self.type.records[self.recordId].name
-local SCRIPT_PATH = "scripts/BestFriendsForever/followerScripts/immortality.lua"
 
 local settings
 local selfEffects = types.Actor.activeEffects(self)
@@ -29,8 +28,6 @@ local leader
 local reviveTimerStarted = false
 local revivalTimeRemaining
 local combatActive = false
-local outcomeProvider
-local outcomeProviderId
 
 local function isCommanded()
     local hasEffect = selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
@@ -38,71 +35,7 @@ local function isCommanded()
     return hasEffect and settings.ingoreCommanded
 end
 
----@param id string
----@param fn fun(): ("down"|"death"|nil)
-local function setOutcomeProvider(id, fn)
-    if type(id) ~= "string" or id == "" then
-        error("BestFriendsForever.setOutcomeProvider: id must be a non-empty string", 2)
-    end
-    if type(fn) ~= "function" then
-        error("BestFriendsForever.setOutcomeProvider: provider must be a function", 2)
-    end
-
-    outcomeProviderId = id
-    outcomeProvider = fn
-end
-
----@param id string
-local function clearOutcomeProvider(id)
-    if outcomeProviderId == id then
-        outcomeProviderId = nil
-        outcomeProvider = nil
-    end
-end
-
----@return "down"|"death"|nil
-local function resolveDownOutcome()
-    if not outcomeProvider then
-        return nil
-    end
-
-    local ok, outcome = pcall(outcomeProvider)
-    if not ok then
-        print(("[BestFriendsForever] Down outcome provider '%s' failed: %s")
-            :format(tostring(outcomeProviderId), tostring(outcome)))
-        return nil
-    end
-
-    if outcome ~= "down" and outcome ~= "death" then
-        if outcome ~= nil then
-            print(("[BestFriendsForever] Down outcome provider '%s' returned an invalid outcome: %s")
-                :format(tostring(outcomeProviderId), tostring(outcome)))
-        end
-        return nil
-    end
-
-    return outcome
-end
-
-local function dieForReal()
-    dying = true
-    down = false
-
-    -- The Died handler takes care of the teleport script.
-    core.sendGlobalEvent("BestFriendsForever_detachScript", {
-        actor = self,
-        script = SCRIPT_PATH,
-    })
-    health.current = 0
-end
-
----@return boolean  false when the resolved outcome was real death.
 local function selfDown()
-    if resolveDownOutcome() == "death" then
-        dieForReal()
-        return false
-    end
-
     down = true
     self:sendEvent("BestFriendsForever_followerDown", eventData)
     leader:sendEvent("BestFriendsForever_followerDown", eventData)
@@ -110,7 +43,6 @@ local function selfDown()
     leader:sendEvent("ShowMessage", {
         message = l10n("msg_followerDown", { npc_name = selfName }),
     })
-    return true
 end
 
 local function revive()
@@ -220,11 +152,7 @@ I.Combat.addOnHitHandler(function(attack)
     local dontDown = lethalDamage and not isCommanded() and stillFollowing
 
     if dontDown then
-        local downed = selfDown()
-        if not downed then
-            -- dieForReal() already committed the death.
-            return
-        end
+        selfDown()
         health.current = settings.threshold
         return false
     end
@@ -252,11 +180,5 @@ return {
                 script = "scripts/BestFriendsForever/followerScripts/teleport.lua",
             })
         end,
-    },
-    interfaceName = "BestFriendsForever",
-    interface = {
-        version = 2,
-        setOutcomeProvider = setOutcomeProvider,
-        clearOutcomeProvider = clearOutcomeProvider,
     },
 }

@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-field
+---@diagnostic disable: undefined-field, need-check-nil
 ---@omw-context menu|player
 local vfs = require("openmw.vfs")
 
@@ -23,8 +23,8 @@ local PREVIEW_KEYS = {
     { "class", "mage" },
     { "class", "stealth" },
     { "id", "julan" },
-    { "id", "bizkuitz" },
-    { "id", "packguar" },
+    { "id", "mlss_biz'kuitz" },
+    { "id", "tr_m3_oe_pack_guar" },
     { "rule", "slave" },
 }
 
@@ -67,7 +67,7 @@ local function parseFile(path)
         return packName, "background", nil, path
     end
 
-    local category, key = stem:match("^([%a]+)_([%w_ ]+)$")
+    local category, key = stem:match("^([%a]+)_([%w_ ']+)$")
     if not category or not key then return end
 
     key = key:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%s+", " ")

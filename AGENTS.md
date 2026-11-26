@@ -3,7 +3,7 @@
 ## Repo shape
 
 - OpenMW 0.52+ Lua-only mod. `BestFriendsForever.omwscripts` is the authoritative entrypoint list; source lives under `scripts/BestFriendsForever/`. There is no build, test, lint, typecheck, codegen, or CI config.
-- No `.esp`: `load.lua` (LOAD context) creates `BFF_Immortality` and the injury spells at runtime from `common/injuries.lua`.
+- No `.esp`: `load.lua` (LOAD context) creates `bff_immortality` and the injury spells at runtime from `common/injuries.lua`.
 - `BestFriendsForever.zip` is an ignored/untracked packaging artifact, not source. `.luarc.json` is also ignored and machine-local: it wires LuaLS to a Cod3x checkout and `omw_context_plugin.lua`.
 - Follower Detection Util must load before BFF. `player.lua` checks `I.FollowerDetectionUtil.version >= 7` and `FollowerDetectionUtil.omwscripts`; failure logs and shows a popup via `utils/dependencyChecker.lua`. (README names the FDU mod version 3.1.)
 

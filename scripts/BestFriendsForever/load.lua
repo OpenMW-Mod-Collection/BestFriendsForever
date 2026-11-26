@@ -2,8 +2,8 @@
 ---@omw-context load
 local content = require("openmw.content")
 
-content.spells.records["BFF_Immortality"] = {
-    name = "BFF_Immortality",
+content.spells.records["bff_immortality"] = {
+    name = "bff_immortality",
     type = content.spells.TYPE.Ability,
     cost = 0,
     isAutocalc = false,

@@ -8,7 +8,7 @@ local I = require("openmw.interfaces")
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 
 local FDU = I.FollowerDetectionUtil
-local immortalitySpell = "BFF_Immortality"
+local immortalitySpell = "bff_immortality"
 local sectionToggles = storage.globalSection("SettingsBestFriendsForever_toggles")
 local sectionBlacklists = storage.globalSection("SettingsBestFriendsForever_blacklist")
 

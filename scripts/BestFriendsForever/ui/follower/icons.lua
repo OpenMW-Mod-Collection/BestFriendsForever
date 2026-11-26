@@ -571,14 +571,24 @@ iconsUI.updateIcons = function(fData, settings)
     container.props.visible = true
 end
 
+---@param actor openmw.GObject
+---@return boolean
+local function isAnimunculus(actor)
+    if not types.Creature.objectIsInstance(actor) then return false end
+    local record = types.Creature.records[actor.recordId]
+    return record.bloodType == 2 and record.soulValue == 0
+end
+
 -- Priority: slightly special. Order-dependent: first matching rule wins.
 iconsUI.registerFollowerIconSuffix {
-    suffix = "animunculi",
+    suffix = "animunculi_summoned",
     rule = function(actor)
-        if not types.Creature.objectIsInstance(actor) then return false end
-        local record = types.Creature.records[actor.recordId]
-        return record.bloodType == 2 and record.soulValue == 0
+        return isAnimunculus(actor) and I.FollowerDetectionUtil.isSummon(actor)
     end,
+}
+iconsUI.registerFollowerIconSuffix {
+    suffix = "animunculi",
+    rule = isAnimunculus,
 }
 iconsUI.registerFollowerIconSuffix {
     suffix = "slave",
