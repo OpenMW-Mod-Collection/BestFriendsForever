@@ -60,6 +60,14 @@ changeAggro_desc: >
 waitUntilCombatEnds_name: Get Up Only Once Combat Ends
 upDelay_name: Getting Up Delay (sec)
 upDelay_desc: Ignored if "Get Up Only Once Combat Ends" is enabled.
+injuryWeights_name: Injury Weights
+injuryWeights_desc: |
+  Relative weights for the outcome when a follower would die.
+  Values are weights, not normalized percentages; 80/15/5 gives 80/15/5 odds.
+  Duplicate injuries do not stack: a duplicate is rerolled until an unused one is found.
+light: Light Injury Weight
+heavy: Heavy Injury Weight
+death: Death Weight
 ward_groupName: Ward
 ward_groupDesc: Protecting followers from diseases and stat damage.
 protections_name: Protection
@@ -175,7 +183,7 @@ iconBackgroundColor_name: Follower Icon Background Color
 iconBackgroundColor_desc: |
   Affects only two-layer icons.
 
-  Gets overriden by damaged stat color when the follower has damaged stats or a disease.
+  Gets overriden by damaged stat color when the follower has damaged stats, a disease, or an injury.
 tooltip_groupName: Tooltip
 tooltip_groupDesc: Hovering over follower widget will make a tooltip appear.
 enabledFields_name: Visible Fields
@@ -183,6 +191,7 @@ class: NPC Class / Creature Type
 summon: Summon
 diseases: Diseases
 statDamage: Stat Damage
+injuries: Injuries
 diseaseVerbosity_name: Disease Verbosity
 Names: Names
 "By Type": By Type

@@ -11,6 +11,7 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local followerIconPacks = require("scripts.BestFriendsForever.utils.followerIconPacks")
+local commonInjuries = require("scripts.BestFriendsForever.common.injuries")
 
 local defaultIconSize = 32
 local skillThreshold = 30
@@ -235,7 +236,10 @@ local function shouldHighlight(fData)
     local toggles = tooltipSettings.enabledFields or {}
     local showDiseases = toggles.diseases ~= false
     local showStatDamage = toggles.statDamage ~= false
-    return (showDiseases and hasDisease(fData)) or (showStatDamage and hasDamagedStats(fData))
+    local showInjuries = toggles.injuries ~= false
+    return (showDiseases and hasDisease(fData))
+        or (showStatDamage and hasDamagedStats(fData))
+        or (showInjuries and commonInjuries.hasActiveInjury(fData.activeSpells))
 end
 
 ---@param name string

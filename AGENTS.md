@@ -3,15 +3,15 @@
 ## Repo shape
 
 - OpenMW 0.52+ Lua-only mod. `BestFriendsForever.omwscripts` is the authoritative entrypoint list; source lives under `scripts/BestFriendsForever/`. There is no build, test, lint, typecheck, codegen, or CI config.
-- No `.esp`: `load.lua` (LOAD context) creates `bff_immortality` and the injury spells at runtime from `common/injuries.lua`.
+- No `.esp`: `load.lua` (LOAD context) creates `bff_immortality`, injury spells, and one demoralize spell at runtime from `common/injuries.lua`.
 - `BestFriendsForever.zip` is an ignored/untracked packaging artifact, not source. `.luarc.json` is also ignored and machine-local: it wires LuaLS to a Cod3x checkout and `omw_context_plugin.lua`.
 - Follower Detection Util must load before BFF. `player.lua` checks `I.FollowerDetectionUtil.version >= 7` and `FollowerDetectionUtil.omwscripts`; failure logs and shows a popup via `utils/dependencyChecker.lua`. (README names the FDU mod version 3.1.)
 
 ## Contexts and wiring
 
 - Every script starts with `---@omw-context ...`; editor diagnostics depend on it. Keep the annotation correct when adding files.
-- MENU: `settingsPlayer.lua` (pages + player groups) and `settingsRenderers/*`. GLOBAL: `settingsGlobal.lua`, `global.lua`. PLAYER: `player.lua` merger plus `playerHandlers/*` (combat, teleport, menu, repair UI, HUD, raw UI access, `I.BestFriendsForever` interface). `actor.lua` runs as NPC/CREATURE local script.
-- `global.lua` attaches/detaches `followerScripts/*` on `FDU_SyncFollowerList`; CUSTOM lines in `.omwscripts` do not by themselves give followers a module.
+- MENU: `settingsPlayer.lua` (pages + player groups) and `settingsRenderers/*`. GLOBAL: `settingsGlobal.lua`, `global.lua` plus `globalHandlers/*` (including injury upkeep in `globalHandlers/injuries.lua`). PLAYER: `player.lua` merger plus `playerHandlers/*` (combat, teleport, menu, repair UI, HUD, raw UI access, `I.BestFriendsForever` interface). `actor.lua` runs as NPC/CREATURE local script and only handles aggro switching.
+- `global.lua` attaches/detaches `followerScripts/*` on `FDU_SyncFollowerList`; CUSTOM lines in `.omwscripts` do not by themselves give followers a module. It also dispatches `onSave`, `onLoad`, `onActivate`, `onUpdate`, and `onActorActive` to `globalHandlers/*`.
 - New setting groups need a file in `settings/` **and** an entry in the explicit list in `settingsPlayer.lua` or `settingsGlobal.lua`. Section scope (`playerSection` vs `globalSection`) must match the script context; runtime reads are cached via `utils/settingsCache.lua`, so key/section renames must be updated at registration, cache, and readers.
 - Renderer IDs (`SuperSlider6`, `SuperSelect3`, `SuperColorPicker2`, `*_V1`) are referenced by other mods via `InstalledSettingsRenderers`; don't rename them casually. UI strings live only in `l10n/BestFriendsForever/en.yaml`; cross-context messages use `BestFriendsForever_*` events.
 

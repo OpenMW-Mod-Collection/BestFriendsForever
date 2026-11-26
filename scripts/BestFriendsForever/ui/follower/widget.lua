@@ -93,6 +93,7 @@ local widgetEventCallbacks = {
 ---@field followerState table
 ---@field down boolean
 ---@field spells table
+---@field activeSpells table
 ---@field activeEffects table
 ---@field attributes table<string, table>
 ---@field skills table<string, table>
@@ -134,6 +135,7 @@ local function newFollowerData(followerState, down, settings)
         followerState = followerState,
         down = down,
         spells = types.Actor.spells(follower),
+        activeSpells = types.Actor.activeSpells(follower),
         activeEffects = types.Actor.activeEffects(follower),
         attributes = attributes,
         skills = skills,

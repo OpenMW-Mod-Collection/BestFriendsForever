@@ -11,6 +11,7 @@ local storage = require("openmw.storage")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
 local commonUI = require("scripts.BestFriendsForever.utils.commonUI")
+local commonInjuries = require("scripts.BestFriendsForever.common.injuries")
 
 local l10n = core.l10n("BestFriendsForever_ui")
 local damagedColor = util.color.commaString(core.getGMST("fontcolor_color_negative"))
@@ -133,6 +134,22 @@ local function getStatDamage(fData)
     end
     return l10n("followerTooltip_statDamage", {
         stats = table.concat(damagedStats, ", "),
+    })
+end
+
+local function getInjuries(fData)
+    local active = commonInjuries.activeInjuries(fData.activeSpells)
+    if #active == 0 then
+        return nil
+    end
+
+    local names = {}
+    for _, injury in ipairs(active) do
+        names[#names + 1] = injury.name
+    end
+    table.sort(names)
+    return l10n("followerTooltip_injuries", {
+        injuries = table.concat(names, ", "),
     })
 end
 
@@ -402,6 +419,16 @@ tooltipUI.registerField {
     textColor = damagedColor,
     getText = function(_, followerData)
         return getStatDamage(followerData)
+    end,
+}
+
+tooltipUI.registerField {
+    name = "injuries",
+    order = 6,
+    toggleKey = "injuries",
+    textColor = damagedColor,
+    getText = function(_, followerData)
+        return getInjuries(followerData)
     end,
 }
 

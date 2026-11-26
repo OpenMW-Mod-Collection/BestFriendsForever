@@ -50,5 +50,32 @@ I.Settings.registerGroup {
             renderer = "checkbox",
             default = true,
         },
+        {
+            key = "injuryWeights",
+            name = "injuryWeights_name",
+            description = "injuryWeights_desc",
+            renderer = "multiInput_V1",
+            default = {
+                light = 80,
+                heavy = 15,
+                death = 5,
+            },
+            argument = {
+                mode = "number",
+                keys = {
+                    "light",
+                    "heavy",
+                    "death",
+                },
+                l10n = "BestFriendsForever_settings",
+                width = 80,
+                integer = true,
+                min = {
+                    light = 0,
+                    heavy = 0,
+                    death = 0,
+                },
+            },
+        },
     },
 }

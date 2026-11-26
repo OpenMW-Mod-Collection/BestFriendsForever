@@ -8,13 +8,16 @@ local async = require("openmw.async")
 local types = require("openmw.types")
 
 local settingsCache = require("scripts.BestFriendsForever.utils.settingsCache")
+local injuries = require("scripts.BestFriendsForever.common.injuries")
 
 local immortalitySection = storage.globalSection("SettingsBestFriendsForever_immortality")
 local l10n = core.l10n("BestFriendsForever_messages")
 local selfName = self.type.records[self.recordId].name
+local SCRIPT_PATH = "scripts/BestFriendsForever/followerScripts/immortality.lua"
 
 local settings
 local selfEffects = types.Actor.activeEffects(self)
+local selfActiveSpells = types.Actor.activeSpells(self)
 local health = self.type.stats.dynamic.health(self)
 local fatigue = self.type.stats.dynamic.fatigue(self)
 local eventData = {
@@ -29,13 +32,36 @@ local reviveTimerStarted = false
 local revivalTimeRemaining
 local combatActive = false
 
+local applyInjuryOutcome
+
+----------------------------------------------------------------------
+-- Main
+----------------------------------------------------------------------
+
 local function isCommanded()
     local hasEffect = selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandCreature).magnitude > 0
         or selfEffects:getEffect(core.magic.EFFECT_TYPE.CommandHumanoid).magnitude > 0
     return hasEffect and settings.ingoreCommanded
 end
 
+local function dieForReal()
+    dying = true
+    down = false
+
+    -- The Died handler takes care of the teleport script.
+    core.sendGlobalEvent("BestFriendsForever_detachScript", {
+        actor = self,
+        script = SCRIPT_PATH,
+    })
+    health.current = 0
+end
+
+---@return boolean  false when death was committed.
 local function selfDown()
+    if not applyInjuryOutcome() then
+        return false
+    end
+
     down = true
     self:sendEvent("BestFriendsForever_followerDown", eventData)
     leader:sendEvent("BestFriendsForever_followerDown", eventData)
@@ -43,6 +69,7 @@ local function selfDown()
     leader:sendEvent("ShowMessage", {
         message = l10n("msg_followerDown", { npc_name = selfName }),
     })
+    return true
 end
 
 local function revive()
@@ -133,6 +160,75 @@ local function onLoad(data)
     end
 end
 
+----------------------------------------------------------------------
+-- Injury
+----------------------------------------------------------------------
+
+local OUTCOME_TIER = {
+    light = "minor",
+    heavy = "major",
+}
+
+local function unusedInjuries(outcome)
+    local pool = {}
+    for _, injury in ipairs(injuries.byTier[OUTCOME_TIER[outcome]] or {}) do
+        if not selfActiveSpells:isSpellActive(injury.id) then
+            pool[#pool + 1] = injury
+        end
+    end
+    return pool
+end
+
+---@param exhausted table<string, boolean>
+---@return "light"|"heavy"|"death"? outcome  nil when no outcome has weight left.
+local function rollOutcome(exhausted)
+    local weights = settings.injuryWeights
+    local light = exhausted.light and 0 or weights.light
+    local heavy = exhausted.heavy and 0 or weights.heavy
+    local death = weights.death
+    local total = light + heavy + death
+    if total <= 0 then
+        return nil
+    end
+
+    local roll = math.random() * total
+    if roll < light then
+        return "light"
+    end
+    roll = roll - light
+    if roll < heavy then
+        return "heavy"
+    end
+    return "death"
+end
+
+---@return boolean  false when death was committed.
+function applyInjuryOutcome()
+    local exhausted = {}
+    while true do
+        local outcome = rollOutcome(exhausted)
+        if outcome == nil then
+            return true
+        end
+        if outcome == "death" then
+            dieForReal()
+            return false
+        end
+
+        local pool = unusedInjuries(outcome)
+        if #pool == 0 then
+            exhausted[outcome] = true
+        else
+            local injury = pool[math.random(#pool)]
+            core.sendGlobalEvent("BestFriendsForever_applyInjury", {
+                actor = self,
+                id = injury.id,
+            })
+            return true
+        end
+    end
+end
+
 -- Initialization
 settings = settingsCache.new(immortalitySection, async)
 
@@ -152,7 +248,9 @@ I.Combat.addOnHitHandler(function(attack)
     local dontDown = lethalDamage and not isCommanded() and stillFollowing
 
     if dontDown then
-        selfDown()
+        if not selfDown() then
+            return
+        end
         health.current = settings.threshold
         return false
     end

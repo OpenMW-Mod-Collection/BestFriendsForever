@@ -2,6 +2,7 @@ followerTooltip_summon: Summon
 followerMenu_summon: Summon
 followerTooltip_diseases: "Diseases: {diseases}"
 followerTooltip_statDamage: "Stat damage: {stats}"
+followerTooltip_injuries: "Injuries: {injuries}"
 Blight: Blight
 Disease: Disease
 followerTooltip_diseased: Diseased

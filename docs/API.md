@@ -29,6 +29,7 @@ The built-in extension points use the defaults and reserved names below. They ma
 | `summon`       |   3   |
 | `diseases`     |   4   |
 | `statDamage`   |   5   |
+| `injuries`     |   6   |
 
 Use fractional order values such as `1.5` to insert a field between built-ins. Field names are unique exact strings, so they can be overriden.
 
@@ -110,7 +111,7 @@ I.BestFriendsForever.registerFollowerIconSuffix {
 
 ### Tooltip fields
 
-`registerFollowerTooltipField()` adds information to BFF's follower tooltips without taking ownership of the HUD. Give each field a unique `name`, optionally set a numeric `order` (default `100`; built-ins use `1`-`5`, decimals allowed), and provide either `getText` or `getLayout`. Text fields can also set `header = true` to use the header template. Fields can be registered at any time; BFF rebuilds the tooltip.
+`registerFollowerTooltipField()` adds information to BFF's follower tooltips without taking ownership of the HUD. Give each field a unique `name`, optionally set a numeric `order` (default `100`; built-ins use `1`-`6`, decimals allowed), and provide either `getText` or `getLayout`. Text fields can also set `header = true` to use the header template. Fields can be registered at any time; BFF rebuilds the tooltip.
 
 `getText(followerState, followerData)` receives the FDU state and BFF's read-only follower data, and returns text or nil; nil hides the field.
 

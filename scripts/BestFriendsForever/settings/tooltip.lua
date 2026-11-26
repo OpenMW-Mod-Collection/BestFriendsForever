@@ -19,6 +19,7 @@ I.Settings.registerGroup {
                 summon = true,
                 diseases = true,
                 statDamage = true,
+                injuries = true,
             },
             argument = {
                 l10n = "BestFriendsForever_settings",
@@ -27,6 +28,7 @@ I.Settings.registerGroup {
                     "summon",
                     "diseases",
                     "statDamage",
+                    "injuries",
                 },
             },
         },

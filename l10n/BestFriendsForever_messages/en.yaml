@@ -4,3 +4,4 @@ msg_followerFollowingAgain: "{npc_name} is following you again."
 msg_repairNoGear: The follower has no damaged gear to repair.
 msg_repairNoTool: No repair tool with uses left was found on you or your follower.
 msg_repairRestoredPartial: Not everything could be restored after the repair session.
+msg_majorInjuriesHealed: "{npc_name} has recovered from all major injuries."

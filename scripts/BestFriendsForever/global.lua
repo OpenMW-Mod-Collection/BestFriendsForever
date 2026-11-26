@@ -4,6 +4,7 @@ local handlers = {
     require("scripts.BestFriendsForever.globalHandlers.customScript"),
     require("scripts.BestFriendsForever.globalHandlers.wait"),
     require("scripts.BestFriendsForever.globalHandlers.repair"),
+    require("scripts.BestFriendsForever.globalHandlers.injuries"),
 }
 
 local eventHandlers = {
@@ -19,6 +20,8 @@ local eventHandlers = {
 }
 local saveHandlers = {}
 local activationHandlers = {}
+local updateHandlers = {}
+local actorActiveHandlers = {}
 
 for _, handler in ipairs(handlers) do
     for name, callback in pairs(handler.eventHandlers or {}) do
@@ -29,6 +32,12 @@ for _, handler in ipairs(handlers) do
     end
     if handler.onActivate then
         activationHandlers[#activationHandlers + 1] = handler.onActivate
+    end
+    if handler.onUpdate then
+        updateHandlers[#updateHandlers + 1] = handler.onUpdate
+    end
+    if handler.onActorActive then
+        actorActiveHandlers[#actorActiveHandlers + 1] = handler.onActorActive
     end
 end
 
@@ -57,11 +66,25 @@ local function onActivate(object, actor)
     end
 end
 
+local function onUpdate(dt)
+    for _, callback in ipairs(updateHandlers) do
+        callback(dt)
+    end
+end
+
+local function onActorActive(actor)
+    for _, callback in ipairs(actorActiveHandlers) do
+        callback(actor)
+    end
+end
+
 return {
     engineHandlers = {
         onSave = onSave,
         onLoad = onLoad,
         onActivate = onActivate,
+        onUpdate = onUpdate,
+        onActorActive = onActorActive,
     },
     eventHandlers = eventHandlers,
 }

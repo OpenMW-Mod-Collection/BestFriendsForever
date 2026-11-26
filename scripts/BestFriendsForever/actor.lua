@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-field
 ---@omw-context local
 local I = require("openmw.interfaces")
 local storage = require("openmw.storage")
@@ -73,9 +74,15 @@ local function onLoad(data)
     data = data or {}
     downedFollowersToLeaders = data.downedFollowersToLeaders or downedFollowersToLeaders
     noOneDowned = not next(downedFollowersToLeaders)
+
     if not noOneDowned then
         ensureSettings()
     end
+end
+
+local function onDied()
+    downedFollowersToLeaders = {}
+    noOneDowned = true
 end
 
 return {
@@ -89,10 +96,7 @@ return {
         end,
     },
     eventHandlers = {
-        Died = function()
-            downedFollowersToLeaders = {}
-            noOneDowned = true
-        end,
+        Died = onDied,
         BestFriendsForever_followerDown = followerDown,
         BestFriendsForever_followerUp = followerUp,
     },
